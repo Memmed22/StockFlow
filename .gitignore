@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# .NET build output
+bin/
+obj/
+
+# SQLite database (local data — don't share)
+*.db
+*.db-shm
+*.db-wal
+
+# .NET user secrets & local config
+appsettings.Local.json
+*.user
+
+# Rider / JetBrains
+.idea/
+
+# Claude Code
+.claude/
+
+# Node / Vite
+node_modules/
+dist/
