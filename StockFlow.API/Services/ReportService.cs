@@ -91,7 +91,7 @@ public class ReportService(AppDbContext db)
         }
 
         
-        // Payment records — stored negative, shown positive
+        // tes Payment records — stored negative, shown positive
         foreach (var p in sales.Where(s => s.Type == SaleType.Payment))
         {
             var amount = Math.Abs(p.TotalAmount);
