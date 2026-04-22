@@ -90,6 +90,7 @@ public class ReportService(AppDbContext db)
                 "Return", null));
         }
 
+        
         // Payment records — stored negative, shown positive
         foreach (var p in sales.Where(s => s.Type == SaleType.Payment))
         {
