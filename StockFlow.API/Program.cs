@@ -33,6 +33,8 @@ using (var scope = app.Services.CreateScope())
     SeedData(db);
 }
 
+// test me 
+
 app.UseExceptionHandler(err => err.Run(async ctx => {
     ctx.Response.StatusCode = 500;
     ctx.Response.ContentType = "application/json";
