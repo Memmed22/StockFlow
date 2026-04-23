@@ -14,6 +14,7 @@ const currency = (n) => `${Number(n).toFixed(2)} ₾`;
 export default function CashClosing() {
   const { user } = useAuth();
   const [preview, setPreview] = useState(null);
+  const [openingStatus, setOpeningStatus] = useState(null);
   const [history, setHistory] = useState([]);
   const [counted, setCounted] = useState('');
   const [note, setNote] = useState('');
@@ -27,12 +28,14 @@ export default function CashClosing() {
   const loadAll = async () => {
     setLoadingPreview(true);
     try {
-      const [prev, hist] = await Promise.all([
+      const [prev, hist, opening] = await Promise.all([
         cashClosingApi.preview(),
         cashClosingApi.getAll(),
+        cashClosingApi.openingStatus(),
       ]);
       setPreview(prev.data);
       setHistory(hist.data);
+      setOpeningStatus(opening.data);
     } catch {
       setError('Failed to load data.');
     } finally {
@@ -86,6 +89,15 @@ export default function CashClosing() {
               <span style={s.periodValue}>{fmtDate(preview.toDate)}</span>
             </div>
             <div style={s.periodDivider} />
+            {openingStatus?.hasOpeningCash && (
+              <>
+                <div style={s.periodItem}>
+                  <span style={s.periodLabel}>Opening Cash</span>
+                  <span style={{ ...s.periodValue, color: '#059669' }}>{currency(openingStatus.amount)}</span>
+                </div>
+                <div style={s.periodDivider} />
+              </>
+            )}
             <div style={s.periodItem}>
               <span style={s.periodLabel}>Expected Cash</span>
               <span style={{ ...s.periodValue, color: '#4F46E5', fontSize: 22, fontWeight: 700 }}>

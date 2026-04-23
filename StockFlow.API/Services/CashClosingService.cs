@@ -47,6 +47,39 @@ public class CashClosingService(AppDbContext db)
             closing.Note, closing.CreatedAt), null);
     }
 
+    public async Task<OpeningCashStatusDto> GetOpeningStatusAsync()
+    {
+        var fromDate = await GetFromDateAsync();
+        var opening = await db.Sales
+            .Where(s => s.Type == SaleType.OpeningCash && s.CreatedAt > fromDate)
+            .Select(s => (decimal?)s.TotalAmount)
+            .FirstOrDefaultAsync();
+        return new OpeningCashStatusDto(opening.HasValue, opening);
+    }
+
+    public async Task<(bool ok, string? error)> CreateOpeningCashAsync(CreateOpeningCashDto dto)
+    {
+        var user = await db.Users.FindAsync(dto.UserId);
+        if (user == null) return (false, "User not found.");
+        if (dto.Amount < 0) return (false, "Opening cash cannot be negative.");
+
+        var fromDate = await GetFromDateAsync();
+        var alreadyExists = await db.Sales
+            .AnyAsync(s => s.Type == SaleType.OpeningCash && s.CreatedAt > fromDate);
+        if (alreadyExists) return (false, "Opening cash already recorded for this period.");
+
+        db.Sales.Add(new Sale
+        {
+            UserId = dto.UserId,
+            Type = SaleType.OpeningCash,
+            TotalAmount = dto.Amount,
+            DiscountAmount = 0,
+            CreatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+        return (true, null);
+    }
+
     public async Task<List<CashClosingDto>> GetAllAsync()
     {
         return await db.CashClosings
@@ -78,7 +111,8 @@ public class CashClosingService(AppDbContext db)
             .Where(s => s.CreatedAt > from && s.CreatedAt <= to &&
                         (s.Type == SaleType.CashSale ||
                          s.Type == SaleType.Return ||
-                         s.Type == SaleType.Payment))
+                         s.Type == SaleType.Payment ||
+                         s.Type == SaleType.OpeningCash))
             .Select(s => new { s.Type, s.TotalAmount })
             .ToListAsync();
 
