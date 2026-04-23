@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { salesApi, customersApi } from '../api/client';
+import { salesApi, customersApi, cashClosingApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import ProductSearch from '../components/ProductSearch';
 
@@ -26,6 +26,11 @@ export default function POS() {
   const [success, setSuccess] = useState('');
   const searchRef = useRef();
 
+  const [openingModal, setOpeningModal] = useState(false);
+  const [openingAmount, setOpeningAmount] = useState('');
+  const [openingError, setOpeningError] = useState('');
+  const [openingLoading, setOpeningLoading] = useState(false);
+
   const [payModal, setPayModal] = useState(false);
   const [pmCustomers, setPmCustomers] = useState([]);
   const [pmSearch, setPmSearch] = useState('');
@@ -35,6 +40,12 @@ export default function POS() {
   const [pmError, setPmError] = useState('');
   const [pmSuccess, setPmSuccess] = useState('');
   const [pmLoading, setPmLoading] = useState(false);
+
+  useEffect(() => {
+    cashClosingApi.openingStatus()
+      .then(r => { if (!r.data.hasOpeningCash) setOpeningModal(true); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => { saveCart(cart); }, [cart]);
   useEffect(() => { saveCartDiscount(cartDiscount); }, [cartDiscount]);
@@ -175,6 +186,21 @@ export default function POS() {
       searchRef.current?.focus();
     } catch (err) {
       setError(err.response?.data?.error || 'Checkout failed.');
+    }
+  };
+
+  const handleOpeningSubmit = async (e) => {
+    e.preventDefault();
+    const amount = parseFloat(openingAmount);
+    if (isNaN(amount) || amount < 0) { setOpeningError('Enter a valid amount (0 or more).'); return; }
+    setOpeningError(''); setOpeningLoading(true);
+    try {
+      await cashClosingApi.createOpening({ userId: user.id, amount });
+      setOpeningModal(false);
+    } catch (err) {
+      setOpeningError(err.response?.data?.error || 'Failed to record opening cash.');
+    } finally {
+      setOpeningLoading(false);
     }
   };
 
@@ -362,6 +388,53 @@ export default function POS() {
         )}
       </div>
 
+      {openingModal && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <div style={styles.openingIcon}>₾</div>
+              <h3 style={{ margin: '12px 0 6px', fontSize: 18, fontWeight: 700, color: '#111827' }}>
+                Enter Opening Cash
+              </h3>
+              <p style={{ margin: 0, fontSize: 14, color: '#6B7280', lineHeight: 1.5 }}>
+                Enter the starting cash amount in the register before beginning sales.
+              </p>
+            </div>
+            <form onSubmit={handleOpeningSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={styles.modalLabel}>Opening Cash Amount (₾)</label>
+                <input
+                  style={{ ...styles.modalInput, fontSize: 20, fontWeight: 700, textAlign: 'center', padding: '12px' }}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={openingAmount}
+                  onChange={e => setOpeningAmount(e.target.value)}
+                  autoFocus
+                  required
+                />
+                <p style={{ margin: '6px 0 0', fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
+                  Enter 0 if no change money was provided
+                </p>
+              </div>
+              {openingError && (
+                <p style={{ color: '#B91C1C', margin: 0, fontSize: 13, background: '#FEE2E2', padding: '8px 12px', borderRadius: 6 }}>
+                  {openingError}
+                </p>
+              )}
+              <button
+                style={{ ...styles.checkoutBtn, background: '#4F46E5', marginBottom: 0, opacity: openingLoading ? 0.7 : 1 }}
+                type="submit"
+                disabled={openingLoading}
+              >
+                {openingLoading ? 'Saving…' : 'Start Shift'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {payModal && (
         <div style={styles.overlay} onClick={e => e.target === e.currentTarget && closePayModal()}>
           <div style={styles.modal}>
@@ -495,4 +568,5 @@ const styles = {
   modalClose: { background: '#F3F4F8', border: 'none', borderRadius: 6, width: 28, height: 28, fontSize: 16, cursor: 'pointer', color: '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   modalLabel: { fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 },
   modalInput: { width: '100%', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, boxSizing: 'border-box', background: '#F9FAFB' },
+  openingIcon: { width: 56, height: 56, borderRadius: '50%', background: '#EEF2FF', color: '#4F46E5', fontSize: 24, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' },
 };

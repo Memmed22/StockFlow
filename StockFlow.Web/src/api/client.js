@@ -52,6 +52,8 @@ export const customersApi = {
 };
 
 export const cashClosingApi = {
+  openingStatus: () => api.get('/cashclosings/opening/status'),
+  createOpening: (data) => api.post('/cashclosings/opening', data),
   preview: () => api.get('/cashclosings/preview'),
   create: (data) => api.post('/cashclosings', data),
   getAll: () => api.get('/cashclosings'),
