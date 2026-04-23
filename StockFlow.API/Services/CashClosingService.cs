@@ -5,13 +5,13 @@ using StockFlow.API.Models;
 
 namespace StockFlow.API.Services;
 
-public class CashClosingService(AppDbContext db)
+public class CashClosingService(AppDbContext db, TelegramService telegram)
 {
     public async Task<CashClosingPreviewDto> GetPreviewAsync()
     {
         var fromDate = await GetFromDateAsync();
         var toDate = DateTime.UtcNow;
-        var expected = await CalcExpectedCashAsync(fromDate, toDate);
+        var (_, _, _, _, expected) = await GetBreakdownAsync(fromDate, toDate);
         return new CashClosingPreviewDto(fromDate, toDate, expected);
     }
 
@@ -23,7 +23,7 @@ public class CashClosingService(AppDbContext db)
 
         var fromDate = await GetFromDateAsync();
         var toDate = DateTime.UtcNow;
-        var expected = await CalcExpectedCashAsync(fromDate, toDate);
+        var (opening, cashSales, payments, returns, expected) = await GetBreakdownAsync(fromDate, toDate);
         var diff = dto.CountedCash - expected;
 
         var closing = new CashClosing
@@ -41,10 +41,16 @@ public class CashClosingService(AppDbContext db)
         db.CashClosings.Add(closing);
         await db.SaveChangesAsync();
 
-        return (new CashClosingDto(
+        var result = new CashClosingDto(
             closing.Id, user.Username, closing.FromDate, closing.ToDate,
             closing.ExpectedCash, closing.CountedCash, closing.Difference,
-            closing.Note, closing.CreatedAt), null);
+            closing.Note, closing.CreatedAt);
+
+        var telegramError = await telegram.SendMessageAsync(
+            BuildReport(result, opening, cashSales, payments, returns));
+
+        // telegramError is non-null only for diagnostics; closing itself always succeeds
+        return (result, telegramError);
     }
 
     public async Task<OpeningCashStatusDto> GetOpeningStatusAsync()
@@ -80,6 +86,9 @@ public class CashClosingService(AppDbContext db)
         return (true, null);
     }
 
+    public Task<string?> SendTestAsync() =>
+        telegram.SendMessageAsync("✅ StockFlow Telegram test — connection OK!");
+
     public async Task<List<CashClosingDto>> GetAllAsync()
     {
         return await db.CashClosings
@@ -92,7 +101,6 @@ public class CashClosingService(AppDbContext db)
             .ToListAsync();
     }
 
-    // Returns the end of the last closing, or DateTime.MinValue if no closings exist
     private async Task<DateTime> GetFromDateAsync()
     {
         var last = await db.CashClosings
@@ -102,20 +110,74 @@ public class CashClosingService(AppDbContext db)
         return last ?? DateTime.MinValue;
     }
 
-    private async Task<decimal> CalcExpectedCashAsync(DateTime from, DateTime to)
+    // Returns (openingCash, cashSales, paymentsReceived, returnsGiven, expected)
+    // cashSales/opening: positive. paymentsReceived: positive (negated storage). returnsGiven: positive.
+    // expected = opening + cashSales + paymentsReceived - returnsGiven
+    private async Task<(decimal opening, decimal cashSales, decimal payments, decimal returns, decimal expected)>
+        GetBreakdownAsync(DateTime from, DateTime to)
     {
-        // Cash in: CashSale (positive TotalAmount)
-        // Cash in: Payment (TotalAmount stored negative, negate to get positive)
-        // Cash out: Return (TotalAmount stored negative)
         var items = await db.Sales
             .Where(s => s.CreatedAt > from && s.CreatedAt <= to &&
-                        (s.Type == SaleType.CashSale ||
-                         s.Type == SaleType.Return ||
-                         s.Type == SaleType.Payment ||
-                         s.Type == SaleType.OpeningCash))
+                        (s.Type == SaleType.OpeningCash || s.Type == SaleType.CashSale ||
+                         s.Type == SaleType.Return     || s.Type == SaleType.Payment))
             .Select(s => new { s.Type, s.TotalAmount })
             .ToListAsync();
 
-        return items.Sum(s => s.Type == SaleType.Payment ? -s.TotalAmount : s.TotalAmount);
+        var opening   = items.Where(x => x.Type == SaleType.OpeningCash).Sum(x => x.TotalAmount);
+        var cashSales = items.Where(x => x.Type == SaleType.CashSale).Sum(x => x.TotalAmount);
+        var payments  = items.Where(x => x.Type == SaleType.Payment).Sum(x => -x.TotalAmount);
+        var returns   = items.Where(x => x.Type == SaleType.Return).Sum(x => -x.TotalAmount);
+        var expected  = items.Sum(x => x.Type == SaleType.Payment ? -x.TotalAmount : x.TotalAmount);
+
+        return (opening, cashSales, payments, returns, expected);
+    }
+
+    private static string BuildReport(CashClosingDto c,
+        decimal opening, decimal cashSales, decimal payments, decimal returns)
+    {
+        var fromStr = c.FromDate == DateTime.MinValue
+            ? "Beginning of records"
+            : c.FromDate.ToLocalTime().ToString("yyyy-MM-dd");
+        var toStr   = c.ToDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+        var sep     = "---------------------";
+        var diff    = c.Difference;
+        var diffStr = $"{(diff >= 0 ? "+" : "")}{diff:F2} ₾";
+
+        var lines = new System.Text.StringBuilder();
+        lines.AppendLine("📊 Cash Closing Report");
+        lines.AppendLine();
+        lines.AppendLine($"🗓 From: {fromStr}");
+        lines.AppendLine($"🗓 To:   {toStr}");
+        lines.AppendLine($"👤 Cashier: {c.Username}");
+        lines.AppendLine();
+        lines.AppendLine(sep);
+        lines.AppendLine();
+        lines.AppendLine($"💰 Opening Cash: {opening:F2} ₾");
+        lines.AppendLine();
+        lines.AppendLine($"💵 Cash Sales:  {cashSales:F2} ₾");
+        lines.AppendLine($"💳 Payments:    {payments:F2} ₾");
+        lines.AppendLine($"🔁 Returns:    -{returns:F2} ₾");
+        lines.AppendLine();
+        lines.AppendLine(sep);
+        lines.AppendLine();
+        lines.AppendLine($"📦 Expected: {c.ExpectedCash:F2} ₾");
+        lines.AppendLine($"💵 Counted:  {c.CountedCash:F2} ₾");
+        lines.AppendLine();
+        lines.AppendLine($"{(diff != 0 ? "⚠️" : "✅")} Difference: {diffStr}");
+
+        if (diff != 0)
+        {
+            lines.AppendLine();
+            lines.AppendLine("⚠️ ATTENTION: Cash mismatch detected");
+        }
+
+        if (!string.IsNullOrWhiteSpace(c.Note))
+        {
+            lines.AppendLine();
+            lines.AppendLine(sep);
+            lines.AppendLine($"📝 Note: {c.Note}");
+        }
+
+        return lines.ToString().TrimEnd();
     }
 }

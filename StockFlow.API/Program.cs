@@ -3,6 +3,7 @@ using StockFlow.API.Data;
 using StockFlow.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
@@ -16,6 +17,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<CashClosingService>();
+builder.Services.AddScoped<TelegramService>();
 
 builder.Services.AddControllers();
 builder.Services.AddCors(opt =>

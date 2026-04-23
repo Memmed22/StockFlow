@@ -53,8 +53,9 @@ export default function CashClosing() {
     }
     setLoading(true);
     try {
-      await cashClosingApi.create({ userId: user.id, countedCash: countedNum, note: note || null });
-      setMessage('Cash closing recorded successfully. Cash has been reset.');
+      const { data } = await cashClosingApi.create({ userId: user.id, countedCash: countedNum, note: note || null });
+      const tgStatus = data.telegramError ? ` (Telegram: ${data.telegramError})` : ' · Telegram report sent ✓';
+      setMessage(`Cash closing recorded successfully. Cash has been reset.${tgStatus}`);
       setCounted('');
       setNote('');
       loadAll();
