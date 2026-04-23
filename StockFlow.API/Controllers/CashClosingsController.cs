@@ -27,9 +27,16 @@ public class CashClosingsController(CashClosingService cashClosingService) : Con
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCashClosingDto dto)
     {
-        var (result, error) = await cashClosingService.CreateClosingAsync(dto);
-        if (error != null) return BadRequest(new { error });
-        return Ok(result);
+        var (result, telegramError) = await cashClosingService.CreateClosingAsync(dto);
+        if (result == null) return BadRequest(new { error = telegramError });
+        return Ok(new { closing = result, telegramError });
+    }
+
+    [HttpPost("telegram/test")]
+    public async Task<IActionResult> TelegramTest()
+    {
+        var error = await cashClosingService.SendTestAsync();
+        return Ok(new { sent = error == null, error });
     }
 
     [HttpGet]
