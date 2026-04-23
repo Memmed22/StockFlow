@@ -15,6 +15,7 @@ builder.Services.AddScoped<ReturnService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<CustomerService>();
+builder.Services.AddScoped<CashClosingService>();
 
 builder.Services.AddControllers();
 builder.Services.AddCors(opt =>

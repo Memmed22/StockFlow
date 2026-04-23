@@ -51,6 +51,12 @@ export const customersApi = {
   recordPayment: (id, data) => api.post(`/customers/${id}/payment`, data),
 };
 
+export const cashClosingApi = {
+  preview: () => api.get('/cashclosings/preview'),
+  create: (data) => api.post('/cashclosings', data),
+  getAll: () => api.get('/cashclosings'),
+};
+
 export const reportsApi = {
   dailySales: (from, to) => api.get('/reports/daily-sales', { params: { from, to } }),
   salesPerUser: (from, to) => api.get('/reports/sales-per-user', { params: { from, to } }),

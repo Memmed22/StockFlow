@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 const allNavItems = [
   { to: '/pos',       label: 'POS',       roles: ['Admin', 'Cashier'] },
   { to: '/returns',   label: 'Returns',   roles: ['Admin', 'Cashier'] },
+  { to: '/closing',   label: 'Cash Close', roles: ['Admin', 'Cashier'] },
   { to: '/products',  label: 'Products',  roles: ['Admin'] },
   { to: '/stock',     label: 'Stock In',  roles: ['Admin'] },
   { to: '/customers', label: 'Customers', roles: ['Admin'] },
