@@ -18,8 +18,14 @@ export default function Login() {
       const { data } = await usersApi.login(form);
       login(data);
       navigate('/pos');
-    } catch {
-      setError('Invalid username or password.');
+    } catch (err) {
+      if (err.response) {
+        setError(err.response.data?.error || `Server error ${err.response.status}`);
+      } else if (err.request) {
+        setError('Cannot reach server — is the API running on port 5000?');
+      } else {
+        setError(err.message || 'Unexpected error');
+      }
     } finally {
       setLoading(false);
     }
