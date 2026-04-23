@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Sale> Sales => Set<Sale>();
     public DbSet<SaleItem> SaleItems => Set<SaleItem>();
     public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<CashClosing> CashClosings => Set<CashClosing>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -71,6 +72,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<StockMovement>()
             .HasIndex(m => m.CreatedAt);
+
+        modelBuilder.Entity<CashClosing>()
+            .Property(c => c.ExpectedCash)
+            .HasColumnType("TEXT");
+
+        modelBuilder.Entity<CashClosing>()
+            .Property(c => c.CountedCash)
+            .HasColumnType("TEXT");
+
+        modelBuilder.Entity<CashClosing>()
+            .Property(c => c.Difference)
+            .HasColumnType("TEXT");
+
+        modelBuilder.Entity<CashClosing>()
+            .HasIndex(c => c.CreatedAt);
 
         modelBuilder.Entity<Customer>()
             .HasIndex(c => c.Name);

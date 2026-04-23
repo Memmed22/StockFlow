@@ -10,6 +10,7 @@ import Reports from './pages/Reports';
 import Users from './pages/Users';
 import Customers from './pages/Customers';
 import CustomerDetail from './pages/CustomerDetail';
+import CashClosing from './pages/CashClosing';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -40,6 +41,7 @@ export default function App() {
                 <Routes>
                   <Route path="/pos" element={<POS />} />
                   <Route path="/returns" element={<Returns />} />
+                  <Route path="/closing" element={<CashClosing />} />
                   <Route path="/products" element={<AdminRoute><Products /></AdminRoute>} />
                   <Route path="/stock" element={<AdminRoute><StockIn /></AdminRoute>} />
                   <Route path="/customers" element={<AdminRoute><Customers /></AdminRoute>} />
