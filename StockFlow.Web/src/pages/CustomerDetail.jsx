@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { customersApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-
-const TYPE_LABELS = { CashSale: 'Cash Sale', DebitSale: 'Debit Sale', Return: 'Return', Payment: 'Payment' };
+import { useTranslation } from 'react-i18next';
 const TYPE_COLORS = { CashSale: '#16a34a', DebitSale: '#dc2626', Return: '#f59e0b', Payment: '#2563eb' };
 
 export default function CustomerDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [detail, setDetail] = useState(null);
   const [payAmount, setPayAmount] = useState('');
   const [payError, setPayError] = useState('');
@@ -32,14 +32,14 @@ export default function CustomerDetail() {
     e.preventDefault();
     setPayError(''); setPaySuccess('');
     const amount = parseFloat(payAmount);
-    if (!amount || amount <= 0) { setPayError('Enter a valid amount.'); return; }
+    if (!amount || amount <= 0) { setPayError(t('customerDetail.payment.errorInvalid')); return; }
     try {
       await customersApi.recordPayment(id, { userId: user.id, amount });
-      setPaySuccess(`Payment of ${amount.toFixed(2)} ₾ recorded.`);
+      setPaySuccess(t('customerDetail.payment.success', { amount: amount.toFixed(2) }));
       setPayAmount('');
       load();
     } catch (err) {
-      setPayError(err.response?.data?.error || 'Failed to record payment.');
+      setPayError(err.response?.data?.error || t('customerDetail.payment.errorFailed'));
     }
   };
 
@@ -51,7 +51,7 @@ export default function CustomerDetail() {
     });
   };
 
-  if (loading) return <p style={{ color: '#64748b' }}>Loading...</p>;
+  if (loading) return <p style={{ color: '#64748b' }}>{t('customerDetail.loading')}</p>;
   if (!detail) return null;
 
   const { info, transactions } = detail;
@@ -59,7 +59,7 @@ export default function CustomerDetail() {
 
   return (
     <div>
-      <button style={styles.backBtn} onClick={() => navigate('/customers')}>← Back</button>
+      <button style={styles.backBtn} onClick={() => navigate('/customers')}>{t('customerDetail.back')}</button>
 
       <div style={styles.topRow}>
         <div style={styles.infoCard}>
@@ -67,7 +67,7 @@ export default function CustomerDetail() {
           <p style={styles.phone}>{info.phoneNumber}</p>
           {info.description && <p style={styles.description}>{info.description}</p>}
           <div style={{ ...styles.balanceBox, borderColor: balance > 0 ? '#fca5a5' : '#86efac', background: balance > 0 ? '#fef2f2' : '#f0fdf4' }}>
-            <span style={styles.balanceLabel}>Current Balance (Debt)</span>
+            <span style={styles.balanceLabel}>{t('customerDetail.balance')}</span>
             <span style={{ ...styles.balanceAmount, color: balance > 0 ? '#dc2626' : '#16a34a' }}>
               {balance.toFixed(2)} ₾
             </span>
@@ -75,9 +75,9 @@ export default function CustomerDetail() {
         </div>
 
         <div style={styles.payCard}>
-          <h3 style={styles.payTitle}>Record Payment</h3>
+          <h3 style={styles.payTitle}>{t('customerDetail.payment.title')}</h3>
           <form onSubmit={handlePayment} style={styles.payForm}>
-            <label style={styles.label}>Amount (₾)</label>
+            <label style={styles.label}>{t('customerDetail.payment.amount')}</label>
             <input
               style={styles.input}
               type="number"
@@ -89,57 +89,57 @@ export default function CustomerDetail() {
             />
             {payError && <p style={styles.error}>{payError}</p>}
             {paySuccess && <p style={styles.success}>{paySuccess}</p>}
-            <button style={styles.payBtn} type="submit">Record Payment</button>
+            <button style={styles.payBtn} type="submit">{t('customerDetail.payment.button')}</button>
           </form>
         </div>
       </div>
 
-      <h3 style={styles.sectionTitle}>Transaction History</h3>
+      <h3 style={styles.sectionTitle}>{t('customerDetail.history')}</h3>
       <table style={styles.table}>
         <thead>
           <tr style={styles.thead}>
             <th style={{ ...styles.th, width: 28 }}></th>
-            <th style={styles.th}>Date</th>
-            <th style={styles.th}>Type</th>
-            <th style={{ ...styles.th, textAlign: 'right' }}>Amount</th>
+            <th style={styles.th}>{t('customerDetail.col.date')}</th>
+            <th style={styles.th}>{t('customerDetail.col.type')}</th>
+            <th style={{ ...styles.th, textAlign: 'right' }}>{t('customerDetail.col.amount')}</th>
           </tr>
         </thead>
         <tbody>
-          {transactions.map(t => {
-            const isPositive = t.amount > 0;
-            const hasItems = t.items && t.items.length > 0;
-            const isOpen = expanded.has(t.id);
+          {transactions.map(tx => {
+            const isPositive = tx.amount > 0;
+            const hasItems = tx.items && tx.items.length > 0;
+            const isOpen = expanded.has(tx.id);
             return (
               <>
-                <tr key={t.id} style={{ ...styles.tr, cursor: hasItems ? 'pointer' : 'default' }}
-                  onClick={() => hasItems && toggleExpand(t.id)}>
+                <tr key={tx.id} style={{ ...styles.tr, cursor: hasItems ? 'pointer' : 'default' }}
+                  onClick={() => hasItems && toggleExpand(tx.id)}>
                   <td style={{ ...styles.td, color: '#94a3b8', fontSize: 12, paddingRight: 0 }}>
                     {hasItems ? (isOpen ? '▾' : '▸') : ''}
                   </td>
-                  <td style={styles.td}>{new Date(t.createdAt).toLocaleString()}</td>
+                  <td style={styles.td}>{new Date(tx.createdAt).toLocaleString()}</td>
                   <td style={styles.td}>
-                    <span style={{ ...styles.typeBadge, background: (TYPE_COLORS[t.type] ?? '#475569') + '22', color: TYPE_COLORS[t.type] ?? '#475569' }}>
-                      {TYPE_LABELS[t.type] ?? t.type}
+                    <span style={{ ...styles.typeBadge, background: (TYPE_COLORS[tx.type] ?? '#475569') + '22', color: TYPE_COLORS[tx.type] ?? '#475569' }}>
+                      {t(`customerDetail.types.${tx.type}`) ?? tx.type}
                     </span>
                   </td>
                   <td style={{ ...styles.td, textAlign: 'right', fontWeight: 600, color: isPositive ? '#dc2626' : '#16a34a' }}>
-                    {isPositive ? '+' : ''}{t.amount.toFixed(2)} ₾
+                    {isPositive ? '+' : ''}{tx.amount.toFixed(2)} ₾
                   </td>
                 </tr>
                 {hasItems && isOpen && (
-                  <tr key={`${t.id}-items`} style={{ background: '#f8fafc' }}>
+                  <tr key={`${tx.id}-items`} style={{ background: '#f8fafc' }}>
                     <td colSpan={4} style={{ padding: '0 0 8px 44px' }}>
                       <table style={styles.itemsTable}>
                         <thead>
                           <tr>
-                            <th style={styles.itemTh}>Product</th>
-                            <th style={styles.itemTh}>Qty</th>
-                            <th style={styles.itemTh}>Unit Price</th>
-                            <th style={{ ...styles.itemTh, textAlign: 'right' }}>Total</th>
+                            <th style={styles.itemTh}>{t('customerDetail.items.product')}</th>
+                            <th style={styles.itemTh}>{t('customerDetail.items.qty')}</th>
+                            <th style={styles.itemTh}>{t('customerDetail.items.unitPrice')}</th>
+                            <th style={{ ...styles.itemTh, textAlign: 'right' }}>{t('customerDetail.items.total')}</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {t.items.map((item, idx) => (
+                          {tx.items.map((item, idx) => (
                             <tr key={idx}>
                               <td style={styles.itemTd}>{item.productName}</td>
                               <td style={styles.itemTd}>{item.quantity}</td>
@@ -156,13 +156,13 @@ export default function CustomerDetail() {
             );
           })}
           {transactions.length === 0 && (
-            <tr><td colSpan={4} style={styles.empty}>No transactions yet.</td></tr>
+            <tr><td colSpan={4} style={styles.empty}>{t('customerDetail.noTransactions')}</td></tr>
           )}
         </tbody>
         {transactions.length > 0 && (
           <tfoot>
             <tr style={{ background: '#f8fafc' }}>
-              <td colSpan={3} style={{ ...styles.td, fontWeight: 700 }}>Net Balance</td>
+              <td colSpan={3} style={{ ...styles.td, fontWeight: 700 }}>{t('customerDetail.netBalance')}</td>
               <td style={{ ...styles.td, textAlign: 'right', fontWeight: 700, fontSize: 16, color: balance > 0 ? '#dc2626' : '#16a34a' }}>
                 {balance.toFixed(2)} ₾
               </td>

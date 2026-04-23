@@ -1,21 +1,18 @@
 import { useEffect, useState } from 'react';
 import { reportsApi } from '../api/client';
+import { useTranslation } from 'react-i18next';
 
 const TYPE_CONFIG = {
-  CashSale:  { label: 'Cash',    bg: '#D1FAE5', color: '#065F46' },
-  DebitSale: { label: 'Debit',   bg: '#FEF3C7', color: '#92400E' },
-  Return:    { label: 'Return',  bg: '#FEE2E2', color: '#B91C1C' },
-  Payment:   { label: 'Payment', bg: '#DBEAFE', color: '#1D4ED8' },
+  CashSale:  { key: 'Cash',    bg: '#D1FAE5', color: '#065F46' },
+  DebitSale: { key: 'Debit',   bg: '#FEF3C7', color: '#92400E' },
+  Return:    { key: 'Return',  bg: '#FEE2E2', color: '#B91C1C' },
+  Payment:   { key: 'Payment', bg: '#DBEAFE', color: '#1D4ED8' },
 };
 
-const TABS = [
-  { key: 'detailed', label: 'Detailed Sales' },
-  { key: 'daily',    label: 'Daily Summary' },
-  { key: 'users',    label: 'By Cashier' },
-  { key: 'stock',    label: 'Stock Report' },
-];
+const TAB_KEYS = ['detailed', 'daily', 'users', 'stock'];
 
 export default function Reports() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState('detailed');
   const [dailySales, setDailySales] = useState([]);
   const [userSales, setUserSales] = useState([]);
@@ -42,7 +39,7 @@ export default function Reports() {
       setStockReport(stock.data);
       setDetailed(det.data);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load reports.');
+      setError(err.response?.data?.error || t('reports.noData.reports'));
     } finally {
       setLoading(false);
     }
@@ -53,17 +50,17 @@ export default function Reports() {
   return (
     <div>
       <div style={s.pageHeader}>
-        <h2 style={s.title}>Reports</h2>
-        <p style={s.subtitle}>Sales, inventory, and cashier performance</p>
+        <h2 style={s.title}>{t('reports.title')}</h2>
+        <p style={s.subtitle}>{t('reports.subtitle')}</p>
       </div>
 
       {/* Tab bar */}
       <div style={s.tabBar}>
-        {TABS.map(t => (
-          <button key={t.key}
-            style={{ ...s.tab, ...(tab === t.key ? s.activeTab : {}) }}
-            onClick={() => setTab(t.key)}>
-            {t.label}
+        {TAB_KEYS.map(key => (
+          <button key={key}
+            style={{ ...s.tab, ...(tab === key ? s.activeTab : {}) }}
+            onClick={() => setTab(key)}>
+            {t(`reports.tabs.${key}`)}
           </button>
         ))}
       </div>
@@ -72,15 +69,15 @@ export default function Reports() {
       {tab !== 'stock' && (
         <div style={s.filters}>
           <div style={s.filterGroup}>
-            <label style={s.filterLabel}>From</label>
+            <label style={s.filterLabel}>{t('common.from')}</label>
             <input type="date" style={s.dateInput} value={from} onChange={e => setFrom(e.target.value)} />
           </div>
           <div style={s.filterGroup}>
-            <label style={s.filterLabel}>To</label>
+            <label style={s.filterLabel}>{t('common.to')}</label>
             <input type="date" style={s.dateInput} value={to} onChange={e => setTo(e.target.value)} />
           </div>
           <button style={s.applyBtn} onClick={handleApply} disabled={loading}>
-            {loading ? 'Loading…' : 'Apply'}
+            {loading ? t('reports.loading') : t('reports.apply')}
           </button>
         </div>
       )}
@@ -88,7 +85,7 @@ export default function Reports() {
       {tab === 'stock' && (
         <div style={{ marginBottom: 16 }}>
           <button style={s.applyBtn} onClick={() => fetchAll(from, to)} disabled={loading}>
-            {loading ? 'Loading…' : 'Refresh'}
+            {loading ? t('reports.loading') : t('reports.refresh')}
           </button>
         </div>
       )}
@@ -102,23 +99,23 @@ export default function Reports() {
             <table style={s.table}>
               <thead>
                 <tr>
-                  <th style={s.th}>Type</th>
-                  <th style={s.th}>Product / Description</th>
-                  <th style={s.th}>Customer</th>
-                  <th style={s.th}>Qty</th>
-                  <th style={s.th}>Unit Price</th>
-                  <th style={{ ...s.th, textAlign: 'right' }}>Total</th>
+                  <th style={s.th}>{t('reports.col.type')}</th>
+                  <th style={s.th}>{t('reports.col.productDesc')}</th>
+                  <th style={s.th}>{t('reports.col.customer')}</th>
+                  <th style={s.th}>{t('reports.col.qty')}</th>
+                  <th style={s.th}>{t('reports.col.unitPrice')}</th>
+                  <th style={{ ...s.th, textAlign: 'right' }}>{t('reports.col.total')}</th>
                 </tr>
               </thead>
               <tbody>
                 {detailed.items.map((r, i) => {
-                  const cfg = TYPE_CONFIG[r.type] ?? { label: r.type, bg: '#F3F4F8', color: '#374151' };
+                  const cfg = TYPE_CONFIG[r.type] ?? { key: r.type, bg: '#F3F4F8', color: '#374151' };
                   const isDebit = r.type === 'DebitSale';
                   const isReturn = r.type === 'Return';
                   return (
                     <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : undefined }}>
                       <td style={s.td}>
-                        <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
+                        <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>{t(`reports.types.${cfg.key}`)}</span>
                       </td>
                       <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>{r.label}</td>
                       <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || '—'}</td>
@@ -128,13 +125,13 @@ export default function Reports() {
                       <td style={s.td}>{r.unitPrice != null ? `${r.unitPrice.toFixed(2)} ₾` : '—'}</td>
                       <td style={{ ...s.td, textAlign: 'right', fontWeight: 700, color: r.total < 0 ? '#DC2626' : isDebit ? '#92400E' : '#059669' }}>
                         {r.total >= 0 && !isReturn ? '+' : ''}{r.total.toFixed(2)} ₾
-                        {isDebit && <span style={s.notCashTag}>not cash</span>}
+                        {isDebit && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
                       </td>
                     </tr>
                   );
                 })}
                 {detailed.items.length === 0 && !loading && (
-                  <tr><td colSpan={6} style={s.empty}>No transactions in this period.</td></tr>
+                  <tr><td colSpan={6} style={s.empty}>{t('reports.noData.transactions')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -142,20 +139,20 @@ export default function Reports() {
 
           {detailed.items.length > 0 && (
             <div style={s.summaryCard}>
-              <h4 style={s.summaryTitle}>Summary</h4>
+              <h4 style={s.summaryTitle}>{t('reports.summary.title')}</h4>
               {[
-                { label: 'Cash Sales', value: `+${detailed.summary.cashSalesTotal.toFixed(2)} ₾`, color: '#059669' },
-                { label: 'Debit Sales (not cash)', value: `+${detailed.summary.debitSalesTotal.toFixed(2)} ₾`, color: '#92400E', muted: true },
-                { label: 'Payments Received', value: `+${detailed.summary.paymentsTotal.toFixed(2)} ₾`, color: '#1D4ED8' },
-                { label: 'Returns', value: `${detailed.summary.returnsTotal.toFixed(2)} ₾`, color: '#DC2626' },
+                { key: 'cashSales', value: `+${detailed.summary.cashSalesTotal.toFixed(2)} ₾`, color: '#059669' },
+                { key: 'debitSales', value: `+${detailed.summary.debitSalesTotal.toFixed(2)} ₾`, color: '#92400E', muted: true },
+                { key: 'payments', value: `+${detailed.summary.paymentsTotal.toFixed(2)} ₾`, color: '#1D4ED8' },
+                { key: 'returns', value: `${detailed.summary.returnsTotal.toFixed(2)} ₾`, color: '#DC2626' },
               ].map(row => (
-                <div key={row.label} style={{ ...s.summaryRow, opacity: row.muted ? 0.7 : 1 }}>
-                  <span style={s.summaryLabel}>{row.label}</span>
+                <div key={row.key} style={{ ...s.summaryRow, opacity: row.muted ? 0.7 : 1 }}>
+                  <span style={s.summaryLabel}>{t(`reports.summary.${row.key}`)}</span>
                   <span style={{ fontWeight: 600, color: row.color }}>{row.value}</span>
                 </div>
               ))}
               <div style={s.cashTotalRow}>
-                <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>Cash Total</span>
+                <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>{t('reports.summary.cashTotal')}</span>
                 <span style={{ fontWeight: 800, fontSize: 22, color: detailed.summary.cashTotal >= 0 ? '#059669' : '#DC2626' }}>
                   {detailed.summary.cashTotal.toFixed(2)} ₾
                 </span>
@@ -169,17 +166,17 @@ export default function Reports() {
       {tab === 'daily' && (
         <>
           <div style={s.infoBar}>
-            Total Revenue: <strong>{dailySales.reduce((s, r) => s + r.totalRevenue, 0).toFixed(2)} ₾</strong>
+            {t('reports.infoRevenue')}: <strong>{dailySales.reduce((s, r) => s + r.totalRevenue, 0).toFixed(2)} ₾</strong>
             &nbsp;·&nbsp;
-            Transactions: <strong>{dailySales.reduce((s, r) => s + r.transactionCount, 0)}</strong>
+            {t('reports.infoTransactions')}: <strong>{dailySales.reduce((s, r) => s + r.transactionCount, 0)}</strong>
           </div>
           <div style={s.tableWrap}>
             <table style={s.table}>
               <thead>
                 <tr>
-                  <th style={s.th}>Date</th>
-                  <th style={s.th}>Transactions</th>
-                  <th style={{ ...s.th, textAlign: 'right' }}>Total Revenue</th>
+                  <th style={s.th}>{t('reports.col.date')}</th>
+                  <th style={s.th}>{t('reports.col.transactions')}</th>
+                  <th style={{ ...s.th, textAlign: 'right' }}>{t('reports.col.totalRevenue')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,7 +188,7 @@ export default function Reports() {
                   </tr>
                 ))}
                 {dailySales.length === 0 && !loading && (
-                  <tr><td colSpan={3} style={s.empty}>No sales in this period.</td></tr>
+                  <tr><td colSpan={3} style={s.empty}>{t('reports.noData.sales')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -205,9 +202,9 @@ export default function Reports() {
           <table style={s.table}>
             <thead>
               <tr>
-                <th style={s.th}>Cashier</th>
-                <th style={s.th}>Transactions</th>
-                <th style={{ ...s.th, textAlign: 'right' }}>Total Revenue</th>
+                <th style={s.th}>{t('reports.col.cashier')}</th>
+                <th style={s.th}>{t('reports.col.transactions')}</th>
+                <th style={{ ...s.th, textAlign: 'right' }}>{t('reports.col.totalRevenue')}</th>
               </tr>
             </thead>
             <tbody>
@@ -219,7 +216,7 @@ export default function Reports() {
                 </tr>
               ))}
               {userSales.length === 0 && !loading && (
-                <tr><td colSpan={3} style={s.empty}>No sales data for this period.</td></tr>
+                <tr><td colSpan={3} style={s.empty}>{t('reports.noData.users')}</td></tr>
               )}
             </tbody>
           </table>
@@ -232,9 +229,9 @@ export default function Reports() {
           <table style={s.table}>
             <thead>
               <tr>
-                <th style={s.th}>Product</th>
-                <th style={s.th}>Barcode</th>
-                <th style={{ ...s.th, textAlign: 'right' }}>Current Stock</th>
+                <th style={s.th}>{t('reports.col.product')}</th>
+                <th style={s.th}>{t('reports.col.barcode')}</th>
+                <th style={{ ...s.th, textAlign: 'right' }}>{t('reports.col.currentStock')}</th>
               </tr>
             </thead>
             <tbody>
@@ -248,7 +245,7 @@ export default function Reports() {
                 </tr>
               ))}
               {stockReport.length === 0 && !loading && (
-                <tr><td colSpan={3} style={s.empty}>No products found.</td></tr>
+                <tr><td colSpan={3} style={s.empty}>{t('reports.noData.products')}</td></tr>
               )}
             </tbody>
           </table>

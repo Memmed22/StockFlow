@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { customersApi } from '../api/client';
+import { useTranslation } from 'react-i18next';
 
 export default function Customers() {
+  const { t } = useTranslation();
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ name: '', phoneNumber: '', description: '' });
@@ -19,7 +21,7 @@ export default function Customers() {
     try {
       const { data } = await customersApi.getAll(q);
       setCustomers(data);
-    } catch { setError('Failed to load customers.'); }
+    } catch { setError(t('customers.errors.load')); }
     finally { setLoading(false); }
   };
 
@@ -39,7 +41,7 @@ export default function Customers() {
       setShowForm(false);
       load(search || undefined);
     } catch (err) {
-      setFormError(err.response?.data?.error || 'Failed to create customer.');
+      setFormError(err.response?.data?.error || t('customers.errors.create'));
     }
   };
 
@@ -49,35 +51,35 @@ export default function Customers() {
     <div>
       <div style={s.header}>
         <div>
-          <h2 style={s.title}>Customers</h2>
-          <p style={s.subtitle}>{customers.length} customers · Outstanding debt: <strong style={{ color: totalDebt > 0 ? '#DC2626' : '#059669' }}>{totalDebt.toFixed(2)} ₾</strong></p>
+          <h2 style={s.title}>{t('customers.title')}</h2>
+          <p style={s.subtitle}>{customers.length} · {t('customers.outstandingDebt')}: <strong style={{ color: totalDebt > 0 ? '#DC2626' : '#059669' }}>{totalDebt.toFixed(2)} ₾</strong></p>
         </div>
         <button style={s.primaryBtn} onClick={() => setShowForm(v => !v)}>
-          {showForm ? 'Cancel' : '+ New Customer'}
+          {showForm ? t('customers.cancel') : t('customers.newCustomer')}
         </button>
       </div>
 
       {showForm && (
         <div style={s.card}>
-          <h3 style={s.cardTitle}>New Customer</h3>
+          <h3 style={s.cardTitle}>{t('customers.newCustomerTitle')}</h3>
           <form onSubmit={handleCreate} style={s.formRow}>
             <div style={s.field}>
-              <label style={s.label}>Name *</label>
-              <input style={s.input} required placeholder="Full name"
+              <label style={s.label}>{t('customers.form.name')}</label>
+              <input style={s.input} required placeholder={t('customers.form.namePlaceholder')}
                 value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Phone *</label>
-              <input style={s.input} required placeholder="+995 555 123456"
+              <label style={s.label}>{t('customers.form.phone')}</label>
+              <input style={s.input} required placeholder={t('customers.form.phonePlaceholder')}
                 value={form.phoneNumber} onChange={e => setForm({ ...form, phoneNumber: e.target.value })} />
             </div>
             <div style={{ ...s.field, flex: 2 }}>
-              <label style={s.label}>Description</label>
-              <input style={s.input} placeholder="Optional notes"
+              <label style={s.label}>{t('customers.form.description')}</label>
+              <input style={s.input} placeholder={t('customers.form.descriptionPlaceholder')}
                 value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <button style={s.successBtn} type="submit">Create</button>
+              <button style={s.successBtn} type="submit">{t('customers.create')}</button>
             </div>
           </form>
           {formError && <div style={{ ...s.errorBox, marginTop: 12 }}>{formError}</div>}
@@ -85,7 +87,7 @@ export default function Customers() {
       )}
 
       <div style={s.searchRow}>
-        <input style={s.searchInput} placeholder="Search by name or phone..."
+        <input style={s.searchInput} placeholder={t('customers.searchPlaceholder')}
           value={search} onChange={handleSearch} />
       </div>
 
@@ -95,10 +97,10 @@ export default function Customers() {
         <table style={s.table}>
           <thead>
             <tr>
-              <th style={s.th}>Name</th>
-              <th style={s.th}>Phone</th>
-              <th style={s.th}>Description</th>
-              <th style={s.th}>Balance</th>
+              <th style={s.th}>{t('customers.col.name')}</th>
+              <th style={s.th}>{t('customers.col.phone')}</th>
+              <th style={s.th}>{t('customers.col.description')}</th>
+              <th style={s.th}>{t('customers.col.balance')}</th>
               <th style={s.th}></th>
             </tr>
           </thead>
@@ -114,12 +116,12 @@ export default function Customers() {
                   </span>
                 </td>
                 <td style={s.td}>
-                  <button style={s.viewBtn} onClick={() => navigate(`/customers/${c.id}`)}>View →</button>
+                  <button style={s.viewBtn} onClick={() => navigate(`/customers/${c.id}`)}>{t('customers.view')}</button>
                 </td>
               </tr>
             ))}
             {customers.length === 0 && !loading && (
-              <tr><td colSpan={5} style={s.empty}>No customers found.</td></tr>
+              <tr><td colSpan={5} style={s.empty}>{t('customers.noCustomers')}</td></tr>
             )}
           </tbody>
         </table>
