@@ -68,7 +68,23 @@
       "unitType": "Ölçü vahidi", "description": "Təsvir", "optional": "İstəyə bağlı"
     },
     "col": { "name": "Ad", "barcode": "Barkod", "unit": "Vahid", "sellPrice": "Satış", "buyPrice": "Alış", "stock": "Anbar", "actions": "Əməliyyatlar" },
-    "units": ["Ədəd", "Metr (m)", "Kv. metr (m²)", "Litr (L)"]
+    "units": ["Ədəd", "Metr (m)", "Kv. metr (m²)", "Litr (L)"],
+    "correctStock": {
+      "button": "Anbarı düzəlt",
+      "title": "Anbarı düzəlt",
+      "subtitle": "Bu məhsul üçün faktiki miqdarı təyin edin",
+      "currentStock": "Cari anbar",
+      "correctQty": "Düzgün miqdar *",
+      "correctQtyPlaceholder": "Faktiki miqdarı daxil edin",
+      "reason": "Səbəb",
+      "reasonPlaceholder": "məs. Səhv giriş, yenidən sayım…",
+      "submit": "Düzəlişi tətbiq et",
+      "submitting": "Yadda saxlanır…",
+      "errors": {
+        "invalidQty": "Düzgün miqdar daxil edin (0 və ya çox).",
+        "failed": "Düzəlişi yadda saxlayarkən xəta."
+      }
+    }
   },
   "stock": {
     "title": "Anbar doldurma", "subtitle": "Məhsulun gələn inventarını qeyd edin",

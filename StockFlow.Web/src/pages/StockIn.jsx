@@ -8,9 +8,10 @@ const UNIT_IS_DECIMAL = { 0: false, 1: true, 2: true, 3: true };
 const PAGE_SIZE = 20;
 
 const TYPE_STYLE = {
-  StockIn: { bg: '#D1FAE5', color: '#065F46' },
-  Sale:    { bg: '#FEE2E2', color: '#B91C1C' },
-  Return:  { bg: '#FEF3C7', color: '#92400E' },
+  StockIn:    { bg: '#D1FAE5', color: '#065F46' },
+  Sale:       { bg: '#FEE2E2', color: '#B91C1C' },
+  Return:     { bg: '#FEF3C7', color: '#92400E' },
+  Adjustment: { bg: '#EDE9FE', color: '#5B21B6' },
 };
 
 export default function StockIn() {

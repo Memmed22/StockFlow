@@ -2,6 +2,8 @@ namespace StockFlow.API.DTOs;
 
 public record StockInDto(int ProductId, decimal Quantity, string? Note);
 
+public record StockAdjustmentDto(int ProductId, decimal CorrectQuantity, string? Note);
+
 public record StockMovementDto(
     int Id,
     int ProductId,

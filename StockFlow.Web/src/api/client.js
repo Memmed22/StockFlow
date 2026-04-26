@@ -23,6 +23,7 @@ export const productsApi = {
 
 export const stockApi = {
   stockIn: (data) => api.post('/stock/in', data),
+  adjustStock: (data) => api.post('/stock/adjust', data),
   getMovements: ({ query, page = 1, pageSize = 20 } = {}) =>
     api.get('/stock/movements', { params: { query: query || undefined, page, pageSize } }),
 };
