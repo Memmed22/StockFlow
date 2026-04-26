@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { stockApi } from '../api/client';
 import ProductSearch from '../components/ProductSearch';
+import { useTranslation } from 'react-i18next';
 
 const UNIT_LABELS = { 0: 'pcs', 1: 'm', 2: 'm²', 3: 'L' };
 const UNIT_IS_DECIMAL = { 0: false, 1: true, 2: true, 3: true };
@@ -13,6 +14,7 @@ const TYPE_STYLE = {
 };
 
 export default function StockIn() {
+  const { t } = useTranslation();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState('');
   const [note, setNote] = useState('');
@@ -69,20 +71,20 @@ export default function StockIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setMessage('');
-    if (!selectedProduct) { setError('Please select a product from the list.'); return; }
+    if (!selectedProduct) { setError(t('stock.errors.selectProduct')); return; }
     const isDecimal = UNIT_IS_DECIMAL[selectedProduct.unitType ?? 0];
     const qty = isDecimal ? parseFloat(quantity) : parseInt(quantity);
-    if (!qty || qty <= 0) { setError('Enter a valid quantity.'); return; }
+    if (!qty || qty <= 0) { setError(t('stock.errors.quantity')); return; }
     try {
       await stockApi.stockIn({ productId: selectedProduct.id, quantity: qty, note: note || null });
-      setMessage(`Added ${qty} ${UNIT_LABELS[selectedProduct.unitType ?? 0]} of "${selectedProduct.name}" to stock.`);
+      setMessage(`+ ${qty} ${UNIT_LABELS[selectedProduct.unitType ?? 0]} — ${selectedProduct.name}`);
       setSelectedProduct(null);
       setQuantity('');
       setNote('');
       setPage(1);
       loadMovements(search, 1);
     } catch (err) {
-      setError(err.response?.data?.error || 'Error adding stock.');
+      setError(err.response?.data?.error || t('stock.errors.stockError'));
     }
   };
 
@@ -92,22 +94,21 @@ export default function StockIn() {
   return (
     <div>
       <div style={s.pageHeader}>
-        <h2 style={s.title}>Stock In</h2>
-        <p style={s.subtitle}>Record incoming inventory for a product</p>
+        <h2 style={s.title}>{t('stock.title')}</h2>
+        <p style={s.subtitle}>{t('stock.subtitle')}</p>
       </div>
 
-      {/* Add stock form */}
       <div style={s.card}>
-        <h3 style={s.cardTitle}>Add Stock</h3>
+        <h3 style={s.cardTitle}>{t('stock.addStock')}</h3>
         <form onSubmit={handleSubmit} style={s.form}>
           <div style={s.field}>
-            <label style={s.label}>Product *</label>
-            <ProductSearch onSelect={handleProductSelect} placeholder="Search by name or barcode..." />
+            <label style={s.label}>{t('stock.product')}</label>
+            <ProductSearch onSelect={handleProductSelect} placeholder={t('stock.searchPlaceholder')} />
             {selectedProduct && (
               <div style={s.selectedBadge}>
                 <span>✓</span>
                 <span>
-                  <strong>{selectedProduct.name}</strong> · {selectedProduct.barcode} · Current stock:{' '}
+                  <strong>{selectedProduct.name}</strong> · {selectedProduct.barcode} · {t('stock.currentStock')}:{' '}
                   <strong>{selectedProduct.stockQuantity} {unitLabel}</strong>
                 </span>
               </div>
@@ -116,7 +117,7 @@ export default function StockIn() {
 
           <div style={s.twoCol}>
             <div style={s.field}>
-              <label style={s.label}>Quantity{unitLabel ? ` (${unitLabel})` : ''} *</label>
+              <label style={s.label}>{t('common.quantity')}{unitLabel ? ` (${unitLabel})` : ''} *</label>
               <input
                 style={s.input}
                 type="number"
@@ -129,8 +130,8 @@ export default function StockIn() {
               />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Note</label>
-              <input style={s.input} placeholder="Optional (supplier, batch…)"
+              <label style={s.label}>{t('stock.note')}</label>
+              <input style={s.input} placeholder={t('stock.notePlaceholder')}
                 value={note} onChange={e => setNote(e.target.value)} />
             </div>
           </div>
@@ -138,19 +139,18 @@ export default function StockIn() {
           {message && <div style={s.successBox}>{message}</div>}
           {error && <div style={s.errorBox}>{error}</div>}
 
-          <button style={s.submitBtn} type="submit">Add Stock</button>
+          <button style={s.submitBtn} type="submit">{t('stock.addButton')}</button>
         </form>
       </div>
 
-      {/* Movements table */}
       <div style={s.tableHeader}>
         <div>
-          <h3 style={s.sectionTitle}>Stock Movements</h3>
-          <p style={s.sectionSub}>{totalCount} total record{totalCount !== 1 ? 's' : ''}</p>
+          <h3 style={s.sectionTitle}>{t('stock.movements')}</h3>
+          <p style={s.sectionSub}>{t('stock.totalRecords', { count: totalCount })}</p>
         </div>
         <input
           style={s.searchInput}
-          placeholder="Search by name or barcode…"
+          placeholder={t('stock.searchMovements')}
           value={search}
           onChange={handleSearchChange}
         />
@@ -160,12 +160,12 @@ export default function StockIn() {
         <table style={s.table}>
           <thead>
             <tr>
-              <th style={s.th}>Date</th>
-              <th style={s.th}>Product</th>
-              <th style={s.th}>Barcode</th>
-              <th style={s.th}>Type</th>
-              <th style={s.th}>Quantity</th>
-              <th style={s.th}>Note</th>
+              <th style={s.th}>{t('stock.col.date')}</th>
+              <th style={s.th}>{t('stock.col.product')}</th>
+              <th style={s.th}>{t('stock.col.barcode')}</th>
+              <th style={s.th}>{t('stock.col.type')}</th>
+              <th style={s.th}>{t('stock.col.quantity')}</th>
+              <th style={s.th}>{t('stock.col.note')}</th>
             </tr>
           </thead>
           <tbody style={{ opacity: loadingTable ? 0.5 : 1, transition: 'opacity 0.15s' }}>
@@ -189,7 +189,7 @@ export default function StockIn() {
             {movements.length === 0 && !loadingTable && (
               <tr>
                 <td colSpan={6} style={s.empty}>
-                  {search ? `No movements matching "${search}".` : 'No movements yet.'}
+                  {search ? t('stock.noMovementsSearch', { query: search }) : t('stock.noMovements')}
                 </td>
               </tr>
             )}
@@ -198,22 +198,12 @@ export default function StockIn() {
 
         {/* Pagination */}
         <div style={s.pagination}>
-          <button
-            style={{ ...s.pageBtn, opacity: page <= 1 ? 0.4 : 1 }}
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page <= 1}
-          >
-            ← Previous
+          <button style={{ ...s.pageBtn, opacity: page <= 1 ? 0.4 : 1 }} onClick={() => handlePageChange(page - 1)} disabled={page <= 1}>
+            {t('stock.prev')}
           </button>
-          <span style={s.pageInfo}>
-            Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-          </span>
-          <button
-            style={{ ...s.pageBtn, opacity: page >= totalPages ? 0.4 : 1 }}
-            onClick={() => handlePageChange(page + 1)}
-            disabled={page >= totalPages}
-          >
-            Next →
+          <span style={s.pageInfo}>{t('stock.pageOf', { page, total: totalPages })}</span>
+          <button style={{ ...s.pageBtn, opacity: page >= totalPages ? 0.4 : 1 }} onClick={() => handlePageChange(page + 1)} disabled={page >= totalPages}>
+            {t('stock.next')}
           </button>
         </div>
       </div>

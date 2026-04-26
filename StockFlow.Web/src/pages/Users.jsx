@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { usersApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const emptyForm = { username: '', password: '', role: 'Cashier' };
 
 export default function Users() {
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
@@ -21,18 +23,18 @@ export default function Users() {
     setError(''); setSuccess('');
     try {
       await usersApi.create(form);
-      setSuccess(`User "${form.username}" created successfully.`);
+      setSuccess(t('users.userCreated', { username: form.username }));
       setForm(emptyForm);
       setShowForm(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.error || 'Error creating user.');
+      setError(err.response?.data?.error || t('users.errorCreate'));
     }
   };
 
   const handleDelete = async (id) => {
-    if (id === currentUser.id) { setError("You can't delete your own account."); return; }
-    if (!confirm('Delete this user?')) return;
+    if (id === currentUser.id) { setError(t('users.cantDeleteSelf')); return; }
+    if (!confirm(t('users.deleteConfirm'))) return;
     await usersApi.delete(id);
     load();
   };
@@ -41,11 +43,11 @@ export default function Users() {
     <div>
       <div style={s.header}>
         <div>
-          <h2 style={s.title}>User Management</h2>
-          <p style={s.subtitle}>{users.length} user{users.length !== 1 ? 's' : ''}</p>
+          <h2 style={s.title}>{t('users.title')}</h2>
+          <p style={s.subtitle}>{t('users.subtitle', { count: users.length })}</p>
         </div>
         <button style={s.primaryBtn} onClick={() => { setShowForm(true); setForm(emptyForm); setError(''); setSuccess(''); }}>
-          + Add User
+          {t('users.addUser')}
         </button>
       </div>
 
@@ -53,20 +55,20 @@ export default function Users() {
 
       {showForm && (
         <div style={s.card}>
-          <h3 style={s.cardTitle}>New User</h3>
+          <h3 style={s.cardTitle}>{t('users.newUser')}</h3>
           <form onSubmit={handleSubmit} style={s.form}>
             <div style={s.field}>
-              <label style={s.label}>Username *</label>
-              <input style={s.input} required placeholder="Username" value={form.username}
+              <label style={s.label}>{t('users.username')}</label>
+              <input style={s.input} required placeholder={t('users.username')} value={form.username}
                 onChange={e => setForm({ ...form, username: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Password *</label>
-              <input style={s.input} type="password" required placeholder="Password" value={form.password}
+              <label style={s.label}>{t('users.password')}</label>
+              <input style={s.input} type="password" required placeholder={t('users.password')} value={form.password}
                 onChange={e => setForm({ ...form, password: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Role</label>
+              <label style={s.label}>{t('users.role')}</label>
               <select style={s.input} value={form.role}
                 onChange={e => setForm({ ...form, role: e.target.value })}>
                 <option value="Cashier">Cashier</option>
@@ -75,8 +77,8 @@ export default function Users() {
             </div>
             {error && <div style={{ ...s.errorBox, gridColumn: '1 / -1' }}>{error}</div>}
             <div style={{ display: 'flex', gap: 8, gridColumn: '1 / -1' }}>
-              <button style={s.successBtn} type="submit">Create User</button>
-              <button style={s.ghostBtn} type="button" onClick={() => { setShowForm(false); setError(''); }}>Cancel</button>
+              <button style={s.successBtn} type="submit">{t('users.createUser')}</button>
+              <button style={s.ghostBtn} type="button" onClick={() => { setShowForm(false); setError(''); }}>{t('common.cancel')}</button>
             </div>
           </form>
         </div>
@@ -86,9 +88,9 @@ export default function Users() {
         <table style={s.table}>
           <thead>
             <tr>
-              <th style={s.th}>Username</th>
-              <th style={s.th}>Role</th>
-              <th style={s.th}>Actions</th>
+              <th style={s.th}>{t('users.col.username')}</th>
+              <th style={s.th}>{t('users.col.role')}</th>
+              <th style={s.th}>{t('users.col.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -96,7 +98,7 @@ export default function Users() {
               <tr key={u.id} style={s.tr}>
                 <td style={s.td}>
                   <span style={{ fontWeight: 600, color: '#111827' }}>{u.username}</span>
-                  {u.id === currentUser.id && <span style={s.youBadge}>you</span>}
+                  {u.id === currentUser.id && <span style={s.youBadge}>{t('users.you')}</span>}
                 </td>
                 <td style={s.td}>
                   <span style={{ ...s.roleBadge, background: u.role === 'Admin' ? '#EEF2FF' : '#D1FAE5', color: u.role === 'Admin' ? '#4F46E5' : '#059669' }}>
@@ -105,22 +107,19 @@ export default function Users() {
                 </td>
                 <td style={s.td}>
                   {u.id !== currentUser.id && (
-                    <button style={s.delBtn} onClick={() => handleDelete(u.id)}>Delete</button>
+                    <button style={s.delBtn} onClick={() => handleDelete(u.id)}>{t('users.delete')}</button>
                   )}
                 </td>
               </tr>
             ))}
             {users.length === 0 && (
-              <tr><td colSpan={3} style={s.empty}>No users found.</td></tr>
+              <tr><td colSpan={3} style={s.empty}>{t('users.noUsers')}</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <div style={s.hint}>
-        <strong>Cashier</strong> — POS and Returns only.&nbsp;&nbsp;
-        <strong>Admin</strong> — full access to all modules.
-      </div>
+      <div style={s.hint}>{t('users.hint')}</div>
     </div>
   );
 }

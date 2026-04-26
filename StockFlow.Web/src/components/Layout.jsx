@@ -1,27 +1,32 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
-const allNavItems = [
-  { to: '/pos',       label: 'POS',       roles: ['Admin', 'Cashier'] },
-  { to: '/returns',   label: 'Returns',   roles: ['Admin', 'Cashier'] },
-  { to: '/closing',   label: 'Cash Close', roles: ['Admin', 'Cashier'] },
-  { to: '/products',  label: 'Products',  roles: ['Admin'] },
-  { to: '/stock',     label: 'Stock In',  roles: ['Admin'] },
-  { to: '/customers', label: 'Customers', roles: ['Admin'] },
-  { to: '/reports',   label: 'Reports',   roles: ['Admin'] },
-  { to: '/users',     label: 'Users',     roles: ['Admin'] },
+const NAV_KEYS = [
+  { to: '/pos',       key: 'nav.pos',      roles: ['Admin', 'Cashier'] },
+  { to: '/returns',   key: 'nav.returns',  roles: ['Admin', 'Cashier'] },
+  { to: '/closing',   key: 'nav.cashClose', roles: ['Admin', 'Cashier'] },
+  { to: '/products',  key: 'nav.products', roles: ['Admin'] },
+  { to: '/stock',     key: 'nav.stockIn',  roles: ['Admin'] },
+  { to: '/customers', key: 'nav.customers', roles: ['Admin'] },
+  { to: '/reports',   key: 'nav.reports',  roles: ['Admin'] },
+  { to: '/users',     key: 'nav.users',    roles: ['Admin'] },
 ];
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
-  const navItems = allNavItems.filter(item => item.roles.includes(user?.role));
+  const navItems = NAV_KEYS.filter(item => item.roles.includes(user?.role));
   const initials = user?.username?.slice(0, 2).toUpperCase() ?? '??';
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = () => { logout(); navigate('/login'); };
+
+  const handleLang = (e) => {
+    const lang = e.target.value;
+    i18n.changeLanguage(lang);
+    localStorage.setItem('lang', lang);
   };
 
   return (
@@ -47,7 +52,7 @@ export default function Layout({ children }) {
                 ...(isActive ? styles.activeLink : {}),
               })}
             >
-              {item.label}
+              {t(item.key)}
             </NavLink>
           ))}
         </div>
@@ -59,8 +64,13 @@ export default function Layout({ children }) {
             <div style={styles.avatar}>{initials}</div>
             <span style={styles.userName}>{user?.username}</span>
           </div>
+          <select style={styles.langSelect} value={i18n.language} onChange={handleLang}>
+            <option value="en">EN</option>
+            <option value="ka">ქარ</option>
+            <option value="az">AZ</option>
+          </select>
           <button style={styles.logoutBtn} onClick={handleLogout}>
-            Sign out
+            {t('nav.signOut')}
           </button>
         </div>
       </nav>
@@ -183,6 +193,11 @@ const styles = {
     fontSize: 14,
     color: '#D1D5DB',
     fontWeight: 500,
+  },
+  langSelect: {
+    background: 'transparent', color: '#9CA3AF', border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: 'var(--radius-sm)', padding: '5px 8px', cursor: 'pointer', fontSize: 12,
+    fontWeight: 600, outline: 'none',
   },
   logoutBtn: {
     background: 'transparent',

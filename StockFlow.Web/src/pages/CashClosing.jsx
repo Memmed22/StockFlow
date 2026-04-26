@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { cashClosingApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const fmt = (dt) => new Date(dt).toLocaleString();
-const fmtDate = (dt) => {
-  const d = new Date(dt);
-  return d.getTime() === new Date('0001-01-01').getTime()
-    ? 'Beginning of records'
-    : d.toLocaleDateString();
-};
 const currency = (n) => `${Number(n).toFixed(2)} ₾`;
 
 export default function CashClosing() {
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const fmtDate = (dt) => {
+    const d = new Date(dt);
+    return d.getTime() === new Date('0001-01-01').getTime() ? t('cashClosing.beginning') : d.toLocaleDateString();
+  };
   const [preview, setPreview] = useState(null);
   const [openingStatus, setOpeningStatus] = useState(null);
   const [history, setHistory] = useState([]);
@@ -37,7 +37,7 @@ export default function CashClosing() {
       setHistory(hist.data);
       setOpeningStatus(opening.data);
     } catch {
-      setError('Failed to load data.');
+      setError(t('common.error'));
     } finally {
       setLoadingPreview(false);
     }
@@ -54,13 +54,13 @@ export default function CashClosing() {
     setLoading(true);
     try {
       const { data } = await cashClosingApi.create({ userId: user.id, countedCash: countedNum, note: note || null });
-      const tgStatus = data.telegramError ? ` (Telegram: ${data.telegramError})` : ' · Telegram report sent ✓';
-      setMessage(`Cash closing recorded successfully. Cash has been reset.${tgStatus}`);
+      const tgStatus = data.telegramError ? ` (Telegram: ${data.telegramError})` : t('cashClosing.telegramOk');
+      setMessage(t('cashClosing.successMsg') + tgStatus);
       setCounted('');
       setNote('');
       loadAll();
     } catch (err) {
-      setError(err.response?.data?.error || 'Error recording closing.');
+      setError(err.response?.data?.error || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -72,8 +72,8 @@ export default function CashClosing() {
   return (
     <div>
       <div style={s.pageHeader}>
-        <h2 style={s.title}>Cash Closing</h2>
-        <p style={s.subtitle}>Record the end-of-period cash count and reset the register</p>
+        <h2 style={s.title}>{t('cashClosing.title')}</h2>
+        <p style={s.subtitle}>{t('cashClosing.subtitle')}</p>
       </div>
 
       {/* Period Summary */}
@@ -81,26 +81,26 @@ export default function CashClosing() {
         <div style={s.periodCard}>
           <div style={s.periodRow}>
             <div style={s.periodItem}>
-              <span style={s.periodLabel}>Period From</span>
+              <span style={s.periodLabel}>{t('cashClosing.periodFrom')}</span>
               <span style={s.periodValue}>{fmtDate(preview.fromDate)}</span>
             </div>
             <div style={s.periodArrow}>→</div>
             <div style={s.periodItem}>
-              <span style={s.periodLabel}>Period To</span>
+              <span style={s.periodLabel}>{t('cashClosing.periodTo')}</span>
               <span style={s.periodValue}>{fmtDate(preview.toDate)}</span>
             </div>
             <div style={s.periodDivider} />
             {openingStatus?.hasOpeningCash && (
               <>
                 <div style={s.periodItem}>
-                  <span style={s.periodLabel}>Opening Cash</span>
+                  <span style={s.periodLabel}>{t('cashClosing.openingCash')}</span>
                   <span style={{ ...s.periodValue, color: '#059669' }}>{currency(openingStatus.amount)}</span>
                 </div>
                 <div style={s.periodDivider} />
               </>
             )}
             <div style={s.periodItem}>
-              <span style={s.periodLabel}>Expected Cash</span>
+              <span style={s.periodLabel}>{t('cashClosing.expectedCash')}</span>
               <span style={{ ...s.periodValue, color: '#4F46E5', fontSize: 22, fontWeight: 700 }}>
                 {currency(preview.expectedCash)}
               </span>
@@ -111,11 +111,11 @@ export default function CashClosing() {
 
       {/* Closing Form */}
       <div style={s.card}>
-        <h3 style={s.cardTitle}>Record Closing</h3>
+        <h3 style={s.cardTitle}>{t('cashClosing.recordClosing')}</h3>
         <form onSubmit={handleSubmit} style={s.form}>
           <div style={s.twoCol}>
             <div style={s.field}>
-              <label style={s.label}>Counted Cash (₾) *</label>
+              <label style={s.label}>{t('cashClosing.countedCash')}</label>
               <input
                 style={s.input}
                 type="number"
@@ -128,10 +128,10 @@ export default function CashClosing() {
               />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Note</label>
+              <label style={s.label}>{t('common.note')}</label>
               <input
                 style={s.input}
-                placeholder="Optional note…"
+                placeholder={t('cashClosing.notePlaceholder')}
                 value={note}
                 onChange={e => setNote(e.target.value)}
               />
@@ -141,13 +141,13 @@ export default function CashClosing() {
           {/* Live difference preview */}
           {counted !== '' && preview && (
             <div style={{ ...s.diffBox, borderColor: diff < 0 ? '#FECACA' : diff > 0 ? '#6EE7B7' : '#E5E7EB' }}>
-              <span style={s.diffLabel}>Difference</span>
+              <span style={s.diffLabel}>{t('cashClosing.diff.label')}</span>
               <span style={{ ...s.diffValue, color: diffColor }}>
                 {diff >= 0 ? '+' : ''}{currency(diff)}
               </span>
-              {diff === 0 && <span style={s.diffNote}>Perfect match</span>}
-              {diff < 0 && <span style={s.diffNote}>Cash is short</span>}
-              {diff > 0 && <span style={s.diffNote}>Cash overage</span>}
+              {diff === 0 && <span style={s.diffNote}>{t('cashClosing.diff.perfect')}</span>}
+              {diff < 0 && <span style={s.diffNote}>{t('cashClosing.diff.short')}</span>}
+              {diff > 0 && <span style={s.diffNote}>{t('cashClosing.diff.overage')}</span>}
             </div>
           )}
 
@@ -155,7 +155,7 @@ export default function CashClosing() {
           {error && <div style={s.errorBox}>{error}</div>}
 
           <button style={{ ...s.submitBtn, opacity: loading ? 0.7 : 1 }} type="submit" disabled={loading}>
-            {loading ? 'Saving…' : 'Confirm Closing'}
+            {loading ? t('cashClosing.saving') : t('cashClosing.confirmClosing')}
           </button>
         </form>
       </div>
@@ -163,8 +163,8 @@ export default function CashClosing() {
       {/* History */}
       <div style={s.tableHeader}>
         <div>
-          <h3 style={s.sectionTitle}>Closing History</h3>
-          <p style={s.sectionSub}>{history.length} record{history.length !== 1 ? 's' : ''}</p>
+          <h3 style={s.sectionTitle}>{t('cashClosing.history.title')}</h3>
+          <p style={s.sectionSub}>{t('cashClosing.history.subtitle', { count: history.length })}</p>
         </div>
       </div>
 
@@ -172,13 +172,13 @@ export default function CashClosing() {
         <table style={s.table}>
           <thead>
             <tr>
-              <th style={s.th}>From</th>
-              <th style={s.th}>To</th>
-              <th style={s.th}>Expected</th>
-              <th style={s.th}>Counted</th>
-              <th style={s.th}>Difference</th>
-              <th style={s.th}>By</th>
-              <th style={s.th}>Note</th>
+              <th style={s.th}>{t('cashClosing.col.from')}</th>
+              <th style={s.th}>{t('cashClosing.col.to')}</th>
+              <th style={s.th}>{t('cashClosing.col.expected')}</th>
+              <th style={s.th}>{t('cashClosing.col.counted')}</th>
+              <th style={s.th}>{t('cashClosing.col.difference')}</th>
+              <th style={s.th}>{t('cashClosing.col.by')}</th>
+              <th style={s.th}>{t('cashClosing.col.note')}</th>
             </tr>
           </thead>
           <tbody>
@@ -201,7 +201,7 @@ export default function CashClosing() {
             })}
             {history.length === 0 && (
               <tr>
-                <td colSpan={7} style={s.empty}>No closings recorded yet.</td>
+                <td colSpan={7} style={s.empty}>{t('cashClosing.history.noHistory')}</td>
               </tr>
             )}
           </tbody>

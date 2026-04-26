@@ -1,0 +1,164 @@
+{
+  "nav": {
+    "pos": "POS", "returns": "Returns", "cashClose": "Cash Close",
+    "products": "Products", "stockIn": "Stock In", "customers": "Customers",
+    "reports": "Reports", "users": "Users", "signOut": "Sign out"
+  },
+  "common": {
+    "save": "Save", "cancel": "Cancel", "delete": "Delete", "edit": "Edit",
+    "update": "Update", "add": "Add", "loading": "Loading…", "note": "Note",
+    "actions": "Actions", "name": "Name", "barcode": "Barcode",
+    "quantity": "Quantity",
+    "from": "From", "to": "To", "apply": "Apply", "refresh": "Refresh",
+    "optional": "optional", "back": "← Back", "previous": "← Previous", "next": "Next →",
+    "page": "Page", "of": "of", "noData": "No data found.", "error": "An error occurred."
+  },
+  "login": {
+    "heroPOS": "Point-of-Sale & Inventory Management",
+    "features": ["Real-time inventory tracking", "Multi-role access control", "Sales & return management", "Customer credit accounts"],
+    "version": "StockFlow v1.0",
+    "welcomeBack": "Welcome back",
+    "signInSub": "Sign in to your account to continue",
+    "username": "Username", "password": "Password",
+    "usernamePlaceholder": "Enter your username",
+    "passwordPlaceholder": "Enter your password",
+    "signingIn": "Signing in...", "signIn": "Sign in",
+    "errorNetwork": "Cannot reach server — is the API running on port 5000?",
+    "errorServer": "Server error {{status}}",
+    "errorInvalid": "Invalid username or password."
+  },
+  "pos": {
+    "title": "Point of Sale",
+    "searchPlaceholder": "Search by name or scan barcode...",
+    "cartEmpty": "Cart is empty. Scan a product to start.",
+    "col": { "product": "Product", "stock": "Stock", "basePrice": "Base Price", "discount": "Discount", "finalPrice": "Final Price", "qty": "Qty", "lineTotal": "Line Total" },
+    "summary": { "title": "Order Summary", "subtotal": "Subtotal", "cartDiscount": "Cart Discount", "total": "Total" },
+    "paymentType": "Payment Type", "cash": "Cash", "debit": "Debit", "customer": "Customer",
+    "loadingCustomers": "Loading customers...",
+    "checkout": "Checkout", "chargeToCustomer": "Charge to Customer",
+    "clearCart": "Clear Cart", "customerPayment": "Customer Payment",
+    "itemsSaved": "{{count}} item(s) — cart saved",
+    "changeBtn": "Change",
+    "payment": {
+      "title": "Customer Payment", "customer": "Customer", "amount": "Amount (₾) *",
+      "searchPlaceholder": "Search by name or phone...",
+      "record": "Record Payment", "recording": "Recording...", "done": "Done",
+      "selectCustomer": "Select a customer.", "invalidAmount": "Enter a valid amount."
+    },
+    "opening": {
+      "title": "Enter Opening Cash",
+      "subtitle": "Enter the starting cash amount in the register before beginning sales.",
+      "label": "Opening Cash Amount (₾)",
+      "hint": "Enter 0 if no change money was provided",
+      "startShift": "Start Shift", "saving": "Saving…",
+      "invalidAmount": "Enter a valid amount (0 or more)."
+    },
+    "outOfStock": "Out of stock",
+    "notEnoughStock": "Not enough stock. Available: {{available}}",
+    "cartEmptyError": "Cart is empty.",
+    "selectCustomerError": "Select a customer for debit sale."
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "{{count}} item(s) in inventory",
+    "addProduct": "+ Add Product", "editProduct": "Edit Product", "newProduct": "New Product",
+    "deleteConfirm": "Delete this product?", "noProducts": "No products found.",
+    "update": "Update", "save": "Save", "cancel": "Cancel",
+    "form": {
+      "name": "Name *", "namePlaceholder": "Product name",
+      "barcode": "Barcode *", "barcodePlaceholder": "Barcode",
+      "sellingPrice": "Selling Price (₾) *", "buyingPrice": "Buying Price (₾)",
+      "unitType": "Unit Type", "description": "Description", "optional": "Optional"
+    },
+    "col": { "name": "Name", "barcode": "Barcode", "unit": "Unit", "sellPrice": "Sell Price", "buyPrice": "Buy Price", "stock": "Stock", "actions": "Actions" },
+    "units": ["Quantity (pcs)", "Meter (m)", "Square Meter (m²)", "Liter (L)"]
+  },
+  "stock": {
+    "title": "Stock In", "subtitle": "Record incoming inventory for a product",
+    "addStock": "Add Stock", "product": "Product *",
+    "searchPlaceholder": "Search by name or barcode...",
+    "currentStock": "Current stock", "note": "Note", "notePlaceholder": "Optional (supplier, batch…)",
+    "addButton": "Add Stock", "movements": "Stock Movements",
+    "totalRecords": "{{count}} total record(s)",
+    "searchMovements": "Search by name or barcode…",
+    "noMovements": "No movements yet.", "noMovementsSearch": "No movements matching \"{{query}}\".",
+    "col": { "date": "Date", "product": "Product", "barcode": "Barcode", "type": "Type", "quantity": "Quantity", "note": "Note" },
+    "prev": "← Previous", "next": "Next →",
+    "pageOf": "Page {{page}} of {{total}}",
+    "errors": { "selectProduct": "Please select a product from the list.", "quantity": "Enter a valid quantity.", "stockError": "Error adding stock." }
+  },
+  "returns": {
+    "title": "Returns",
+    "subtitle": "Process a customer return — stock will be restocked automatically",
+    "product": "Product *", "searchPlaceholder": "Search by name or barcode...",
+    "currentStock": "Stock", "quantity": "Quantity",
+    "returnPrice": "Return Price (₾)", "modified": "modified",
+    "reset": "Reset", "defaultPrice": "Default: {{price}} ₾",
+    "returnTotal": "Return Total", "note": "Note", "notePlaceholder": "Reason for return (optional)",
+    "linkCustomer": "Link to Customer", "linkCustomerNote": "(optional — deducts from balance)",
+    "searchCustomer": "Search customer by name or phone...",
+    "remove": "Remove", "deductNote": "Customer balance will decrease by {{amount}} ₾",
+    "processReturn": "Process Return",
+    "errors": { "selectProduct": "Please select a product.", "quantity": "Enter a valid quantity.", "price": "Return price must be 0 or greater.", "processing": "Error processing return." }
+  },
+  "cashClosing": {
+    "title": "Cash Closing",
+    "subtitle": "Record the end-of-period cash count and reset the register",
+    "periodFrom": "Period From", "periodTo": "Period To",
+    "openingCash": "Opening Cash", "expectedCash": "Expected Cash",
+    "recordClosing": "Record Closing", "countedCash": "Counted Cash (₾) *",
+    "notePlaceholder": "Optional note…", "confirmClosing": "Confirm Closing", "saving": "Saving…",
+    "diff": { "label": "Difference", "perfect": "Perfect match", "short": "Cash is short", "overage": "Cash overage" },
+    "history": { "title": "Closing History", "subtitle": "{{count}} record(s)", "noHistory": "No closings recorded yet." },
+    "col": { "from": "From", "to": "To", "expected": "Expected", "counted": "Counted", "difference": "Difference", "by": "By", "note": "Note" },
+    "beginning": "Beginning of records", "successMsg": "Cash closing recorded successfully. Cash has been reset.",
+    "telegramOk": " · Telegram report sent ✓"
+  },
+  "reports": {
+    "title": "Reports", "subtitle": "Sales, inventory, and cashier performance",
+    "tabs": { "detailed": "Detailed Sales", "daily": "Daily Summary", "users": "By Cashier", "stock": "Stock Report" },
+    "apply": "Apply", "refresh": "Refresh", "loading": "Loading…",
+    "col": {
+      "type": "Type", "productDesc": "Product / Description", "customer": "Customer",
+      "qty": "Qty", "unitPrice": "Unit Price", "total": "Total",
+      "date": "Date", "transactions": "Transactions", "totalRevenue": "Total Revenue",
+      "cashier": "Cashier", "product": "Product", "barcode": "Barcode", "currentStock": "Current Stock"
+    },
+    "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "cashTotal": "Cash Total" },
+    "infoRevenue": "Total Revenue", "infoTransactions": "Transactions",
+    "notCash": "not cash",
+    "noData": { "transactions": "No transactions in this period.", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "reports": "Failed to load reports." },
+    "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "Payment": "Payment" }
+  },
+  "users": {
+    "title": "User Management", "subtitle": "{{count}} user(s)",
+    "addUser": "+ Add User", "newUser": "New User",
+    "username": "Username *", "password": "Password *", "role": "Role",
+    "createUser": "Create User", "delete": "Delete",
+    "deleteConfirm": "Delete this user?", "cantDeleteSelf": "You can't delete your own account.",
+    "noUsers": "No users found.", "you": "you",
+    "col": { "username": "Username", "role": "Role", "actions": "Actions" },
+    "hint": "Cashier — POS and Returns only.   Admin — full access to all modules.",
+    "userCreated": "User \"{{username}}\" created successfully.",
+    "errorCreate": "Error creating user."
+  },
+  "customers": {
+    "title": "Customers", "outstandingDebt": "Outstanding debt",
+    "newCustomer": "+ New Customer", "cancel": "Cancel", "newCustomerTitle": "New Customer",
+    "form": { "name": "Name *", "namePlaceholder": "Full name", "phone": "Phone *", "phonePlaceholder": "+995 555 123456", "description": "Description", "descriptionPlaceholder": "Optional notes" },
+    "create": "Create", "searchPlaceholder": "Search by name or phone...",
+    "noCustomers": "No customers found.",
+    "col": { "name": "Name", "phone": "Phone", "description": "Description", "balance": "Balance" },
+    "view": "View →",
+    "errors": { "load": "Failed to load customers.", "create": "Failed to create customer." }
+  },
+  "customerDetail": {
+    "back": "← Back", "balance": "Current Balance (Debt)",
+    "payment": { "title": "Record Payment", "amount": "Amount (₾)", "button": "Record Payment", "success": "Payment of {{amount}} ₾ recorded.", "errorInvalid": "Enter a valid amount.", "errorFailed": "Failed to record payment." },
+    "history": "Transaction History", "netBalance": "Net Balance", "noTransactions": "No transactions yet.",
+    "loading": "Loading...",
+    "col": { "date": "Date", "type": "Type", "amount": "Amount" },
+    "items": { "product": "Product", "qty": "Qty", "unitPrice": "Unit Price", "total": "Total" },
+    "types": { "CashSale": "Cash Sale", "DebitSale": "Debit Sale", "Return": "Return", "Payment": "Payment" }
+  }
+}

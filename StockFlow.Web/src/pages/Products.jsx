@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { productsApi } from '../api/client';
-
-const UNIT_TYPES = [
-  { value: 0, label: 'Quantity (pcs)' },
-  { value: 1, label: 'Meter (m)' },
-  { value: 2, label: 'Square Meter (m²)' },
-  { value: 3, label: 'Liter (L)' },
-];
-
-const emptyForm = { name: '', barcode: '', sellingPrice: '', buyingPrice: '', unitType: 0, description: '' };
+import { useTranslation } from 'react-i18next';
 
 export default function Products() {
+  const { t } = useTranslation();
+  const UNIT_TYPES = [
+    { value: 0, label: t('products.units.0') },
+    { value: 1, label: t('products.units.1') },
+    { value: 2, label: t('products.units.2') },
+    { value: 3, label: t('products.units.3') },
+  ];
+
+  const emptyForm = { name: '', barcode: '', sellingPrice: '', buyingPrice: '', unitType: 0, description: '' };
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState(emptyForm);
@@ -28,115 +29,84 @@ export default function Products() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const payload = {
-      ...form,
-      sellingPrice: parseFloat(form.sellingPrice),
-      buyingPrice: form.buyingPrice ? parseFloat(form.buyingPrice) : null,
-      unitType: parseInt(form.unitType),
-    };
+    const payload = { ...form, sellingPrice: parseFloat(form.sellingPrice), buyingPrice: form.buyingPrice ? parseFloat(form.buyingPrice) : null, unitType: parseInt(form.unitType) };
     try {
-      if (editId) {
-        await productsApi.update(editId, payload);
-      } else {
-        await productsApi.create(payload);
-      }
-      setForm(emptyForm);
-      setEditId(null);
-      setShowForm(false);
-      load();
-    } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred.');
-    }
+      if (editId) { await productsApi.update(editId, payload); } else { await productsApi.create(payload); }
+      setForm(emptyForm); setEditId(null); setShowForm(false); load();
+    } catch (err) { setError(err.response?.data?.error || t('common.error')); }
   };
 
   const handleEdit = (p) => {
-    setForm({
-      name: p.name,
-      barcode: p.barcode,
-      sellingPrice: String(p.sellingPrice),
-      buyingPrice: p.buyingPrice != null ? String(p.buyingPrice) : '',
-      unitType: p.unitType,
-      description: p.description || '',
-    });
-    setEditId(p.id);
-    setShowForm(true);
-    setError('');
+    setForm({ name: p.name, barcode: p.barcode, sellingPrice: String(p.sellingPrice), buyingPrice: p.buyingPrice != null ? String(p.buyingPrice) : '', unitType: p.unitType, description: p.description || '' });
+    setEditId(p.id); setShowForm(true); setError('');
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this product?')) return;
-    await productsApi.delete(id);
-    load();
+    if (!confirm(t('products.deleteConfirm'))) return;
+    await productsApi.delete(id); load();
   };
 
-  const handleCancel = () => {
-    setForm(emptyForm);
-    setEditId(null);
-    setShowForm(false);
-    setError('');
-  };
-
-  const unitLabel = (unitType) => UNIT_TYPES.find(u => u.value === unitType)?.label ?? 'Quantity';
+  const handleCancel = () => { setForm(emptyForm); setEditId(null); setShowForm(false); setError(''); };
+  const unitLabel = (unitType) => UNIT_TYPES.find(u => u.value === unitType)?.label ?? UNIT_TYPES[0].label;
 
   return (
     <div>
       <div style={s.header}>
         <div>
-          <h2 style={s.title}>Products</h2>
-          <p style={s.subtitle}>{products.length} item{products.length !== 1 ? 's' : ''} in inventory</p>
+          <h2 style={s.title}>{t('products.title')}</h2>
+          <p style={s.subtitle}>{t('products.subtitle', { count: products.length })}</p>
         </div>
         <button style={s.primaryBtn} onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }}>
-          + Add Product
+          {t('products.addProduct')}
         </button>
       </div>
 
       {showForm && (
         <div style={s.card}>
-          <h3 style={s.cardTitle}>{editId ? 'Edit Product' : 'New Product'}</h3>
+          <h3 style={s.cardTitle}>{editId ? t('products.editProduct') : t('products.newProduct')}</h3>
           <form onSubmit={handleSubmit} style={s.form}>
             <div style={s.field}>
-              <label style={s.label}>Name *</label>
-              <input style={s.input} placeholder="Product name" required value={form.name}
+              <label style={s.label}>{t('products.form.name')}</label>
+              <input style={s.input} placeholder={t('products.form.namePlaceholder')} required value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Barcode *</label>
-              <input style={s.input} placeholder="Barcode" required value={form.barcode}
+              <label style={s.label}>{t('products.form.barcode')}</label>
+              <input style={s.input} placeholder={t('products.form.barcodePlaceholder')} required value={form.barcode}
                 onChange={e => setForm({ ...form, barcode: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Selling Price (₾) *</label>
+              <label style={s.label}>{t('products.form.sellingPrice')}</label>
               <input style={s.input} placeholder="0.00" required type="number" step="0.01" min="0"
                 value={form.sellingPrice} onChange={e => setForm({ ...form, sellingPrice: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Buying Price (₾)</label>
-              <input style={s.input} placeholder="Optional" type="number" step="0.01" min="0"
+              <label style={s.label}>{t('products.form.buyingPrice')}</label>
+              <input style={s.input} placeholder={t('products.form.optional')} type="number" step="0.01" min="0"
                 value={form.buyingPrice} onChange={e => setForm({ ...form, buyingPrice: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>Unit Type</label>
-              <select style={s.input} value={form.unitType}
-                onChange={e => setForm({ ...form, unitType: e.target.value })}>
+              <label style={s.label}>{t('products.form.unitType')}</label>
+              <select style={s.input} value={form.unitType} onChange={e => setForm({ ...form, unitType: e.target.value })}>
                 {UNIT_TYPES.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
               </select>
             </div>
             <div style={s.field}>
-              <label style={s.label}>Description</label>
-              <input style={s.input} placeholder="Optional" value={form.description}
+              <label style={s.label}>{t('products.form.description')}</label>
+              <input style={s.input} placeholder={t('products.form.optional')} value={form.description}
                 onChange={e => setForm({ ...form, description: e.target.value })} />
             </div>
             {error && <div style={s.errorBox}>{error}</div>}
             <div style={{ ...s.field, flexDirection: 'row', gap: 8, gridColumn: '1 / -1' }}>
-              <button style={s.successBtn} type="submit">{editId ? 'Update' : 'Save'}</button>
-              <button style={s.ghostBtn} type="button" onClick={handleCancel}>Cancel</button>
+              <button style={s.successBtn} type="submit">{editId ? t('products.update') : t('products.save')}</button>
+              <button style={s.ghostBtn} type="button" onClick={handleCancel}>{t('products.cancel')}</button>
             </div>
           </form>
         </div>
       )}
 
       <div style={s.searchRow}>
-        <input style={s.searchInput} placeholder="Search by name or barcode..."
+        <input style={s.searchInput} placeholder={t('products.form.namePlaceholder') + '…'}
           value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
@@ -144,13 +114,13 @@ export default function Products() {
         <table style={s.table}>
           <thead>
             <tr>
-              <th style={s.th}>Name</th>
-              <th style={s.th}>Barcode</th>
-              <th style={s.th}>Unit</th>
-              <th style={s.th}>Sell Price</th>
-              <th style={s.th}>Buy Price</th>
-              <th style={s.th}>Stock</th>
-              <th style={s.th}>Actions</th>
+              <th style={s.th}>{t('products.col.name')}</th>
+              <th style={s.th}>{t('products.col.barcode')}</th>
+              <th style={s.th}>{t('products.col.unit')}</th>
+              <th style={s.th}>{t('products.col.sellPrice')}</th>
+              <th style={s.th}>{t('products.col.buyPrice')}</th>
+              <th style={s.th}>{t('products.col.stock')}</th>
+              <th style={s.th}>{t('products.col.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -160,23 +130,17 @@ export default function Products() {
                 <td style={s.td}><code style={s.code}>{p.barcode}</code></td>
                 <td style={s.td}>{unitLabel(p.unitType)}</td>
                 <td style={{ ...s.td, fontWeight: 600 }}>{p.sellingPrice.toFixed(2)} ₾</td>
-                <td style={{ ...s.td, color: '#6B7280' }}>
-                  {p.buyingPrice != null ? `${p.buyingPrice.toFixed(2)} ₾` : '—'}
+                <td style={{ ...s.td, color: '#6B7280' }}>{p.buyingPrice != null ? `${p.buyingPrice.toFixed(2)} ₾` : '—'}</td>
+                <td style={s.td}>
+                  <span style={{ ...s.stockBadge, background: p.stockQuantity <= 0 ? '#FEE2E2' : '#D1FAE5', color: p.stockQuantity <= 0 ? '#DC2626' : '#059669' }}>{p.stockQuantity}</span>
                 </td>
                 <td style={s.td}>
-                  <span style={{ ...s.stockBadge, background: p.stockQuantity <= 0 ? '#FEE2E2' : '#D1FAE5', color: p.stockQuantity <= 0 ? '#DC2626' : '#059669' }}>
-                    {p.stockQuantity}
-                  </span>
-                </td>
-                <td style={s.td}>
-                  <button style={s.editBtn} onClick={() => handleEdit(p)}>Edit</button>
-                  <button style={s.delBtn} onClick={() => handleDelete(p.id)}>Delete</button>
+                  <button style={s.editBtn} onClick={() => handleEdit(p)}>{t('common.edit')}</button>
+                  <button style={s.delBtn} onClick={() => handleDelete(p.id)}>{t('common.delete')}</button>
                 </td>
               </tr>
             ))}
-            {products.length === 0 && (
-              <tr><td colSpan={7} style={s.empty}>No products found.</td></tr>
-            )}
+            {products.length === 0 && (<tr><td colSpan={7} style={s.empty}>{t('products.noProducts')}</td></tr>)}
           </tbody>
         </table>
       </div>
@@ -191,7 +155,6 @@ const s = {
   primaryBtn: { background: '#4F46E5', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 18px', cursor: 'pointer', fontWeight: 600, fontSize: 14, flexShrink: 0 },
   successBtn: { background: '#059669', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer', fontWeight: 600 },
   ghostBtn: { background: '#F3F4F8', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 8, padding: '9px 20px', cursor: 'pointer', fontWeight: 500 },
-
   card: { background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: 24, marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   cardTitle: { margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: '#111827' },
   form: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px' },
@@ -199,10 +162,8 @@ const s = {
   label: { fontSize: 13, fontWeight: 600, color: '#374151' },
   input: { padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, width: '100%', background: '#F9FAFB', boxSizing: 'border-box', color: '#111827' },
   errorBox: { background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#B91C1C', gridColumn: '1 / -1' },
-
   searchRow: { marginBottom: 16 },
   searchInput: { padding: '9px 14px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, width: 300, background: '#fff', boxSizing: 'border-box' },
-
   tableWrap: { background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { padding: '11px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' },

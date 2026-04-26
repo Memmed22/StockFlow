@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { salesApi, customersApi, cashClosingApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import ProductSearch from '../components/ProductSearch';
+import { useTranslation } from 'react-i18next';
 
 const UNIT_LABELS = { 0: 'pcs', 1: 'm', 2: 'm²', 3: 'L' };
 const UNIT_IS_DECIMAL = { 0: false, 1: true, 2: true, 3: true };
@@ -15,6 +16,7 @@ function saveCartDiscount(v) { localStorage.setItem('pos_cart_discount', String(
 
 export default function POS() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [cart, setCart] = useState(loadCart);
   const [cartDiscount, setCartDiscount] = useState(loadCartDiscount);
   const [saleType, setSaleType] = useState('cash');
@@ -71,16 +73,16 @@ export default function POS() {
 
   const handleModalPayment = async (e) => {
     e.preventDefault();
-    if (!pmCustomer) { setPmError('Select a customer.'); return; }
+    if (!pmCustomer) { setPmError(t('pos.payment.selectCustomer')); return; }
     const amount = parseFloat(pmAmount);
-    if (!amount || amount <= 0) { setPmError('Enter a valid amount.'); return; }
+    if (!amount || amount <= 0) { setPmError(t('pos.payment.invalidAmount')); return; }
     setPmError(''); setPmLoading(true);
     try {
       await customersApi.recordPayment(pmCustomer.id, { userId: user.id, amount });
-      setPmSuccess(`Payment of ${amount.toFixed(2)} ₾ recorded for ${pmCustomer.name}.`);
+      setPmSuccess(`${amount.toFixed(2)} ₾ — ${pmCustomer.name}`);
       setPmCustomer(null); setPmSearch(''); setPmAmount('');
     } catch (err) {
-      setPmError(err.response?.data?.error || 'Failed to record payment.');
+      setPmError(err.response?.data?.error || t('common.error'));
     } finally { setPmLoading(false); }
   };
 
@@ -97,9 +99,9 @@ export default function POS() {
     const existing = cart.find(i => i.productId === product.id);
     const alreadyInCart = existing ? existing.quantity : 0;
     if (product.stockQuantity <= 0) {
-      setError(`${product.name} is out of stock.`);
+      setError(`${product.name}: ${t('pos.outOfStock')}`);
     } else if (alreadyInCart >= product.stockQuantity) {
-      setError(`Not enough stock for ${product.name}. Available: ${product.stockQuantity}`);
+      setError(`${product.name}: ${t('pos.notEnoughStock', { available: product.stockQuantity })}`);
     } else {
       addToCart(product);
     }
@@ -134,7 +136,7 @@ export default function POS() {
     const qty = isDecimal ? parseFloat(rawVal) : parseInt(rawVal);
     if (!qty || qty <= 0) return;
     if (qty > item.maxStock) {
-      setError(`Not enough stock for ${item.name}. Available: ${item.maxStock}`);
+      setError(`${item.name}: ${t('pos.notEnoughStock', { available: item.maxStock })}`);
       return;
     }
     setError('');
@@ -162,8 +164,8 @@ export default function POS() {
   };
 
   const handleCheckout = async () => {
-    if (cart.length === 0) { setError('Cart is empty.'); return; }
-    if (saleType === 'debit' && !selectedCustomer) { setError('Select a customer for debit sale.'); return; }
+    if (cart.length === 0) { setError(t('pos.cartEmptyError')); return; }
+    if (saleType === 'debit' && !selectedCustomer) { setError(t('pos.selectCustomerError')); return; }
     setError(''); setSuccess('');
     try {
       const payload = {
@@ -179,26 +181,26 @@ export default function POS() {
         customerId: saleType === 'debit' ? selectedCustomer?.id : null,
       };
       const { data: sale } = await salesApi.create(payload);
-      const customerNote = saleType === 'debit' ? ` — charged to ${selectedCustomer.name}` : '';
-      setSuccess(`Sale #${sale.id} completed! Total: ${sale.totalAmount.toFixed(2)} ₾${customerNote}`);
+      const customerNote = saleType === 'debit' ? ` — ${selectedCustomer.name}` : '';
+      setSuccess(`#${sale.id} · ${sale.totalAmount.toFixed(2)} ₾${customerNote}`);
       setCart([]); setCartDiscount(0);
       setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
       searchRef.current?.focus();
     } catch (err) {
-      setError(err.response?.data?.error || 'Checkout failed.');
+      setError(err.response?.data?.error || t('common.error'));
     }
   };
 
   const handleOpeningSubmit = async (e) => {
     e.preventDefault();
     const amount = parseFloat(openingAmount);
-    if (isNaN(amount) || amount < 0) { setOpeningError('Enter a valid amount (0 or more).'); return; }
+    if (isNaN(amount) || amount < 0) { setOpeningError(t('pos.opening.invalidAmount')); return; }
     setOpeningError(''); setOpeningLoading(true);
     try {
       await cashClosingApi.createOpening({ userId: user.id, amount });
       setOpeningModal(false);
     } catch (err) {
-      setOpeningError(err.response?.data?.error || 'Failed to record opening cash.');
+      setOpeningError(err.response?.data?.error || t('common.error'));
     } finally {
       setOpeningLoading(false);
     }
@@ -207,7 +209,7 @@ export default function POS() {
   return (
     <div style={styles.root}>
       <div style={styles.left}>
-        <h2 style={styles.title}>Point of Sale</h2>
+        <h2 style={styles.title}>{t('pos.title')}</h2>
 
         <div style={styles.searchRow}>
           <ProductSearch
@@ -215,7 +217,7 @@ export default function POS() {
             clearAfterSelect
             autoFocus
             onSelect={handleProductSelected}
-            placeholder="Search by name or scan barcode..."
+            placeholder={t('pos.searchPlaceholder')}
             inputStyle={styles.searchInput}
           />
         </div>
@@ -224,18 +226,18 @@ export default function POS() {
         {success && <p style={styles.success}>{success}</p>}
 
         {cart.length === 0 ? (
-          <div style={styles.empty}>Cart is empty. Scan a product to start.</div>
+          <div style={styles.empty}>{t('pos.cartEmpty')}</div>
         ) : (
           <table style={styles.table}>
             <thead>
               <tr style={styles.thead}>
-                <th style={styles.th}>Product</th>
-                <th style={styles.th}>Stock</th>
-                <th style={styles.th}>Base Price</th>
-                <th style={styles.th}>Discount</th>
-                <th style={styles.th}>Final Price</th>
-                <th style={styles.th}>Qty</th>
-                <th style={styles.th}>Line Total</th>
+                <th style={styles.th}>{t('pos.col.product')}</th>
+                <th style={styles.th}>{t('pos.col.stock')}</th>
+                <th style={styles.th}>{t('pos.col.basePrice')}</th>
+                <th style={styles.th}>{t('pos.col.discount')}</th>
+                <th style={styles.th}>{t('pos.col.finalPrice')}</th>
+                <th style={styles.th}>{t('pos.col.qty')}</th>
+                <th style={styles.th}>{t('pos.col.lineTotal')}</th>
                 <th style={styles.th}></th>
               </tr>
             </thead>
@@ -293,44 +295,44 @@ export default function POS() {
       </div>
 
       <div style={styles.right}>
-        <h3 style={styles.summaryTitle}>Order Summary</h3>
+        <h3 style={styles.summaryTitle}>{t('pos.summary.title')}</h3>
 
         <div style={styles.summaryRow}>
-          <span>Subtotal</span>
+          <span>{t('pos.summary.subtotal')}</span>
           <span>{subtotal.toFixed(2)} ₾</span>
         </div>
         <div style={styles.summaryRow}>
-          <span>Cart Discount</span>
+          <span>{t('pos.summary.cartDiscount')}</span>
           <input type="number" step="0.01" min="0" style={{ ...styles.smallInput, width: 80 }}
             value={cartDiscount}
             onChange={e => setCartDiscount(parseFloat(e.target.value) || 0)} />
         </div>
         <div style={styles.totalRow}>
-          <span>Total</span>
+          <span>{t('pos.summary.total')}</span>
           <span>{total.toFixed(2)} ₾</span>
         </div>
 
         <div style={styles.payTypeSection}>
-          <div style={styles.payTypeLabel}>Payment Type</div>
+          <div style={styles.payTypeLabel}>{t('pos.paymentType')}</div>
           <div style={styles.payTypeRow}>
             <button
               style={{ ...styles.payTypeBtn, ...(saleType === 'cash' ? styles.payTypeBtnActive : {}) }}
               onClick={() => { setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch(''); }}
             >
-              Cash
+              {t('pos.cash')}
             </button>
             <button
               style={{ ...styles.payTypeBtn, ...(saleType === 'debit' ? styles.payTypeBtnDebit : {}) }}
               onClick={() => setSaleType('debit')}
             >
-              Debit
+              {t('pos.debit')}
             </button>
           </div>
         </div>
 
         {saleType === 'debit' && (
           <div style={styles.customerSection}>
-            <div style={styles.payTypeLabel}>Customer *</div>
+            <div style={styles.payTypeLabel}>{t('pos.customer')}</div>
             {selectedCustomer ? (
               <div style={styles.selectedCustomer}>
                 <div>
@@ -341,14 +343,14 @@ export default function POS() {
                   </div>
                 </div>
                 <button style={styles.changeBtn} onClick={() => { setSelectedCustomer(null); setCustomerSearch(''); }}>
-                  Change
+                  {t('pos.changeBtn')}
                 </button>
               </div>
             ) : (
               <div style={{ position: 'relative' }}>
                 <input
                   style={styles.customerSearchInput}
-                  placeholder="Search customer..."
+                  placeholder={t('pos.payment.searchPlaceholder')}
                   value={customerSearch}
                   onChange={e => { setCustomerSearch(e.target.value); setShowCustomerList(true); }}
                   onFocus={() => setShowCustomerList(true)}
@@ -371,7 +373,7 @@ export default function POS() {
                   </div>
                 )}
                 {customers.length === 0 && (
-                  <p style={{ fontSize: 12, color: '#94a3b8', margin: '4px 0 0' }}>Loading customers...</p>
+                  <p style={{ fontSize: 12, color: '#94a3b8', margin: '4px 0 0' }}>{t('pos.loadingCustomers')}</p>
                 )}
               </div>
             )}
@@ -379,12 +381,12 @@ export default function POS() {
         )}
 
         <button style={styles.checkoutBtn} onClick={handleCheckout} disabled={cart.length === 0}>
-          {saleType === 'debit' ? 'Charge to Customer' : 'Checkout'}
+          {saleType === 'debit' ? t('pos.chargeToCustomer') : t('pos.checkout')}
         </button>
-        <button style={styles.clearBtn} onClick={clearCart}>Clear Cart</button>
-        <button style={styles.payModalBtn} onClick={openPayModal}>Customer Payment</button>
+        <button style={styles.clearBtn} onClick={clearCart}>{t('pos.clearCart')}</button>
+        <button style={styles.payModalBtn} onClick={openPayModal}>{t('pos.customerPayment')}</button>
         {cart.length > 0 && (
-          <p style={styles.cartHint}>{cart.length} item(s) — cart saved</p>
+          <p style={styles.cartHint}>{t('pos.itemsSaved', { count: cart.length })}</p>
         )}
       </div>
 
@@ -394,15 +396,15 @@ export default function POS() {
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               <div style={styles.openingIcon}>₾</div>
               <h3 style={{ margin: '12px 0 6px', fontSize: 18, fontWeight: 700, color: '#111827' }}>
-                Enter Opening Cash
+                {t('pos.opening.title')}
               </h3>
               <p style={{ margin: 0, fontSize: 14, color: '#6B7280', lineHeight: 1.5 }}>
-                Enter the starting cash amount in the register before beginning sales.
+                {t('pos.opening.subtitle')}
               </p>
             </div>
             <form onSubmit={handleOpeningSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={styles.modalLabel}>Opening Cash Amount (₾)</label>
+                <label style={styles.modalLabel}>{t('pos.opening.label')}</label>
                 <input
                   style={{ ...styles.modalInput, fontSize: 20, fontWeight: 700, textAlign: 'center', padding: '12px' }}
                   type="number"
@@ -415,7 +417,7 @@ export default function POS() {
                   required
                 />
                 <p style={{ margin: '6px 0 0', fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
-                  Enter 0 if no change money was provided
+                  {t('pos.opening.hint')}
                 </p>
               </div>
               {openingError && (
@@ -428,7 +430,7 @@ export default function POS() {
                 type="submit"
                 disabled={openingLoading}
               >
-                {openingLoading ? 'Saving…' : 'Start Shift'}
+                {openingLoading ? t('pos.opening.saving') : t('pos.opening.startShift')}
               </button>
             </form>
           </div>
@@ -439,19 +441,19 @@ export default function POS() {
         <div style={styles.overlay} onClick={e => e.target === e.currentTarget && closePayModal()}>
           <div style={styles.modal}>
             <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Customer Payment</h3>
+              <h3 style={styles.modalTitle}>{t('pos.payment.title')}</h3>
               <button style={styles.modalClose} onClick={closePayModal}>✕</button>
             </div>
 
             {pmSuccess ? (
               <div style={{ padding: '20px 0', textAlign: 'center' }}>
                 <p style={{ color: '#16a34a', fontWeight: 600, fontSize: 15, marginBottom: 16 }}>{pmSuccess}</p>
-                <button style={styles.checkoutBtn} onClick={closePayModal}>Done</button>
+                <button style={styles.checkoutBtn} onClick={closePayModal}>{t('pos.payment.done')}</button>
               </div>
             ) : (
               <form onSubmit={handleModalPayment} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <label style={styles.modalLabel}>Customer *</label>
+                  <label style={styles.modalLabel}>{t('pos.payment.customer')}</label>
                   {pmCustomer ? (
                     <div style={styles.selectedCustomer}>
                       <div>
@@ -464,14 +466,14 @@ export default function POS() {
                         </div>
                       </div>
                       <button type="button" style={styles.changeBtn} onClick={() => { setPmCustomer(null); setPmSearch(''); }}>
-                        Change
+                        {t('pos.changeBtn')}
                       </button>
                     </div>
                   ) : (
                     <div style={{ position: 'relative' }}>
                       <input
                         style={styles.modalInput}
-                        placeholder="Search by name or phone..."
+                        placeholder={t('pos.payment.searchPlaceholder')}
                         value={pmSearch}
                         onChange={e => { setPmSearch(e.target.value); setPmShowList(true); }}
                         onFocus={() => setPmShowList(true)}
@@ -499,7 +501,7 @@ export default function POS() {
                 </div>
 
                 <div>
-                  <label style={styles.modalLabel}>Amount (₾) *</label>
+                  <label style={styles.modalLabel}>{t('pos.payment.amount')}</label>
                   <input
                     style={styles.modalInput}
                     type="number"
@@ -514,7 +516,7 @@ export default function POS() {
                 {pmError && <p style={{ color: '#dc2626', margin: 0, fontSize: 13 }}>{pmError}</p>}
 
                 <button style={{ ...styles.checkoutBtn, background: '#2563eb', marginBottom: 0 }} type="submit" disabled={pmLoading}>
-                  {pmLoading ? 'Recording...' : 'Record Payment'}
+                  {pmLoading ? t('pos.payment.recording') : t('pos.payment.record')}
                 </button>
               </form>
             )}

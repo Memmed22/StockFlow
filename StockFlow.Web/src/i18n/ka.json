@@ -1,0 +1,159 @@
+{
+  "nav": {
+    "pos": "გაყიდვა", "returns": "დაბრუნება", "cashClose": "სალარო",
+    "products": "პროდუქტები", "stockIn": "მარაგი", "customers": "კლიენტები",
+    "reports": "ანგარიში", "users": "მომხმარებლები", "signOut": "გასვლა"
+  },
+  "common": {
+    "save": "შენახვა", "cancel": "გაუქმება", "delete": "წაშლა", "edit": "რედაქტირება",
+    "update": "განახლება", "add": "დამატება", "loading": "იტვირთება…", "note": "შენიშვნა",
+    "actions": "მოქმედება", "name": "სახელი", "barcode": "შტრიხკოდი",
+    "quantity": "რაოდენობა",
+    "from": "დან", "to": "მდე", "apply": "გამოყენება", "refresh": "განახლება",
+    "optional": "არასავალდებულო", "back": "← უკან", "previous": "← წინა", "next": "შემდეგი →",
+    "page": "გვერდი", "of": "ის", "noData": "მონაცემი ვერ მოიძებნა.", "error": "შეცდომა."
+  },
+  "login": {
+    "heroPOS": "გაყიდვა და ინვენტარის მართვა",
+    "features": ["მარაგის რეალურ დროში თვალყური", "მრავალ-დონიანი წვდომა", "გაყიდვა და დაბრუნება", "კლიენტების კრედიტი"],
+    "version": "StockFlow v1.0",
+    "welcomeBack": "კეთილი დაბრუნება", "signInSub": "შედი ანგარიშში გასაგრძელებლად",
+    "username": "მომხმარებელი", "password": "პაროლი",
+    "usernamePlaceholder": "მომხმარებლის სახელი", "passwordPlaceholder": "პაროლი",
+    "signingIn": "შესვლა...", "signIn": "შესვლა",
+    "errorNetwork": "სერვერთან კავშირი ვერ მოხერხდა — API პორტ 5000-ზე?",
+    "errorServer": "სერვერის შეცდომა {{status}}",
+    "errorInvalid": "მომხმარებელი ან პაროლი არასწორია."
+  },
+  "pos": {
+    "title": "გაყიდვების პუნქტი",
+    "searchPlaceholder": "ძიება სახელით ან შტრიხკოდით...",
+    "cartEmpty": "კალათა ცარიელია. სკანირება დასაწყებად.",
+    "col": { "product": "პროდუქტი", "stock": "მარაგი", "basePrice": "ბაზური ფასი", "discount": "ფასდაკლება", "finalPrice": "საბოლოო ფასი", "qty": "რ-ბა", "lineTotal": "ჯამი" },
+    "summary": { "title": "შეკვეთის შეჯამება", "subtotal": "ჯამი", "cartDiscount": "ფასდაკლება", "total": "სულ" },
+    "paymentType": "გადახდის ტიპი", "cash": "ნაღდი", "debit": "კრედიტი", "customer": "კლიენტი",
+    "loadingCustomers": "კლიენტები იტვირთება...",
+    "checkout": "გადახდა", "chargeToCustomer": "კლიენტზე ჩაწერა",
+    "clearCart": "კალათის გასუფთავება", "customerPayment": "კლიენტის გადახდა",
+    "itemsSaved": "{{count}} ნივთი — შენახულია",
+    "changeBtn": "შეცვლა",
+    "payment": {
+      "title": "კლიენტის გადახდა", "customer": "კლიენტი", "amount": "თანხა (₾) *",
+      "searchPlaceholder": "სახელი ან ტელეფონი...",
+      "record": "გადახდის ჩაწერა", "recording": "ჩაიწერება...", "done": "დასრულება",
+      "selectCustomer": "კლიენტი შეარჩიეთ.", "invalidAmount": "სწორი თანხა შეიყვანეთ."
+    },
+    "opening": {
+      "title": "საწყისი სალარო",
+      "subtitle": "შეიყვანე სალაროში არსებული ნაღდი ფულის ოდენობა გაყიდვის დაწყებამდე.",
+      "label": "საწყისი ნაღდი ფული (₾)",
+      "hint": "0 შეიყვანე თუ ხურდა ფული არ გინდა",
+      "startShift": "ცვლის დაწყება", "saving": "იწერება…",
+      "invalidAmount": "სწორი თანხა შეიყვანეთ (0 ან მეტი)."
+    },
+    "outOfStock": "მარაგი ამოიწურა",
+    "notEnoughStock": "მარაგი არ არის. ხელმისაწვდომია: {{available}}",
+    "cartEmptyError": "კალათა ცარიელია.",
+    "selectCustomerError": "კლიენტი შეარჩიეთ კრედიტის გასაყიდად."
+  },
+  "products": {
+    "title": "პროდუქტები", "subtitle": "{{count}} ნივთი ინვენტარში",
+    "addProduct": "+ პროდუქტის დამატება", "editProduct": "პროდუქტის რედაქტირება", "newProduct": "ახალი პროდუქტი",
+    "deleteConfirm": "გსურთ პროდუქტის წაშლა?", "noProducts": "პროდუქტი ვერ მოიძებნა.",
+    "update": "განახლება", "save": "შენახვა", "cancel": "გაუქმება",
+    "form": {
+      "name": "სახელი *", "namePlaceholder": "პროდუქტის სახელი",
+      "barcode": "შტრიხკოდი *", "barcodePlaceholder": "შტრიხკოდი",
+      "sellingPrice": "გაყიდვის ფასი (₾) *", "buyingPrice": "შესყიდვის ფასი (₾)",
+      "unitType": "გაზომვის ერთეული", "description": "აღწერა", "optional": "სურვილისამებრ"
+    },
+    "col": { "name": "სახელი", "barcode": "შტრიხკოდი", "unit": "ერთეული", "sellPrice": "გაყიდვა", "buyPrice": "შესყიდვა", "stock": "მარაგი", "actions": "მოქმედება" },
+    "units": ["რაოდენობა (ცალი)", "მეტრი (მ)", "კვ. მეტრი (მ²)", "ლიტრი (ლ)"]
+  },
+  "stock": {
+    "title": "მარაგის შევსება", "subtitle": "პროდუქტის შემომავალი ინვენტარის ჩაწერა",
+    "addStock": "მარაგის დამატება", "product": "პროდუქტი *",
+    "searchPlaceholder": "ძიება სახელით ან შტრიხკოდით...",
+    "currentStock": "მიმდინარე მარაგი", "note": "შენიშვნა", "notePlaceholder": "სურვილისამებრ (მომწოდებელი, პარტია…)",
+    "addButton": "მარაგის დამატება", "movements": "მარაგის მოძრაობა",
+    "totalRecords": "{{count}} ჩანაწერი სულ",
+    "searchMovements": "ძიება სახელით ან შტრიხკოდით…",
+    "noMovements": "მოძრაობა ჯერ არ არის.", "noMovementsSearch": "\"{{query}}\" — ვერ მოიძებნა.",
+    "col": { "date": "თარიღი", "product": "პროდუქტი", "barcode": "შტრიხკოდი", "type": "ტიპი", "quantity": "რაოდენობა", "note": "შენიშვნა" },
+    "prev": "← წინა", "next": "შემდეგი →",
+    "pageOf": "გვერდი {{page}} / {{total}}",
+    "errors": { "selectProduct": "გთხოვთ, აირჩიეთ პროდუქტი სიიდან.", "quantity": "შეიყვანეთ სწორი რაოდენობა.", "stockError": "მარაგის დამატებისას შეცდომა." }
+  },
+  "returns": {
+    "title": "დაბრუნება", "subtitle": "კლიენტის დაბრუნების დამუშავება — მარაგი ავტომატურად განახლდება",
+    "product": "პროდუქტი *", "searchPlaceholder": "ძიება სახელით ან შტრიხკოდით...",
+    "currentStock": "მარაგი", "quantity": "რაოდენობა",
+    "returnPrice": "დაბრუნების ფასი (₾)", "modified": "შეცვლილი",
+    "reset": "სტანდარტი", "defaultPrice": "სტანდარტი: {{price}} ₾",
+    "returnTotal": "სულ დასაბრუნებელი", "note": "შენიშვნა", "notePlaceholder": "დაბრუნების მიზეზი (სურვილისამებრ)",
+    "linkCustomer": "კლიენტთან დაკავშირება", "linkCustomerNote": "(სურვილისამებრ — ბალანსიდან გამოაკლება)",
+    "searchCustomer": "კლიენტის ძიება სახელით ან ტელეფონით...",
+    "remove": "ამოღება", "deductNote": "კლიენტის ბალანსი შემცირდება {{amount}} ₾-ით",
+    "processReturn": "დაბრუნების დამუშავება",
+    "errors": { "selectProduct": "გთხოვთ, აირჩიეთ პროდუქტი.", "quantity": "შეიყვანეთ სწორი რაოდენობა.", "price": "ფასი 0 ან მეტი უნდა იყოს.", "processing": "დაბრუნების დამუშავებისას შეცდომა." }
+  },
+  "cashClosing": {
+    "title": "სალაროს დახურვა", "subtitle": "პერიოდის ბოლოს ნაღდი ფულის დათვლა და სალაროს გადაყენება",
+    "periodFrom": "პერიოდი დან", "periodTo": "პერიოდი მდე",
+    "openingCash": "საწყისი ნაღდი", "expectedCash": "მოსალოდნელი ნაღდი",
+    "recordClosing": "დახურვის ჩაწერა", "countedCash": "დათვლილი ნაღდი (₾) *",
+    "notePlaceholder": "შენიშვნა…", "confirmClosing": "დახურვის დადასტურება", "saving": "იწერება…",
+    "diff": { "label": "სხვაობა", "perfect": "ზუსტი შესაბამისობა", "short": "ნაღდი ნაკლებია", "overage": "ნაღდი ჭარბია" },
+    "history": { "title": "დახურვების ისტორია", "subtitle": "{{count}} ჩანაწერი", "noHistory": "დახურვა ჯერ არ არის." },
+    "col": { "from": "დან", "to": "მდე", "expected": "მოსალოდნელი", "counted": "დათვლილი", "difference": "სხვაობა", "by": "ვინ", "note": "შენიშვნა" },
+    "beginning": "სისტემის დასაწყისიდან", "successMsg": "სალარო წარმატებით დაიხურა.",
+    "telegramOk": " · Telegram-ი გაიგზავნა ✓"
+  },
+  "reports": {
+    "title": "ანგარიშები", "subtitle": "გაყიდვები, ინვენტარი და მოლარის შედეგები",
+    "tabs": { "detailed": "დეტალური", "daily": "ყოველდღიური", "users": "მოლარეების მიხედვით", "stock": "მარაგის ანგარიში" },
+    "apply": "გამოყენება", "refresh": "განახლება", "loading": "იტვირთება…",
+    "col": {
+      "type": "ტიპი", "productDesc": "პროდუქტი / აღწერა", "customer": "კლიენტი",
+      "qty": "რ-ბა", "unitPrice": "ერთ. ფასი", "total": "სულ",
+      "date": "თარიღი", "transactions": "ტრანზაქციები", "totalRevenue": "შემოსავალი",
+      "cashier": "მოლარე", "product": "პროდუქტი", "barcode": "შტრიხკოდი", "currentStock": "მიმდინარე მარაგი"
+    },
+    "summary": { "title": "შეჯამება", "cashSales": "ნაღდი გაყიდვები", "debitSales": "კრედიტი (არ ნაღდი)", "payments": "მიღებული გადახდები", "returns": "დაბრუნებები", "cashTotal": "ნაღდი სულ" },
+    "infoRevenue": "შემოსავალი", "infoTransactions": "ტრანზაქციები",
+    "notCash": "არ ნაღდი",
+    "noData": { "transactions": "ამ პერიოდში ტრანზაქცია არ არის.", "sales": "ამ პერიოდში გაყიდვა არ არის.", "users": "ამ პერიოდში მონაცემი არ არის.", "products": "პროდუქტი ვერ მოიძებნა.", "reports": "ანგარიშების ჩატვირთვა ვერ მოხერხდა." },
+    "types": { "Cash": "ნაღდი", "Debit": "კრედიტი", "Return": "დაბრუნება", "Payment": "გადახდა" }
+  },
+  "users": {
+    "title": "მომხმარებლების მართვა", "subtitle": "{{count}} მომხმარებელი",
+    "addUser": "+ მომხმარებლის დამატება", "newUser": "ახალი მომხმარებელი",
+    "username": "მომხმარებელი *", "password": "პაროლი *", "role": "როლი",
+    "createUser": "შექმნა", "delete": "წაშლა",
+    "deleteConfirm": "გსურთ მომხმარებლის წაშლა?", "cantDeleteSelf": "საკუთარი ანგარიშის წაშლა შეუძლებელია.",
+    "noUsers": "მომხმარებელი ვერ მოიძებნა.", "you": "შენ",
+    "col": { "username": "მომხმარებელი", "role": "როლი", "actions": "მოქმედება" },
+    "hint": "მოლარე — მხოლოდ გაყიდვა და დაბრუნება.   ადმინი — სრული წვდომა.",
+    "userCreated": "მომხმარებელი \"{{username}}\" შეიქმნა.",
+    "errorCreate": "მომხმარებლის შექმნის შეცდომა."
+  },
+  "customers": {
+    "title": "კლიენტები", "outstandingDebt": "ვალი სულ",
+    "newCustomer": "+ ახალი კლიენტი", "cancel": "გაუქმება", "newCustomerTitle": "ახალი კლიენტი",
+    "form": { "name": "სახელი *", "namePlaceholder": "სრული სახელი", "phone": "ტელეფონი *", "phonePlaceholder": "+995 555 123456", "description": "აღწერა", "descriptionPlaceholder": "შენიშვნები" },
+    "create": "შექმნა", "searchPlaceholder": "ძიება სახელით ან ტელეფონით...",
+    "noCustomers": "კლიენტი ვერ მოიძებნა.",
+    "col": { "name": "სახელი", "phone": "ტელეფონი", "description": "აღწერა", "balance": "ბალანსი" },
+    "view": "ნახვა →",
+    "errors": { "load": "კლიენტების ჩატვირთვა ვერ მოხერხდა.", "create": "კლიენტის შექმნა ვერ მოხერხდა." }
+  },
+  "customerDetail": {
+    "back": "← უკან", "balance": "მიმდინარე ბალანსი (ვალი)",
+    "payment": { "title": "გადახდის ჩაწერა", "amount": "თანხა (₾)", "button": "გადახდის ჩაწერა", "success": "{{amount}} ₾ გადახდა ჩაიწერა.", "errorInvalid": "შეიყვანეთ სწორი თანხა.", "errorFailed": "გადახდის ჩაწერა ვერ მოხერხდა." },
+    "history": "ტრანზაქციების ისტორია", "netBalance": "ნეტო ბალანსი", "noTransactions": "ტრანზაქცია ჯერ არ არის.",
+    "loading": "იტვირთება...",
+    "col": { "date": "თარიღი", "type": "ტიპი", "amount": "თანხა" },
+    "items": { "product": "პროდუქტი", "qty": "რ-ბა", "unitPrice": "ერთ. ფასი", "total": "სულ" },
+    "types": { "CashSale": "ნაღდი გაყიდვა", "DebitSale": "კრედიტი", "Return": "დაბრუნება", "Payment": "გადახდა" }
+  }
+}
