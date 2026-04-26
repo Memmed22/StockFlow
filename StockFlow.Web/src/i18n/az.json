@@ -1,0 +1,159 @@
+{
+  "nav": {
+    "pos": "Satış", "returns": "Qaytarma", "cashClose": "Kassa",
+    "products": "Məhsullar", "stockIn": "Anbar", "customers": "Müştərilər",
+    "reports": "Hesabatlar", "users": "İstifadəçilər", "signOut": "Çıxış"
+  },
+  "common": {
+    "save": "Yadda saxla", "cancel": "Ləğv et", "delete": "Sil", "edit": "Redaktə et",
+    "update": "Yenilə", "add": "Əlavə et", "loading": "Yüklənir…", "note": "Qeyd",
+    "actions": "Əməliyyatlar", "name": "Ad", "barcode": "Barkod",
+    "quantity": "Miqdar",
+    "from": "Başlanğıc", "to": "Son", "apply": "Tətbiq et", "refresh": "Yenilə",
+    "optional": "isteğe bağlı", "back": "← Geri", "previous": "← Əvvəlki", "next": "Növbəti →",
+    "page": "Səhifə", "of": "/", "noData": "Məlumat tapılmadı.", "error": "Xəta baş verdi."
+  },
+  "login": {
+    "heroPOS": "Satış nöqtəsi və anbar idarəetməsi",
+    "features": ["Real vaxt anbar izləmə", "Çox səviyyəli giriş", "Satış və qaytarma idarəetməsi", "Müştəri kredit hesabları"],
+    "version": "StockFlow v1.0",
+    "welcomeBack": "Xoş gəldiniz", "signInSub": "Davam etmək üçün hesabınıza daxil olun",
+    "username": "İstifadəçi adı", "password": "Şifrə",
+    "usernamePlaceholder": "İstifadəçi adınızı daxil edin", "passwordPlaceholder": "Şifrənizi daxil edin",
+    "signingIn": "Daxil olunur...", "signIn": "Daxil ol",
+    "errorNetwork": "Serverə qoşulmaq mümkün olmadı — API port 5000-də işləyirmi?",
+    "errorServer": "Server xətası {{status}}",
+    "errorInvalid": "İstifadəçi adı və ya şifrə yanlışdır."
+  },
+  "pos": {
+    "title": "Satış nöqtəsi",
+    "searchPlaceholder": "Ad və ya barkodla axtarın...",
+    "cartEmpty": "Səbət boşdur. Başlamaq üçün məhsul skan edin.",
+    "col": { "product": "Məhsul", "stock": "Anbar", "basePrice": "Əsas qiymət", "discount": "Endirim", "finalPrice": "Son qiymət", "qty": "Miqdar", "lineTotal": "Cəmi" },
+    "summary": { "title": "Sifariş xülasəsi", "subtotal": "Arajam", "cartDiscount": "Endirim", "total": "Cəmi" },
+    "paymentType": "Ödəniş növü", "cash": "Nağd", "debit": "Borc", "customer": "Müştəri",
+    "loadingCustomers": "Müştərilər yüklənir...",
+    "checkout": "Ödəniş", "chargeToCustomer": "Müştəriyə yaz",
+    "clearCart": "Səbəti təmizlə", "customerPayment": "Müştəri ödənişi",
+    "itemsSaved": "{{count}} məhsul — saxlanıldı",
+    "changeBtn": "Dəyiş",
+    "payment": {
+      "title": "Müştəri ödənişi", "customer": "Müştəri", "amount": "Məbləğ (₾) *",
+      "searchPlaceholder": "Ad və ya telefon...",
+      "record": "Ödənişi qeyd et", "recording": "Qeyd edilir...", "done": "Bitdi",
+      "selectCustomer": "Müştəri seçin.", "invalidAmount": "Düzgün məbləğ daxil edin."
+    },
+    "opening": {
+      "title": "Açılış kassasını daxil edin",
+      "subtitle": "Satışa başlamazdan əvvəl kassada olan pul miqdarını daxil edin.",
+      "label": "Açılış kassası (₾)",
+      "hint": "Xırda pul yoxdursa 0 daxil edin",
+      "startShift": "Növbəni başlat", "saving": "Saxlanılır…",
+      "invalidAmount": "Düzgün məbləğ daxil edin (0 və ya çox)."
+    },
+    "outOfStock": "Stokda yoxdur",
+    "notEnoughStock": "Yetərli stok yoxdur. Mövcud: {{available}}",
+    "cartEmptyError": "Səbət boşdur.",
+    "selectCustomerError": "Kredit satışı üçün müştəri seçin."
+  },
+  "products": {
+    "title": "Məhsullar", "subtitle": "Anbar: {{count}} məhsul",
+    "addProduct": "+ Məhsul əlavə et", "editProduct": "Məhsulu redaktə et", "newProduct": "Yeni məhsul",
+    "deleteConfirm": "Bu məhsulu silmək istəyirsinizmi?", "noProducts": "Məhsul tapılmadı.",
+    "update": "Yenilə", "save": "Yadda saxla", "cancel": "Ləğv et",
+    "form": {
+      "name": "Ad *", "namePlaceholder": "Məhsulun adı",
+      "barcode": "Barkod *", "barcodePlaceholder": "Barkod",
+      "sellingPrice": "Satış qiyməti (₾) *", "buyingPrice": "Alış qiyməti (₾)",
+      "unitType": "Ölçü vahidi", "description": "Təsvir", "optional": "İstəyə bağlı"
+    },
+    "col": { "name": "Ad", "barcode": "Barkod", "unit": "Vahid", "sellPrice": "Satış", "buyPrice": "Alış", "stock": "Anbar", "actions": "Əməliyyatlar" },
+    "units": ["Ədəd", "Metr (m)", "Kv. metr (m²)", "Litr (L)"]
+  },
+  "stock": {
+    "title": "Anbar doldurma", "subtitle": "Məhsulun gələn inventarını qeyd edin",
+    "addStock": "Anbar əlavə et", "product": "Məhsul *",
+    "searchPlaceholder": "Ad və ya barkodla axtarın...",
+    "currentStock": "Cari anbar", "note": "Qeyd", "notePlaceholder": "İstəyə bağlı (təchizatçı, partiya…)",
+    "addButton": "Anbar əlavə et", "movements": "Anbar hərəkətləri",
+    "totalRecords": "Cəmi {{count}} qeyd",
+    "searchMovements": "Ad və ya barkodla axtarın…",
+    "noMovements": "Hərəkət yoxdur.", "noMovementsSearch": "\"{{query}}\" — tapılmadı.",
+    "col": { "date": "Tarix", "product": "Məhsul", "barcode": "Barkod", "type": "Növ", "quantity": "Miqdar", "note": "Qeyd" },
+    "prev": "← Əvvəlki", "next": "Növbəti →",
+    "pageOf": "Səhifə {{page}} / {{total}}",
+    "errors": { "selectProduct": "Zəhmət olmasa siyahıdan məhsul seçin.", "quantity": "Düzgün miqdar daxil edin.", "stockError": "Anbar əlavə edilərkən xəta." }
+  },
+  "returns": {
+    "title": "Qaytarma", "subtitle": "Müştəri qaytarmasını emal edin — anbar avtomatik yenilənəcək",
+    "product": "Məhsul *", "searchPlaceholder": "Ad və ya barkodla axtarın...",
+    "currentStock": "Anbar", "quantity": "Miqdar",
+    "returnPrice": "Qaytarma qiyməti (₾)", "modified": "dəyişdirilmiş",
+    "reset": "Sıfırla", "defaultPrice": "Standart: {{price}} ₾",
+    "returnTotal": "Qaytarma cəmi", "note": "Qeyd", "notePlaceholder": "Qaytarma səbəbi (isteğe bağlı)",
+    "linkCustomer": "Müştəriyə bağla", "linkCustomerNote": "(isteğe bağlı — balansdan çıxılır)",
+    "searchCustomer": "Müştərini ad və ya telefonla axtarın...",
+    "remove": "Çıxar", "deductNote": "Müştəri balansı {{amount}} ₾ azalacaq",
+    "processReturn": "Qaytarmanı emal et",
+    "errors": { "selectProduct": "Zəhmət olmasa məhsul seçin.", "quantity": "Düzgün miqdar daxil edin.", "price": "Qiymət 0 və ya daha çox olmalıdır.", "processing": "Qaytarma emal edilərkən xəta." }
+  },
+  "cashClosing": {
+    "title": "Kassa bağlama", "subtitle": "Dövrün sonunda nağd pulunu sayın və kassanı sıfırlayın",
+    "periodFrom": "Dövr başlanğıcı", "periodTo": "Dövr sonu",
+    "openingCash": "Açılış kassası", "expectedCash": "Gözlənilən nağd",
+    "recordClosing": "Bağlamanı qeyd et", "countedCash": "Sayılan nağd (₾) *",
+    "notePlaceholder": "Qeyd…", "confirmClosing": "Bağlamanı təsdiqlə", "saving": "Saxlanılır…",
+    "diff": { "label": "Fərq", "perfect": "Tam uyğunluq", "short": "Kassa çatışmır", "overage": "Kassa artıqdır" },
+    "history": { "title": "Bağlama tarixçəsi", "subtitle": "{{count}} qeyd", "noHistory": "Bağlama yoxdur." },
+    "col": { "from": "Başlanğıc", "to": "Son", "expected": "Gözlənilən", "counted": "Sayılan", "difference": "Fərq", "by": "Kim", "note": "Qeyd" },
+    "beginning": "Sistemin əvvəlindən", "successMsg": "Kassa uğurla bağlandı.",
+    "telegramOk": " · Telegram göndərildi ✓"
+  },
+  "reports": {
+    "title": "Hesabatlar", "subtitle": "Satış, anbar və kassir nəticələri",
+    "tabs": { "detailed": "Ətraflı satış", "daily": "Gündəlik", "users": "Kassir üzrə", "stock": "Anbar hesabatı" },
+    "apply": "Tətbiq et", "refresh": "Yenilə", "loading": "Yüklənir…",
+    "col": {
+      "type": "Növ", "productDesc": "Məhsul / Təsvir", "customer": "Müştəri",
+      "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi",
+      "date": "Tarix", "transactions": "Əməliyyatlar", "totalRevenue": "Gəlir",
+      "cashier": "Kassir", "product": "Məhsul", "barcode": "Barkod", "currentStock": "Cari anbar"
+    },
+    "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "cashTotal": "Nağd cəmi" },
+    "infoRevenue": "Gəlir", "infoTransactions": "Əməliyyatlar",
+    "notCash": "nağd deyil",
+    "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "reports": "Hesabatlar yüklənmədi." },
+    "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "Payment": "Ödəniş" }
+  },
+  "users": {
+    "title": "İstifadəçi idarəetməsi", "subtitle": "{{count}} istifadəçi",
+    "addUser": "+ İstifadəçi əlavə et", "newUser": "Yeni istifadəçi",
+    "username": "İstifadəçi adı *", "password": "Şifrə *", "role": "Rol",
+    "createUser": "Yarat", "delete": "Sil",
+    "deleteConfirm": "Bu istifadəçini silmək istəyirsinizmi?", "cantDeleteSelf": "Öz hesabınızı silə bilməzsiniz.",
+    "noUsers": "İstifadəçi tapılmadı.", "you": "sən",
+    "col": { "username": "İstifadəçi adı", "role": "Rol", "actions": "Əməliyyatlar" },
+    "hint": "Kassir — yalnız satış və qaytarma.   Admin — bütün modullara tam giriş.",
+    "userCreated": "\"{{username}}\" istifadəçisi yaradıldı.",
+    "errorCreate": "İstifadəçi yaradılarkən xəta."
+  },
+  "customers": {
+    "title": "Müştərilər", "outstandingDebt": "Ümumi borc",
+    "newCustomer": "+ Yeni müştəri", "cancel": "Ləğv et", "newCustomerTitle": "Yeni müştəri",
+    "form": { "name": "Ad *", "namePlaceholder": "Tam ad", "phone": "Telefon *", "phonePlaceholder": "+994 50 123 45 67", "description": "Təsvir", "descriptionPlaceholder": "Qeydlər" },
+    "create": "Yarat", "searchPlaceholder": "Ad və ya telefonla axtarın...",
+    "noCustomers": "Müştəri tapılmadı.",
+    "col": { "name": "Ad", "phone": "Telefon", "description": "Təsvir", "balance": "Balans" },
+    "view": "Bax →",
+    "errors": { "load": "Müştərilər yüklənmədi.", "create": "Müştəri yaradılmadı." }
+  },
+  "customerDetail": {
+    "back": "← Geri", "balance": "Cari balans (Borc)",
+    "payment": { "title": "Ödənişi qeyd et", "amount": "Məbləğ (₾)", "button": "Ödənişi qeyd et", "success": "{{amount}} ₾ ödəniş qeyd edildi.", "errorInvalid": "Düzgün məbləğ daxil edin.", "errorFailed": "Ödəniş qeyd edilmədi." },
+    "history": "Əməliyyat tarixçəsi", "netBalance": "Xalis balans", "noTransactions": "Əməliyyat yoxdur.",
+    "loading": "Yüklənir...",
+    "col": { "date": "Tarix", "type": "Növ", "amount": "Məbləğ" },
+    "items": { "product": "Məhsul", "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi" },
+    "types": { "CashSale": "Nağd satış", "DebitSale": "Kredit", "Return": "Qaytarma", "Payment": "Ödəniş" }
+  }
+}
