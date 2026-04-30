@@ -13,6 +13,7 @@ api.interceptors.request.use(config => {
 
 export const productsApi = {
   getAll: (search) => api.get('/products', { params: { search } }),
+  getInventoryValue: () => api.get('/products/inventory-value'),
   search: (query) => api.get('/products/search', { params: { query } }),
   getById: (id) => api.get(`/products/${id}`),
   getByBarcode: (barcode) => api.get(`/products/barcode/${barcode}`),
@@ -55,6 +56,7 @@ export const customersApi = {
 export const cashClosingApi = {
   openingStatus: () => api.get('/cashclosings/opening/status'),
   createOpening: (data) => api.post('/cashclosings/opening', data),
+  createExpense: (data) => api.post('/cashclosings/expense', data),
   preview: () => api.get('/cashclosings/preview'),
   create: (data) => api.post('/cashclosings', data),
   getAll: () => api.get('/cashclosings'),

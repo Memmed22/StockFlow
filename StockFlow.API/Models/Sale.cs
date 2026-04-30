@@ -1,6 +1,6 @@
 namespace StockFlow.API.Models;
 
-public enum SaleType { CashSale, DebitSale, Return, Payment, OpeningCash }
+public enum SaleType { CashSale, DebitSale, Return, Payment, OpeningCash, Expense }
 
 public class Sale
 {
@@ -10,6 +10,7 @@ public class Sale
     public SaleType Type { get; set; } = SaleType.CashSale;
     public decimal TotalAmount { get; set; }
     public decimal DiscountAmount { get; set; }
+    public string? Note { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;

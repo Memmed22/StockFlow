@@ -35,6 +35,7 @@ public record DetailedReportSummaryDto(
     decimal DebitSalesTotal,
     decimal PaymentsTotal,
     decimal ReturnsTotal,
+    decimal ExpensesTotal,
     decimal CashTotal
 );
 

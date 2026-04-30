@@ -13,6 +13,7 @@ export default function Products() {
 
   const emptyForm = { name: '', barcode: '', sellingPrice: '', buyingPrice: '', unitType: 0, description: '' };
   const [products, setProducts] = useState([]);
+  const [inventoryValue, setInventoryValue] = useState(null);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
@@ -31,15 +32,23 @@ export default function Products() {
     setProducts(data);
   };
 
+  const loadInventoryValue = async () => {
+    try {
+      const { data } = await productsApi.getInventoryValue();
+      setInventoryValue(data);
+    } catch { /* non-critical */ }
+  };
+
   useEffect(() => { load(); }, [search]);
+  useEffect(() => { loadInventoryValue(); }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const payload = { ...form, sellingPrice: parseFloat(form.sellingPrice), buyingPrice: form.buyingPrice ? parseFloat(form.buyingPrice) : null, unitType: parseInt(form.unitType) };
+    const payload = { ...form, sellingPrice: parseFloat(form.sellingPrice), buyingPrice: parseFloat(form.buyingPrice), unitType: parseInt(form.unitType) };
     try {
       if (editId) { await productsApi.update(editId, payload); } else { await productsApi.create(payload); }
-      setForm(emptyForm); setEditId(null); setShowForm(false); load();
+      setForm(emptyForm); setEditId(null); setShowForm(false); load(); loadInventoryValue();
     } catch (err) { setError(err.response?.data?.error || t('common.error')); }
   };
 
@@ -93,6 +102,25 @@ export default function Products() {
         </button>
       </div>
 
+      {inventoryValue && (
+        <div style={s.inventoryRow}>
+          <div style={s.inventoryCard}>
+            <span style={s.inventoryLabel}>{t('products.totalBuyingValue')}</span>
+            <span style={{ ...s.inventoryValue, color: '#1d4ed8' }}>{inventoryValue.totalBuyingValue.toFixed(2)} ₾</span>
+          </div>
+          <div style={s.inventoryCard}>
+            <span style={s.inventoryLabel}>{t('products.totalSellingValue')}</span>
+            <span style={{ ...s.inventoryValue, color: '#059669' }}>{inventoryValue.totalSellingValue.toFixed(2)} ₾</span>
+          </div>
+          <div style={{ ...s.inventoryCard, background: '#F0FDF4', borderColor: '#BBF7D0' }}>
+            <span style={s.inventoryLabel}>{t('products.potentialProfit')}</span>
+            <span style={{ ...s.inventoryValue, color: '#15803d' }}>
+              {(inventoryValue.totalSellingValue - inventoryValue.totalBuyingValue).toFixed(2)} ₾
+            </span>
+          </div>
+        </div>
+      )}
+
       {showForm && (
         <div style={s.card}>
           <h3 style={s.cardTitle}>{editId ? t('products.editProduct') : t('products.newProduct')}</h3>
@@ -113,8 +141,8 @@ export default function Products() {
                 value={form.sellingPrice} onChange={e => setForm({ ...form, sellingPrice: e.target.value })} />
             </div>
             <div style={s.field}>
-              <label style={s.label}>{t('products.form.buyingPrice')}</label>
-              <input style={s.input} placeholder={t('products.form.optional')} type="number" step="0.01" min="0"
+              <label style={s.label}>{t('products.form.buyingPrice')} *</label>
+              <input style={s.input} placeholder="0.00" type="number" step="0.01" min="0.01" required
                 value={form.buyingPrice} onChange={e => setForm({ ...form, buyingPrice: e.target.value })} />
             </div>
             <div style={s.field}>
@@ -242,7 +270,11 @@ export default function Products() {
 }
 
 const s = {
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  inventoryRow: { display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
+  inventoryCard: { flex: 1, minWidth: 160, background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 4 },
+  inventoryLabel: { fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  inventoryValue: { fontSize: 20, fontWeight: 700 },
   title: { margin: 0, fontSize: 24, fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' },
   subtitle: { margin: '4px 0 0', fontSize: 13, color: '#6B7280' },
   primaryBtn: { background: '#4F46E5', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 18px', cursor: 'pointer', fontWeight: 600, fontSize: 14, flexShrink: 0 },

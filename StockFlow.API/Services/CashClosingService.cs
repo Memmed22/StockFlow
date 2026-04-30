@@ -11,8 +11,28 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
     {
         var fromDate = await GetFromDateAsync();
         var toDate = DateTime.UtcNow;
-        var (_, _, _, _, expected) = await GetBreakdownAsync(fromDate, toDate);
+        var (_, _, _, _, _, expected) = await GetBreakdownAsync(fromDate, toDate);
         return new CashClosingPreviewDto(fromDate, toDate, expected);
+    }
+
+    public async Task<(bool ok, string? error)> CreateExpenseAsync(CreateExpenseDto dto)
+    {
+        var user = await db.Users.FindAsync(dto.UserId);
+        if (user == null) return (false, "User not found.");
+        if (dto.Amount <= 0) return (false, "Amount must be greater than 0.");
+        if (string.IsNullOrWhiteSpace(dto.Description)) return (false, "Description is required.");
+
+        db.Sales.Add(new Sale
+        {
+            UserId = dto.UserId,
+            Type = SaleType.Expense,
+            TotalAmount = -dto.Amount,
+            DiscountAmount = 0,
+            Note = dto.Description.Trim(),
+            CreatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+        return (true, null);
     }
 
     public async Task<(CashClosingDto? dto, string? error)> CreateClosingAsync(CreateCashClosingDto dto)
@@ -23,7 +43,7 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
 
         var fromDate = await GetFromDateAsync();
         var toDate = DateTime.UtcNow;
-        var (opening, cashSales, payments, returns, expected) = await GetBreakdownAsync(fromDate, toDate);
+        var (opening, cashSales, payments, returns, expenses, expected) = await GetBreakdownAsync(fromDate, toDate);
         var diff = dto.CountedCash - expected;
 
         var closing = new CashClosing
@@ -47,7 +67,7 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
             closing.Note, closing.CreatedAt);
 
         var telegramError = await telegram.SendMessageAsync(
-            BuildReport(result, opening, cashSales, payments, returns));
+            BuildReport(result, opening, cashSales, payments, returns, expenses));
 
         // telegramError is non-null only for diagnostics; closing itself always succeeds
         return (result, telegramError);
@@ -110,16 +130,17 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
         return last ?? DateTime.MinValue;
     }
 
-    // Returns (openingCash, cashSales, paymentsReceived, returnsGiven, expected)
-    // cashSales/opening: positive. paymentsReceived: positive (negated storage). returnsGiven: positive.
-    // expected = opening + cashSales + paymentsReceived - returnsGiven
-    private async Task<(decimal opening, decimal cashSales, decimal payments, decimal returns, decimal expected)>
+    // Returns (openingCash, cashSales, paymentsReceived, returnsGiven, expenses, expected)
+    // cashSales/opening: positive. paymentsReceived: positive (negated storage). returnsGiven/expenses: positive.
+    // expected = opening + cashSales + paymentsReceived - returnsGiven - expenses
+    private async Task<(decimal opening, decimal cashSales, decimal payments, decimal returns, decimal expenses, decimal expected)>
         GetBreakdownAsync(DateTime from, DateTime to)
     {
         var items = await db.Sales
             .Where(s => s.CreatedAt > from && s.CreatedAt <= to &&
                         (s.Type == SaleType.OpeningCash || s.Type == SaleType.CashSale ||
-                         s.Type == SaleType.Return     || s.Type == SaleType.Payment))
+                         s.Type == SaleType.Return     || s.Type == SaleType.Payment  ||
+                         s.Type == SaleType.Expense))
             .Select(s => new { s.Type, s.TotalAmount })
             .ToListAsync();
 
@@ -127,13 +148,15 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
         var cashSales = items.Where(x => x.Type == SaleType.CashSale).Sum(x => x.TotalAmount);
         var payments  = items.Where(x => x.Type == SaleType.Payment).Sum(x => -x.TotalAmount);
         var returns   = items.Where(x => x.Type == SaleType.Return).Sum(x => -x.TotalAmount);
+        var expenses  = items.Where(x => x.Type == SaleType.Expense).Sum(x => -x.TotalAmount);
+        // Expense stored as negative TotalAmount; direct sum reduces expected correctly
         var expected  = items.Sum(x => x.Type == SaleType.Payment ? -x.TotalAmount : x.TotalAmount);
 
-        return (opening, cashSales, payments, returns, expected);
+        return (opening, cashSales, payments, returns, expenses, expected);
     }
 
     private static string BuildReport(CashClosingDto c,
-        decimal opening, decimal cashSales, decimal payments, decimal returns)
+        decimal opening, decimal cashSales, decimal payments, decimal returns, decimal expenses)
     {
         var fromStr = c.FromDate == DateTime.MinValue
             ? "Beginning of records"
@@ -157,6 +180,7 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
         lines.AppendLine($"💵 Cash Sales:  {cashSales:F2} ₾");
         lines.AppendLine($"💳 Payments:    {payments:F2} ₾");
         lines.AppendLine($"🔁 Returns:    -{returns:F2} ₾");
+        if (expenses > 0) lines.AppendLine($"💸 Expenses:   -{expenses:F2} ₾");
         lines.AppendLine();
         lines.AppendLine(sep);
         lines.AppendLine();

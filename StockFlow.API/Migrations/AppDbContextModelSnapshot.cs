@@ -139,6 +139,9 @@ namespace StockFlow.API.Migrations
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("TEXT");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("TEXT");
 

@@ -6,7 +6,7 @@ public record CreateProductDto(
     string Name,
     string Barcode,
     decimal SellingPrice,
-    decimal? BuyingPrice,
+    decimal BuyingPrice,
     UnitType UnitType,
     string? Description
 );
@@ -15,10 +15,12 @@ public record UpdateProductDto(
     string Name,
     string Barcode,
     decimal SellingPrice,
-    decimal? BuyingPrice,
+    decimal BuyingPrice,
     UnitType UnitType,
     string? Description
 );
+
+public record InventoryValueDto(decimal TotalBuyingValue, decimal TotalSellingValue);
 
 public record ProductDto(
     int Id,

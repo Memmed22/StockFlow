@@ -49,12 +49,13 @@ public class ReportService(AppDbContext db)
         var fromDate = (from ?? DateTime.UtcNow.Date).Date;
         var toDate = (to ?? DateTime.UtcNow.Date).Date.AddDays(1);
 
-        // Load cash/debit sales with their items, and payment records
+        // Load cash/debit sales with their items, payment records, and expense records
         var sales = await db.Sales
             .Include(s => s.Items).ThenInclude(i => i.Product)
             .Include(s => s.Customer)
             .Where(s => s.CreatedAt >= fromDate && s.CreatedAt < toDate &&
-                (s.Type == SaleType.CashSale || s.Type == SaleType.DebitSale || s.Type == SaleType.Payment))
+                (s.Type == SaleType.CashSale || s.Type == SaleType.DebitSale ||
+                 s.Type == SaleType.Payment  || s.Type == SaleType.Expense))
             .ToListAsync();
 
         // Load stock-level returns
@@ -90,7 +91,6 @@ public class ReportService(AppDbContext db)
                 "Return", null));
         }
 
-        
         // Payment records — stored negative, shown positive
         foreach (var p in sales.Where(s => s.Type == SaleType.Payment))
         {
@@ -100,15 +100,24 @@ public class ReportService(AppDbContext db)
                 amount, "Payment", p.Customer?.Name));
         }
 
+        // Expense records — stored as negative TotalAmount, shown as negative
+        foreach (var e in sales.Where(s => s.Type == SaleType.Expense))
+        {
+            items.Add(new DetailedReportItemDto(
+                e.Note ?? "Expense", null, null, null,
+                e.TotalAmount, "Expense", null));
+        }
+
         var cashSalesTotal  = items.Where(i => i.Type == "CashSale").Sum(i => i.Total);
         var debitSalesTotal = items.Where(i => i.Type == "DebitSale").Sum(i => i.Total);
         var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
         var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
-        var cashTotal       = cashSalesTotal + paymentsTotal + returnsTotal;
+        var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);
+        var cashTotal       = cashSalesTotal + paymentsTotal + returnsTotal + expensesTotal;
 
         return new DetailedReportDto(
             items,
-            new DetailedReportSummaryDto(cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, cashTotal));
+            new DetailedReportSummaryDto(cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal, cashTotal));
     }
 
     public async Task<List<StockReportItemDto>> GetStockReportAsync()
