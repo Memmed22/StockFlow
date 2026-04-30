@@ -34,7 +34,7 @@
     "paymentType": "Ödəniş növü", "cash": "Nağd", "debit": "Borc", "customer": "Müştəri",
     "loadingCustomers": "Müştərilər yüklənir...",
     "checkout": "Ödəniş", "chargeToCustomer": "Müştəriyə yaz",
-    "clearCart": "Səbəti təmizlə", "customerPayment": "Müştəri ödənişi",
+    "clearCart": "Səbəti təmizlə", "customerPayment": "Müştəri ödənişi", "addExpense": "💸 Xərc əlavə et",
     "itemsSaved": "{{count}} məhsul — saxlanıldı",
     "changeBtn": "Dəyiş",
     "payment": {
@@ -42,6 +42,16 @@
       "searchPlaceholder": "Ad və ya telefon...",
       "record": "Ödənişi qeyd et", "recording": "Qeyd edilir...", "done": "Bitdi",
       "selectCustomer": "Müştəri seçin.", "invalidAmount": "Düzgün məbləğ daxil edin."
+    },
+    "expense": {
+      "title": "Kassa Xərci",
+      "amount": "Məbləğ (₾) *",
+      "description": "Açıqlama *",
+      "descPlaceholder": "məs. Təmizlik malları alındı",
+      "confirm": "Xərci qeyd et",
+      "saving": "Saxlanılır...",
+      "invalidAmount": "0-dan böyük düzgün məbləğ daxil edin.",
+      "descRequired": "Açıqlama tələb olunur."
     },
     "opening": {
       "title": "Açılış kassasını daxil edin",
@@ -58,6 +68,9 @@
   },
   "products": {
     "title": "Məhsullar", "subtitle": "Anbar: {{count}} məhsul",
+    "totalBuyingValue": "Alış Dəyəri",
+    "totalSellingValue": "Satış Dəyəri",
+    "potentialProfit": "Potensial Mənfəət",
     "addProduct": "+ Məhsul əlavə et", "editProduct": "Məhsulu redaktə et", "newProduct": "Yeni məhsul",
     "deleteConfirm": "Bu məhsulu silmək istəyirsinizmi?", "noProducts": "Məhsul tapılmadı.",
     "update": "Yenilə", "save": "Yadda saxla", "cancel": "Ləğv et",
@@ -135,11 +148,11 @@
       "date": "Tarix", "transactions": "Əməliyyatlar", "totalRevenue": "Gəlir",
       "cashier": "Kassir", "product": "Məhsul", "barcode": "Barkod", "currentStock": "Cari anbar"
     },
-    "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "cashTotal": "Nağd cəmi" },
+    "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "expenses": "💸 Xərclər", "cashTotal": "Nağd cəmi" },
     "infoRevenue": "Gəlir", "infoTransactions": "Əməliyyatlar",
     "notCash": "nağd deyil",
     "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "reports": "Hesabatlar yüklənmədi." },
-    "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "Payment": "Ödəniş" }
+    "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "Payment": "Ödəniş", "Expense": "Xərc" }
   },
   "users": {
     "title": "İstifadəçi idarəetməsi", "subtitle": "{{count}} istifadəçi",

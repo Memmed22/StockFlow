@@ -7,6 +7,7 @@ const TYPE_CONFIG = {
   DebitSale: { key: 'Debit',   bg: '#FEF3C7', color: '#92400E' },
   Return:    { key: 'Return',  bg: '#FEE2E2', color: '#B91C1C' },
   Payment:   { key: 'Payment', bg: '#DBEAFE', color: '#1D4ED8' },
+  Expense:   { key: 'Expense', bg: '#FFE4E6', color: '#9F1239' },
 };
 
 const TAB_KEYS = ['detailed', 'daily', 'users', 'stock'];
@@ -112,19 +113,21 @@ export default function Reports() {
                   const cfg = TYPE_CONFIG[r.type] ?? { key: r.type, bg: '#F3F4F8', color: '#374151' };
                   const isDebit = r.type === 'DebitSale';
                   const isReturn = r.type === 'Return';
+                  const isExpense = r.type === 'Expense';
+                  const isNegative = isReturn || isExpense;
                   return (
-                    <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : undefined }}>
+                    <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : isExpense ? '#FFF1F2' : undefined }}>
                       <td style={s.td}>
                         <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>{t(`reports.types.${cfg.key}`)}</span>
                       </td>
                       <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>{r.label}</td>
                       <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || '—'}</td>
-                      <td style={{ ...s.td, color: isReturn ? '#DC2626' : '#374151', fontWeight: isReturn ? 700 : 400 }}>
+                      <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
                         {r.quantity != null ? (isReturn ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
                       </td>
                       <td style={s.td}>{r.unitPrice != null ? `${r.unitPrice.toFixed(2)} ₾` : '—'}</td>
                       <td style={{ ...s.td, textAlign: 'right', fontWeight: 700, color: r.total < 0 ? '#DC2626' : isDebit ? '#92400E' : '#059669' }}>
-                        {r.total >= 0 && !isReturn ? '+' : ''}{r.total.toFixed(2)} ₾
+                        {r.total >= 0 && !isNegative ? '+' : ''}{r.total.toFixed(2)} ₾
                         {isDebit && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
                       </td>
                     </tr>
@@ -145,6 +148,7 @@ export default function Reports() {
                 { key: 'debitSales', value: `+${detailed.summary.debitSalesTotal.toFixed(2)} ₾`, color: '#92400E', muted: true },
                 { key: 'payments', value: `+${detailed.summary.paymentsTotal.toFixed(2)} ₾`, color: '#1D4ED8' },
                 { key: 'returns', value: `${detailed.summary.returnsTotal.toFixed(2)} ₾`, color: '#DC2626' },
+                ...(detailed.summary.expensesTotal < 0 ? [{ key: 'expenses', value: `${detailed.summary.expensesTotal.toFixed(2)} ₾`, color: '#9F1239' }] : []),
               ].map(row => (
                 <div key={row.key} style={{ ...s.summaryRow, opacity: row.muted ? 0.7 : 1 }}>
                   <span style={s.summaryLabel}>{t(`reports.summary.${row.key}`)}</span>

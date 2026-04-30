@@ -14,6 +14,11 @@ public class ProductsController(ProductService productService) : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] string? search)
         => Ok(await productService.GetAllAsync(search));
 
+    [HttpGet("inventory-value")]
+    [RequireAdmin]
+    public async Task<IActionResult> GetInventoryValue()
+        => Ok(await productService.GetInventoryValueAsync());
+
     [HttpGet("search")]
     [RequireAdmin]
     public async Task<IActionResult> Search([FromQuery] string query)

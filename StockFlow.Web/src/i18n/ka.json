@@ -34,7 +34,7 @@
     "paymentType": "გადახდის ტიპი", "cash": "ნაღდი", "debit": "კრედიტი", "customer": "კლიენტი",
     "loadingCustomers": "კლიენტები იტვირთება...",
     "checkout": "გადახდა", "chargeToCustomer": "კლიენტზე ჩაწერა",
-    "clearCart": "კალათის გასუფთავება", "customerPayment": "კლიენტის გადახდა",
+    "clearCart": "კალათის გასუფთავება", "customerPayment": "კლიენტის გადახდა", "addExpense": "💸 ხარჯის დამატება",
     "itemsSaved": "{{count}} ნივთი — შენახულია",
     "changeBtn": "შეცვლა",
     "payment": {
@@ -42,6 +42,16 @@
       "searchPlaceholder": "სახელი ან ტელეფონი...",
       "record": "გადახდის ჩაწერა", "recording": "ჩაიწერება...", "done": "დასრულება",
       "selectCustomer": "კლიენტი შეარჩიეთ.", "invalidAmount": "სწორი თანხა შეიყვანეთ."
+    },
+    "expense": {
+      "title": "ნაღდი ხარჯი",
+      "amount": "თანხა (₾) *",
+      "description": "აღწერა *",
+      "descPlaceholder": "მაგ. დასუფთავების საშუალებები",
+      "confirm": "ხარჯის ჩაწერა",
+      "saving": "ინახება...",
+      "invalidAmount": "შეიყვანეთ 0-ზე მეტი თანხა.",
+      "descRequired": "აღწერა სავალდებულოა."
     },
     "opening": {
       "title": "საწყისი სალარო",
@@ -58,6 +68,9 @@
   },
   "products": {
     "title": "პროდუქტები", "subtitle": "{{count}} ნივთი ინვენტარში",
+    "totalBuyingValue": "შეძენის ღირებულება",
+    "totalSellingValue": "გაყიდვის ღირებულება",
+    "potentialProfit": "პოტენციური მოგება",
     "addProduct": "+ პროდუქტის დამატება", "editProduct": "პროდუქტის რედაქტირება", "newProduct": "ახალი პროდუქტი",
     "deleteConfirm": "გსურთ პროდუქტის წაშლა?", "noProducts": "პროდუქტი ვერ მოიძებნა.",
     "update": "განახლება", "save": "შენახვა", "cancel": "გაუქმება",
@@ -135,11 +148,11 @@
       "date": "თარიღი", "transactions": "ტრანზაქციები", "totalRevenue": "შემოსავალი",
       "cashier": "მოლარე", "product": "პროდუქტი", "barcode": "შტრიხკოდი", "currentStock": "მიმდინარე მარაგი"
     },
-    "summary": { "title": "შეჯამება", "cashSales": "ნაღდი გაყიდვები", "debitSales": "კრედიტი (არ ნაღდი)", "payments": "მიღებული გადახდები", "returns": "დაბრუნებები", "cashTotal": "ნაღდი სულ" },
+    "summary": { "title": "შეჯამება", "cashSales": "ნაღდი გაყიდვები", "debitSales": "კრედიტი (არ ნაღდი)", "payments": "მიღებული გადახდები", "returns": "დაბრუნებები", "expenses": "💸 ხარჯები", "cashTotal": "ნაღდი სულ" },
     "infoRevenue": "შემოსავალი", "infoTransactions": "ტრანზაქციები",
     "notCash": "არ ნაღდი",
     "noData": { "transactions": "ამ პერიოდში ტრანზაქცია არ არის.", "sales": "ამ პერიოდში გაყიდვა არ არის.", "users": "ამ პერიოდში მონაცემი არ არის.", "products": "პროდუქტი ვერ მოიძებნა.", "reports": "ანგარიშების ჩატვირთვა ვერ მოხერხდა." },
-    "types": { "Cash": "ნაღდი", "Debit": "კრედიტი", "Return": "დაბრუნება", "Payment": "გადახდა" }
+    "types": { "Cash": "ნაღდი", "Debit": "კრედიტი", "Return": "დაბრუნება", "Payment": "გადახდა", "Expense": "ხარჯი" }
   },
   "users": {
     "title": "მომხმარებლების მართვა", "subtitle": "{{count}} მომხმარებელი",

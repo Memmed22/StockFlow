@@ -43,8 +43,35 @@ public class ProductService(AppDbContext db)
         return MapToDto(p, await GetStockQuantity(p.Id));
     }
 
+    public async Task<InventoryValueDto> GetInventoryValueAsync()
+    {
+        var products = await db.Products
+            .Select(p => new { p.Id, p.BuyingPrice, p.SellingPrice })
+            .ToListAsync();
+
+        var movements = await db.StockMovements
+            .Select(m => new { m.ProductId, m.Type, m.Quantity })
+            .ToListAsync();
+
+        var stockByProduct = movements
+            .GroupBy(m => m.ProductId)
+            .ToDictionary(g => g.Key, g => g.Sum(m => m.Type == MovementType.Sale ? -m.Quantity : m.Quantity));
+
+        decimal totalBuying = 0, totalSelling = 0;
+        foreach (var p in products)
+        {
+            var stock = stockByProduct.TryGetValue(p.Id, out var s) ? s : 0;
+            if (stock <= 0) continue;
+            totalBuying += stock * (p.BuyingPrice ?? 0);
+            totalSelling += stock * p.SellingPrice;
+        }
+
+        return new InventoryValueDto(totalBuying, totalSelling);
+    }
+
     public async Task<(ProductDto? product, string? error)> CreateAsync(CreateProductDto dto)
     {
+        if (dto.BuyingPrice <= 0) return (null, "Buying price is required and must be greater than 0.");
         if (await db.Products.AnyAsync(p => p.Barcode == dto.Barcode))
             return (null, "Barcode already exists.");
 
@@ -65,6 +92,7 @@ public class ProductService(AppDbContext db)
 
     public async Task<(ProductDto? product, string? error)> UpdateAsync(int id, UpdateProductDto dto)
     {
+        if (dto.BuyingPrice <= 0) return (null, "Buying price is required and must be greater than 0.");
         var product = await db.Products.FindAsync(id);
         if (product == null) return (null, "Product not found.");
 

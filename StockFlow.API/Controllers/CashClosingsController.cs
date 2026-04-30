@@ -12,6 +12,14 @@ public class CashClosingsController(CashClosingService cashClosingService) : Con
     public async Task<IActionResult> OpeningStatus()
         => Ok(await cashClosingService.GetOpeningStatusAsync());
 
+    [HttpPost("expense")]
+    public async Task<IActionResult> CreateExpense([FromBody] CreateExpenseDto dto)
+    {
+        var (ok, error) = await cashClosingService.CreateExpenseAsync(dto);
+        if (!ok) return BadRequest(new { error });
+        return Ok();
+    }
+
     [HttpPost("opening")]
     public async Task<IActionResult> CreateOpening([FromBody] CreateOpeningCashDto dto)
     {

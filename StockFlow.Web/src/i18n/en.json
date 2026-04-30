@@ -36,7 +36,7 @@
     "paymentType": "Payment Type", "cash": "Cash", "debit": "Debit", "customer": "Customer",
     "loadingCustomers": "Loading customers...",
     "checkout": "Checkout", "chargeToCustomer": "Charge to Customer",
-    "clearCart": "Clear Cart", "customerPayment": "Customer Payment",
+    "clearCart": "Clear Cart", "customerPayment": "Customer Payment", "addExpense": "💸 Add Expense",
     "itemsSaved": "{{count}} item(s) — cart saved",
     "changeBtn": "Change",
     "payment": {
@@ -44,6 +44,16 @@
       "searchPlaceholder": "Search by name or phone...",
       "record": "Record Payment", "recording": "Recording...", "done": "Done",
       "selectCustomer": "Select a customer.", "invalidAmount": "Enter a valid amount."
+    },
+    "expense": {
+      "title": "Add Cash Expense",
+      "amount": "Amount (₾) *",
+      "description": "Description *",
+      "descPlaceholder": "e.g. Bought cleaning supplies",
+      "confirm": "Record Expense",
+      "saving": "Saving...",
+      "invalidAmount": "Enter a valid amount greater than 0.",
+      "descRequired": "Description is required."
     },
     "opening": {
       "title": "Enter Opening Cash",
@@ -61,6 +71,9 @@
   "products": {
     "title": "Products",
     "subtitle": "{{count}} item(s) in inventory",
+    "totalBuyingValue": "Total Buying Value",
+    "totalSellingValue": "Total Selling Value",
+    "potentialProfit": "Potential Profit",
     "addProduct": "+ Add Product", "editProduct": "Edit Product", "newProduct": "New Product",
     "deleteConfirm": "Delete this product?", "noProducts": "No products found.",
     "update": "Update", "save": "Save", "cancel": "Cancel",
@@ -140,11 +153,11 @@
       "date": "Date", "transactions": "Transactions", "totalRevenue": "Total Revenue",
       "cashier": "Cashier", "product": "Product", "barcode": "Barcode", "currentStock": "Current Stock"
     },
-    "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "cashTotal": "Cash Total" },
+    "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "expenses": "💸 Expenses", "cashTotal": "Cash Total" },
     "infoRevenue": "Total Revenue", "infoTransactions": "Transactions",
     "notCash": "not cash",
     "noData": { "transactions": "No transactions in this period.", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "reports": "Failed to load reports." },
-    "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "Payment": "Payment" }
+    "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "Payment": "Payment", "Expense": "Expense" }
   },
   "users": {
     "title": "User Management", "subtitle": "{{count}} user(s)",

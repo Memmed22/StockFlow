@@ -43,6 +43,13 @@ export default function POS() {
   const [pmSuccess, setPmSuccess] = useState('');
   const [pmLoading, setPmLoading] = useState(false);
 
+  const [expenseModal, setExpenseModal] = useState(false);
+  const [expenseAmount, setExpenseAmount] = useState('');
+  const [expenseDesc, setExpenseDesc] = useState('');
+  const [expenseError, setExpenseError] = useState('');
+  const [expenseSuccess, setExpenseSuccess] = useState('');
+  const [expenseLoading, setExpenseLoading] = useState(false);
+
   useEffect(() => {
     cashClosingApi.openingStatus()
       .then(r => { if (!r.data.hasOpeningCash) setOpeningModal(true); })
@@ -188,6 +195,27 @@ export default function POS() {
       searchRef.current?.focus();
     } catch (err) {
       setError(err.response?.data?.error || t('common.error'));
+    }
+  };
+
+  const openExpenseModal = () => {
+    setExpenseModal(true);
+    setExpenseAmount(''); setExpenseDesc(''); setExpenseError(''); setExpenseSuccess('');
+  };
+
+  const handleExpenseSubmit = async (e) => {
+    e.preventDefault();
+    const amount = parseFloat(expenseAmount);
+    if (!amount || amount <= 0) { setExpenseError(t('pos.expense.invalidAmount')); return; }
+    if (!expenseDesc.trim()) { setExpenseError(t('pos.expense.descRequired')); return; }
+    setExpenseError(''); setExpenseLoading(true);
+    try {
+      await cashClosingApi.createExpense({ userId: user.id, amount, description: expenseDesc.trim() });
+      setExpenseSuccess(`-${amount.toFixed(2)} ₾ — ${expenseDesc.trim()}`);
+    } catch (err) {
+      setExpenseError(err.response?.data?.error || t('common.error'));
+    } finally {
+      setExpenseLoading(false);
     }
   };
 
@@ -391,6 +419,7 @@ export default function POS() {
         </button>
         <button style={styles.clearBtn} onClick={clearCart}>{t('pos.clearCart')}</button>
         <button style={styles.payModalBtn} onClick={openPayModal}>{t('pos.customerPayment')}</button>
+        <button style={styles.expenseBtn} onClick={openExpenseModal}>{t('pos.addExpense')}</button>
         {cart.length > 0 && (
           <p style={styles.cartHint}>{t('pos.itemsSaved', { count: cart.length })}</p>
         )}
@@ -439,6 +468,55 @@ export default function POS() {
                 {openingLoading ? t('pos.opening.saving') : t('pos.opening.startShift')}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {expenseModal && (
+        <div style={styles.overlay} onClick={e => e.target === e.currentTarget && setExpenseModal(false)}>
+          <div style={styles.modal}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>{t('pos.expense.title')}</h3>
+              <button style={styles.modalClose} onClick={() => setExpenseModal(false)}>✕</button>
+            </div>
+
+            {expenseSuccess ? (
+              <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                <p style={{ color: '#dc2626', fontWeight: 600, fontSize: 15, marginBottom: 16 }}>{expenseSuccess}</p>
+                <button style={{ ...styles.checkoutBtn, background: '#374151' }} onClick={() => setExpenseModal(false)}>{t('pos.payment.done')}</button>
+              </div>
+            ) : (
+              <form onSubmit={handleExpenseSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div>
+                  <label style={styles.modalLabel}>{t('pos.expense.amount')}</label>
+                  <input
+                    style={styles.modalInput}
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="e.g. 20.00"
+                    value={expenseAmount}
+                    onChange={e => setExpenseAmount(e.target.value)}
+                    autoFocus
+                    required
+                  />
+                </div>
+                <div>
+                  <label style={styles.modalLabel}>{t('pos.expense.description')}</label>
+                  <input
+                    style={styles.modalInput}
+                    placeholder={t('pos.expense.descPlaceholder')}
+                    value={expenseDesc}
+                    onChange={e => setExpenseDesc(e.target.value)}
+                    required
+                  />
+                </div>
+                {expenseError && <p style={{ color: '#dc2626', margin: 0, fontSize: 13 }}>{expenseError}</p>}
+                <button style={{ ...styles.checkoutBtn, background: '#dc2626', marginBottom: 0 }} type="submit" disabled={expenseLoading}>
+                  {expenseLoading ? t('pos.expense.saving') : t('pos.expense.confirm')}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -569,6 +647,7 @@ const styles = {
   clearBtn: { width: '100%', padding: 9, background: '#F3F4F8', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 8, cursor: 'pointer', fontWeight: 500, fontSize: 14 },
   cartHint: { textAlign: 'center', fontSize: 12, color: '#9CA3AF', margin: '8px 0 0' },
   payModalBtn: { width: '100%', padding: 9, background: '#EEF2FF', color: '#4F46E5', border: '1px solid #C7D2FE', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14, marginTop: 6 },
+  expenseBtn: { width: '100%', padding: 9, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14, marginTop: 6 },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   modal: { background: '#fff', borderRadius: 14, padding: 28, width: 430, maxWidth: '95vw', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
