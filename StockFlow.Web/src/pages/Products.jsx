@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { productsApi } from '../api/client';
+import { productsApi, stockApi } from '../api/client';
 import { useTranslation } from 'react-i18next';
 
 export default function Products() {
@@ -18,6 +18,13 @@ export default function Products() {
   const [editId, setEditId] = useState(null);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
+
+  const [correctModal, setCorrectModal] = useState(false);
+  const [correctProduct, setCorrectProduct] = useState(null);
+  const [correctQty, setCorrectQty] = useState('');
+  const [correctNote, setCorrectNote] = useState('');
+  const [correctError, setCorrectError] = useState('');
+  const [correctLoading, setCorrectLoading] = useState(false);
 
   const load = async () => {
     const { data } = await productsApi.getAll(search || undefined);
@@ -47,6 +54,31 @@ export default function Products() {
   };
 
   const handleCancel = () => { setForm(emptyForm); setEditId(null); setShowForm(false); setError(''); };
+
+  const handleOpenCorrect = (p) => {
+    setCorrectProduct(p);
+    setCorrectQty(String(p.stockQuantity));
+    setCorrectNote('');
+    setCorrectError('');
+    setCorrectModal(true);
+  };
+
+  const handleCorrectSubmit = async (e) => {
+    e.preventDefault();
+    setCorrectError('');
+    const qty = parseFloat(correctQty);
+    if (isNaN(qty) || qty < 0) { setCorrectError(t('products.correctStock.errors.invalidQty')); return; }
+    setCorrectLoading(true);
+    try {
+      await stockApi.adjustStock({ productId: correctProduct.id, correctQuantity: qty, note: correctNote || null });
+      setCorrectModal(false);
+      load();
+    } catch (err) {
+      setCorrectError(err.response?.data?.error || t('products.correctStock.errors.failed'));
+    } finally {
+      setCorrectLoading(false);
+    }
+  };
   const unitLabel = (unitType) => UNIT_TYPES.find(u => u.value === unitType)?.label ?? UNIT_TYPES[0].label;
 
   return (
@@ -137,6 +169,7 @@ export default function Products() {
                 <td style={s.td}>
                   <button style={s.editBtn} onClick={() => handleEdit(p)}>{t('common.edit')}</button>
                   <button style={s.delBtn} onClick={() => handleDelete(p.id)}>{t('common.delete')}</button>
+                  <button style={s.correctBtn} onClick={() => handleOpenCorrect(p)}>{t('products.correctStock.button')}</button>
                 </td>
               </tr>
             ))}
@@ -144,6 +177,66 @@ export default function Products() {
           </tbody>
         </table>
       </div>
+
+      {correctModal && correctProduct && (
+        <div style={s.overlay} onClick={e => e.target === e.currentTarget && setCorrectModal(false)}>
+          <div style={s.modal}>
+            <div style={s.modalHeader}>
+              <h3 style={s.modalTitle}>{t('products.correctStock.title')}</h3>
+              <button style={s.modalClose} onClick={() => setCorrectModal(false)}>✕</button>
+            </div>
+            <p style={s.modalSub}>{t('products.correctStock.subtitle')}</p>
+
+            <div style={s.infoRow}>
+              <div style={s.infoItem}>
+                <span style={s.infoLabel}>{t('common.name')}</span>
+                <span style={s.infoValue}>{correctProduct.name}</span>
+              </div>
+              <div style={s.infoItem}>
+                <span style={s.infoLabel}>{t('products.correctStock.currentStock')}</span>
+                <span style={{ ...s.infoValue, color: correctProduct.stockQuantity <= 0 ? '#DC2626' : '#059669', fontWeight: 700 }}>
+                  {correctProduct.stockQuantity} {unitLabel(correctProduct.unitType)}
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={handleCorrectSubmit} style={{ marginTop: 20 }}>
+              <div style={s.modalField}>
+                <label style={s.modalLabel}>{t('products.correctStock.correctQty')}</label>
+                <input
+                  style={s.modalInput}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  required
+                  autoFocus
+                  placeholder={t('products.correctStock.correctQtyPlaceholder')}
+                  value={correctQty}
+                  onChange={e => setCorrectQty(e.target.value)}
+                />
+              </div>
+              <div style={s.modalField}>
+                <label style={s.modalLabel}>{t('products.correctStock.reason')}</label>
+                <input
+                  style={s.modalInput}
+                  placeholder={t('products.correctStock.reasonPlaceholder')}
+                  value={correctNote}
+                  onChange={e => setCorrectNote(e.target.value)}
+                />
+              </div>
+              {correctError && <div style={{ ...s.errorBox, marginBottom: 12 }}>{correctError}</div>}
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <button style={s.successBtn} type="submit" disabled={correctLoading}>
+                  {correctLoading ? t('products.correctStock.submitting') : t('products.correctStock.submit')}
+                </button>
+                <button style={s.ghostBtn} type="button" onClick={() => setCorrectModal(false)}>
+                  {t('products.cancel')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -173,5 +266,19 @@ const s = {
   stockBadge: { display: 'inline-block', padding: '2px 10px', borderRadius: 20, fontSize: 13, fontWeight: 700 },
   empty: { padding: '32px 16px', textAlign: 'center', color: '#9CA3AF', fontSize: 14 },
   editBtn: { background: '#FEF3C7', color: '#92400E', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', marginRight: 6, fontSize: 13, fontWeight: 600 },
-  delBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  delBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', marginRight: 6, fontSize: 13, fontWeight: 600 },
+  correctBtn: { background: '#EDE9FE', color: '#5B21B6', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modal: { background: '#fff', borderRadius: 14, padding: 28, width: 440, maxWidth: '95vw', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' },
+  modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  modalTitle: { margin: 0, fontSize: 17, fontWeight: 700, color: '#111827' },
+  modalClose: { background: '#F3F4F8', border: 'none', borderRadius: 6, width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#6B7280' },
+  modalSub: { margin: '0 0 16px', fontSize: 13, color: '#6B7280' },
+  infoRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, padding: '12px 16px' },
+  infoItem: { display: 'flex', flexDirection: 'column', gap: 3 },
+  infoLabel: { fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  infoValue: { fontSize: 14, fontWeight: 600, color: '#111827' },
+  modalField: { display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 14 },
+  modalLabel: { fontSize: 13, fontWeight: 600, color: '#374151' },
+  modalInput: { padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, background: '#F9FAFB', boxSizing: 'border-box', width: '100%', color: '#111827' },
 };

@@ -18,6 +18,14 @@ public class StockController(StockService stockService) : ControllerBase
         return Ok(movement);
     }
 
+    [HttpPost("adjust")]
+    public async Task<IActionResult> AdjustStock([FromBody] StockAdjustmentDto dto)
+    {
+        var (movement, error) = await stockService.AdjustStockAsync(dto);
+        if (error != null) return BadRequest(new { error });
+        return Ok(movement);
+    }
+
     [HttpGet("movements")]
     public async Task<IActionResult> GetMovements(
         [FromQuery] string? query,

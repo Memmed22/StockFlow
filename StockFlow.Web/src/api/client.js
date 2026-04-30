@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: 'http://localhost:5000/api' });
+const api = axios.create({ baseURL: '/api' });
 
 api.interceptors.request.use(config => {
   const user = JSON.parse(localStorage.getItem('stockflow_user') || 'null');
@@ -23,6 +23,7 @@ export const productsApi = {
 
 export const stockApi = {
   stockIn: (data) => api.post('/stock/in', data),
+  adjustStock: (data) => api.post('/stock/adjust', data),
   getMovements: ({ query, page = 1, pageSize = 20 } = {}) =>
     api.get('/stock/movements', { params: { query: query || undefined, page, pageSize } }),
 };

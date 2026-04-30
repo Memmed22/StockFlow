@@ -92,7 +92,7 @@ export default function POS() {
   );
 
   const subtotal = cart.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0);
-  const total = Math.max(0, subtotal - cartDiscount);
+  const total = Math.max(0, subtotal * (1 - cartDiscount / 100));
 
   const handleProductSelected = (product) => {
     setError('');
@@ -151,8 +151,8 @@ export default function POS() {
   const updateItemDiscount = (productId, discount) => {
     setCart(prev => prev.map(i => {
       if (i.productId !== productId) return i;
-      const d = parseFloat(discount) || 0;
-      return { ...i, discount: d, finalPrice: Math.max(0, i.basePrice - d) };
+      const d = Math.min(100, Math.max(0, parseFloat(discount) || 0));
+      return { ...i, discount: d, finalPrice: Math.max(0, i.basePrice * (1 - d / 100)) };
     }));
   };
 
@@ -170,12 +170,12 @@ export default function POS() {
     try {
       const payload = {
         userId: user.id,
-        discountAmount: cartDiscount,
+        discountAmount: subtotal * cartDiscount / 100,
         items: cart.map(i => ({
           productId: i.productId,
           quantity: i.quantity,
           finalPrice: i.finalPrice,
-          discountAmount: i.discount,
+          discountAmount: i.basePrice * i.discount / 100,
         })),
         type: saleType === 'debit' ? 1 : 0,
         customerId: saleType === 'debit' ? selectedCustomer?.id : null,
@@ -234,7 +234,7 @@ export default function POS() {
                 <th style={styles.th}>{t('pos.col.product')}</th>
                 <th style={styles.th}>{t('pos.col.stock')}</th>
                 <th style={styles.th}>{t('pos.col.basePrice')}</th>
-                <th style={styles.th}>{t('pos.col.discount')}</th>
+                <th style={styles.th}>{t('pos.col.discount')} (%)</th>
                 <th style={styles.th}>{t('pos.col.finalPrice')}</th>
                 <th style={styles.th}>{t('pos.col.qty')}</th>
                 <th style={styles.th}>{t('pos.col.lineTotal')}</th>
@@ -257,12 +257,15 @@ export default function POS() {
                     </td>
                     <td style={styles.td}>{item.basePrice.toFixed(2)} ₾</td>
                     <td style={styles.td}>
-                      <input type="number" step="0.01" min="0" style={styles.smallInput}
-                        value={item.discount}
-                        onChange={e => updateItemDiscount(item.productId, e.target.value)} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                        <input type="number" step="1" min="0" max="100" style={styles.smallInput}
+                          value={item.discount}
+                          onChange={e => updateItemDiscount(item.productId, e.target.value)} />
+                        <span style={{ fontSize: 12, color: '#64748b' }}>%</span>
+                      </div>
                     </td>
                     <td style={styles.td}>
-                      <input type="number" step="0.01" min="0" style={styles.smallInput}
+                      <input type="number" step="0.5" min="0" style={styles.smallInput}
                         value={item.finalPrice}
                         onChange={e => updatePrice(item.productId, e.target.value)} />
                     </td>
@@ -303,9 +306,12 @@ export default function POS() {
         </div>
         <div style={styles.summaryRow}>
           <span>{t('pos.summary.cartDiscount')}</span>
-          <input type="number" step="0.01" min="0" style={{ ...styles.smallInput, width: 80 }}
-            value={cartDiscount}
-            onChange={e => setCartDiscount(parseFloat(e.target.value) || 0)} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <input type="number" step="1" min="0" max="100" style={{ ...styles.smallInput, width: 70 }}
+              value={cartDiscount}
+              onChange={e => setCartDiscount(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))} />
+            <span style={{ fontSize: 13, color: '#64748b' }}>%</span>
+          </div>
         </div>
         <div style={styles.totalRow}>
           <span>{t('pos.summary.total')}</span>

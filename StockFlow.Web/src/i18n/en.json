@@ -71,7 +71,23 @@
       "unitType": "Unit Type", "description": "Description", "optional": "Optional"
     },
     "col": { "name": "Name", "barcode": "Barcode", "unit": "Unit", "sellPrice": "Sell Price", "buyPrice": "Buy Price", "stock": "Stock", "actions": "Actions" },
-    "units": ["Quantity (pcs)", "Meter (m)", "Square Meter (m²)", "Liter (L)"]
+    "units": ["Quantity (pcs)", "Meter (m)", "Square Meter (m²)", "Liter (L)"],
+    "correctStock": {
+      "button": "Correct Stock",
+      "title": "Correct Stock",
+      "subtitle": "Set the actual quantity for this product",
+      "currentStock": "Current Stock",
+      "correctQty": "Correct Quantity *",
+      "correctQtyPlaceholder": "Enter actual quantity",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. Wrong input, recount…",
+      "submit": "Apply Correction",
+      "submitting": "Saving…",
+      "errors": {
+        "invalidQty": "Enter a valid quantity (0 or more).",
+        "failed": "Error saving correction."
+      }
+    }
   },
   "stock": {
     "title": "Stock In", "subtitle": "Record incoming inventory for a product",

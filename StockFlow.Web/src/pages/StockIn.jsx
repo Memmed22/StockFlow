@@ -8,9 +8,10 @@ const UNIT_IS_DECIMAL = { 0: false, 1: true, 2: true, 3: true };
 const PAGE_SIZE = 20;
 
 const TYPE_STYLE = {
-  StockIn: { bg: '#D1FAE5', color: '#065F46' },
-  Sale:    { bg: '#FEE2E2', color: '#B91C1C' },
-  Return:  { bg: '#FEF3C7', color: '#92400E' },
+  StockIn:    { bg: '#D1FAE5', color: '#065F46' },
+  Sale:       { bg: '#FEE2E2', color: '#B91C1C' },
+  Return:     { bg: '#FEF3C7', color: '#92400E' },
+  Adjustment: { bg: '#EDE9FE', color: '#5B21B6' },
 };
 
 export default function StockIn() {
@@ -20,6 +21,7 @@ export default function StockIn() {
   const [note, setNote] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [searchKey, setSearchKey] = useState(0);
 
   const [movements, setMovements] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -29,6 +31,12 @@ export default function StockIn() {
 
   const debounceRef = useRef(null);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(''), 3000);
+    return () => clearTimeout(timer);
+  }, [message]);
 
   useEffect(() => {
     loadMovements(search, page);
@@ -81,6 +89,7 @@ export default function StockIn() {
       setSelectedProduct(null);
       setQuantity('');
       setNote('');
+      setSearchKey(k => k + 1);
       setPage(1);
       loadMovements(search, 1);
     } catch (err) {
@@ -103,7 +112,7 @@ export default function StockIn() {
         <form onSubmit={handleSubmit} style={s.form}>
           <div style={s.field}>
             <label style={s.label}>{t('stock.product')}</label>
-            <ProductSearch onSelect={handleProductSelect} placeholder={t('stock.searchPlaceholder')} />
+            <ProductSearch key={searchKey} onSelect={handleProductSelect} placeholder={t('stock.searchPlaceholder')} />
             {selectedProduct && (
               <div style={s.selectedBadge}>
                 <span>✓</span>

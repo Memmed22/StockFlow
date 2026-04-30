@@ -4,7 +4,8 @@ public enum MovementType
 {
     StockIn,
     Sale,
-    Return
+    Return,
+    Adjustment
 }
 
 public class StockMovement
