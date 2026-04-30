@@ -44,8 +44,11 @@ app.UseExceptionHandler(err => err.Run(async ctx => {
     await ctx.Response.WriteAsJsonAsync(new { error = ex?.Error.Message ?? "Internal server error" });
 }));
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseCors();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 app.Run("http://localhost:5000");
 
 static void SeedData(AppDbContext db)

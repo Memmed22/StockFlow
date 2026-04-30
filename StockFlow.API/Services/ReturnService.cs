@@ -5,7 +5,7 @@ using StockFlow.API.Models;
 namespace StockFlow.API.Services;
 
 public class ReturnService(AppDbContext db)
-{
+{   
     public async Task<(StockMovementDto? movement, string? error)> ProcessReturnAsync(ReturnDto dto)
     {
         var product = await db.Products.FindAsync(dto.ProductId);
