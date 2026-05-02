@@ -140,19 +140,21 @@
   },
   "reports": {
     "title": "ანგარიშები", "subtitle": "გაყიდვები, ინვენტარი და მოლარის შედეგები",
-    "tabs": { "detailed": "დეტალური", "daily": "ყოველდღიური", "users": "მოლარეების მიხედვით", "stock": "მარაგის ანგარიში" },
+    "tabs": { "detailed": "დეტალური", "daily": "ყოველდღიური", "users": "მოლარეების მიხედვით", "stock": "მარაგის ანგარიში", "closings": "სალაროს დახურვები" },
     "apply": "გამოყენება", "refresh": "განახლება", "loading": "იტვირთება…",
     "col": {
       "type": "ტიპი", "productDesc": "პროდუქტი / აღწერა", "customer": "კლიენტი",
       "qty": "რ-ბა", "unitPrice": "ერთ. ფასი", "total": "სულ",
       "date": "თარიღი", "transactions": "ტრანზაქციები", "totalRevenue": "შემოსავალი",
-      "cashier": "მოლარე", "product": "პროდუქტი", "barcode": "შტრიხკოდი", "currentStock": "მიმდინარე მარაგი"
+      "cashier": "მოლარე", "product": "პროდუქტი", "barcode": "შტრიხკოდი", "currentStock": "მიმდინარე მარაგი",
+      "closingDate": "დახურვის თარიღი", "period": "პერიოდი"
     },
     "summary": { "title": "შეჯამება", "cashSales": "ნაღდი გაყიდვები", "debitSales": "კრედიტი (არ ნაღდი)", "payments": "მიღებული გადახდები", "returns": "დაბრუნებები", "expenses": "💸 ხარჯები", "cashTotal": "ნაღდი სულ" },
     "infoRevenue": "შემოსავალი", "infoTransactions": "ტრანზაქციები",
     "notCash": "არ ნაღდი",
     "noData": { "transactions": "ამ პერიოდში ტრანზაქცია არ არის.", "sales": "ამ პერიოდში გაყიდვა არ არის.", "users": "ამ პერიოდში მონაცემი არ არის.", "products": "პროდუქტი ვერ მოიძებნა.", "reports": "ანგარიშების ჩატვირთვა ვერ მოხერხდა." },
-    "types": { "Cash": "ნაღდი", "Debit": "კრედიტი", "Return": "დაბრუნება", "Payment": "გადახდა", "Expense": "ხარჯი" }
+    "types": { "Cash": "ნაღდი", "Debit": "კრედიტი", "Return": "დაბრუნება", "Payment": "გადახდა", "Expense": "ხარჯი", "OpeningCash": "გახსნა" },
+    "closingDetail": { "title": "სალაროს დახურვა", "cashier": "მოლარე", "period": "პერიოდი", "breakdown": "ფინანსური ანალიზი", "totals": "ჯამები", "transactions": "ტრანზაქციები" }
   },
   "users": {
     "title": "მომხმარებლების მართვა", "subtitle": "{{count}} მომხმარებელი",

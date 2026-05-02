@@ -140,19 +140,21 @@
   },
   "reports": {
     "title": "Hesabatlar", "subtitle": "Satış, anbar və kassir nəticələri",
-    "tabs": { "detailed": "Ətraflı satış", "daily": "Gündəlik", "users": "Kassir üzrə", "stock": "Anbar hesabatı" },
+    "tabs": { "detailed": "Ətraflı satış", "daily": "Gündəlik", "users": "Kassir üzrə", "stock": "Anbar hesabatı", "closings": "Kassa Bağlanmaları" },
     "apply": "Tətbiq et", "refresh": "Yenilə", "loading": "Yüklənir…",
     "col": {
       "type": "Növ", "productDesc": "Məhsul / Təsvir", "customer": "Müştəri",
       "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi",
       "date": "Tarix", "transactions": "Əməliyyatlar", "totalRevenue": "Gəlir",
-      "cashier": "Kassir", "product": "Məhsul", "barcode": "Barkod", "currentStock": "Cari anbar"
+      "cashier": "Kassir", "product": "Məhsul", "barcode": "Barkod", "currentStock": "Cari anbar",
+      "closingDate": "Bağlanma tarixi", "period": "Dövr"
     },
     "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "expenses": "💸 Xərclər", "cashTotal": "Nağd cəmi" },
     "infoRevenue": "Gəlir", "infoTransactions": "Əməliyyatlar",
     "notCash": "nağd deyil",
     "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "reports": "Hesabatlar yüklənmədi." },
-    "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "Payment": "Ödəniş", "Expense": "Xərc" }
+    "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "Payment": "Ödəniş", "Expense": "Xərc", "OpeningCash": "Açılış" },
+    "closingDetail": { "title": "Kassa Bağlanması", "cashier": "Kassir", "period": "Dövr", "breakdown": "Maliyyə Xülasəsi", "totals": "Cəmlər", "transactions": "Əməliyyatlar" }
   },
   "users": {
     "title": "İstifadəçi idarəetməsi", "subtitle": "{{count}} istifadəçi",
