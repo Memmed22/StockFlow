@@ -24,4 +24,15 @@ public class ReportsController(ReportService reportService) : ControllerBase
     [HttpGet("detailed")]
     public async Task<IActionResult> DetailedReport([FromQuery] DateTime? from, [FromQuery] DateTime? to)
         => Ok(await reportService.GetDetailedReportAsync(from, to));
+
+    [HttpGet("closings")]
+    public async Task<IActionResult> GetClosings()
+        => Ok(await reportService.GetClosingsListAsync());
+
+    [HttpGet("closings/{id:int}")]
+    public async Task<IActionResult> GetClosingDetail(int id)
+    {
+        var result = await reportService.GetClosingDetailAsync(id);
+        return result == null ? NotFound() : Ok(result);
+    }
 }

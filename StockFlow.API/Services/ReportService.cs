@@ -120,6 +120,77 @@ public class ReportService(AppDbContext db)
             new DetailedReportSummaryDto(cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal, cashTotal));
     }
 
+    public async Task<List<CashClosingDto>> GetClosingsListAsync()
+    {
+        return await db.CashClosings
+            .Include(c => c.User)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new CashClosingDto(
+                c.Id, c.User.Username, c.FromDate, c.ToDate,
+                c.ExpectedCash, c.CountedCash, c.Difference, c.Note, c.CreatedAt))
+            .ToListAsync();
+    }
+
+    public async Task<ClosingDetailDto?> GetClosingDetailAsync(int id)
+    {
+        var closing = await db.CashClosings
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.Id == id);
+        if (closing == null) return null;
+
+        var from = closing.FromDate;
+        var to = closing.ToDate;
+
+        var sales = await db.Sales
+            .Include(s => s.Items).ThenInclude(i => i.Product)
+            .Include(s => s.Customer)
+            .Where(s => s.CreatedAt > from && s.CreatedAt <= to)
+            .ToListAsync();
+
+        var returns = await db.StockMovements
+            .Include(m => m.Product)
+            .Where(m => m.Type == MovementType.Return && m.CreatedAt > from && m.CreatedAt <= to)
+            .ToListAsync();
+
+        var items = new List<DetailedReportItemDto>();
+
+        foreach (var o in sales.Where(s => s.Type == SaleType.OpeningCash))
+            items.Add(new DetailedReportItemDto("Opening Cash", null, null, null, o.TotalAmount, "OpeningCash", null));
+
+        foreach (var sale in sales.Where(s => s.Type == SaleType.CashSale || s.Type == SaleType.DebitSale))
+        {
+            var type = sale.Type == SaleType.CashSale ? "CashSale" : "DebitSale";
+            foreach (var si in sale.Items)
+                items.Add(new DetailedReportItemDto(si.Product.Name, si.Product.Barcode, si.Quantity, si.FinalPrice, si.Quantity * si.FinalPrice, type, sale.Customer?.Name));
+        }
+
+        foreach (var r in returns)
+        {
+            var unitPrice = r.ReturnPrice ?? 0m;
+            items.Add(new DetailedReportItemDto(r.Product.Name, r.Product.Barcode, -r.Quantity, unitPrice, -(r.Quantity * unitPrice), "Return", null));
+        }
+
+        foreach (var p in sales.Where(s => s.Type == SaleType.Payment))
+            items.Add(new DetailedReportItemDto("Payment received", null, null, null, Math.Abs(p.TotalAmount), "Payment", p.Customer?.Name));
+
+        foreach (var e in sales.Where(s => s.Type == SaleType.Expense))
+            items.Add(new DetailedReportItemDto(e.Note ?? "Expense", null, null, null, e.TotalAmount, "Expense", null));
+
+        var openingCash    = sales.Where(s => s.Type == SaleType.OpeningCash).Sum(s => s.TotalAmount);
+        var cashSalesTotal  = items.Where(i => i.Type == "CashSale").Sum(i => i.Total);
+        var debitSalesTotal = items.Where(i => i.Type == "DebitSale").Sum(i => i.Total);
+        var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
+        var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
+        var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);
+
+        return new ClosingDetailDto(
+            closing.Id, closing.User.Username,
+            closing.FromDate, closing.ToDate, closing.CreatedAt, closing.Note,
+            openingCash, cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal,
+            closing.ExpectedCash, closing.CountedCash, closing.Difference,
+            items);
+    }
+
     public async Task<List<StockReportItemDto>> GetStockReportAsync()
     {
         var products = await db.Products.ToListAsync();

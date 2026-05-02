@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { reportsApi } from '../api/client';
 import { useTranslation } from 'react-i18next';
 
@@ -10,21 +11,35 @@ const TYPE_CONFIG = {
   Expense:   { key: 'Expense', bg: '#FFE4E6', color: '#9F1239' },
 };
 
-const TAB_KEYS = ['detailed', 'daily', 'users', 'stock'];
+const TAB_KEYS = ['closings', 'detailed', 'daily', 'users', 'stock'];
 
 export default function Reports() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState('detailed');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [tab, setTab] = useState(location.state?.tab ?? 'closings');
   const [dailySales, setDailySales] = useState([]);
   const [userSales, setUserSales] = useState([]);
   const [stockReport, setStockReport] = useState([]);
   const [detailed, setDetailed] = useState(null);
+  const [closings, setClosings] = useState([]);
   const [from, setFrom] = useState(todayStr());
   const [to, setTo] = useState(todayStr());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => { fetchAll(from, to); }, []);
+
+  useEffect(() => {
+    if (tab === 'closings' && closings.length === 0) fetchClosings();
+  }, [tab]);
+
+  const fetchClosings = async () => {
+    try {
+      const { data } = await reportsApi.getClosings();
+      setClosings(data);
+    } catch { /* non-critical */ }
+  };
 
   const fetchAll = async (fromDate, toDate) => {
     setLoading(true); setError('');
@@ -67,7 +82,7 @@ export default function Reports() {
       </div>
 
       {/* Date filter */}
-      {tab !== 'stock' && (
+      {tab !== 'stock' && tab !== 'closings' && (
         <div style={s.filters}>
           <div style={s.filterGroup}>
             <label style={s.filterLabel}>{t('common.from')}</label>
@@ -83,9 +98,9 @@ export default function Reports() {
         </div>
       )}
 
-      {tab === 'stock' && (
+      {(tab === 'stock' || tab === 'closings') && (
         <div style={{ marginBottom: 16 }}>
-          <button style={s.applyBtn} onClick={() => fetchAll(from, to)} disabled={loading}>
+          <button style={s.applyBtn} onClick={tab === 'closings' ? fetchClosings : () => fetchAll(from, to)} disabled={loading}>
             {loading ? t('reports.loading') : t('reports.refresh')}
           </button>
         </div>
@@ -250,6 +265,54 @@ export default function Reports() {
               ))}
               {stockReport.length === 0 && !loading && (
                 <tr><td colSpan={3} style={s.empty}>{t('reports.noData.products')}</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── Cash Closing History ── */}
+      {tab === 'closings' && (
+        <div style={s.tableWrap}>
+          <table style={s.table}>
+            <thead>
+              <tr>
+                <th style={s.th}>{t('reports.col.closingDate')}</th>
+                <th style={s.th}>{t('reports.col.cashier')}</th>
+                <th style={s.th}>{t('reports.col.period')}</th>
+                <th style={s.th}>{t('cashClosing.col.expected')}</th>
+                <th style={s.th}>{t('cashClosing.col.counted')}</th>
+                <th style={{ ...s.th, textAlign: 'right' }}>{t('cashClosing.col.difference')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {closings.map(c => {
+                const diff = c.difference;
+                const dColor = diff < 0 ? '#B91C1C' : diff > 0 ? '#065F46' : '#6B7280';
+                const fromLabel = new Date(c.fromDate).getTime() === new Date('0001-01-01').getTime()
+                  ? t('cashClosing.beginning') : new Date(c.fromDate).toLocaleDateString();
+                return (
+                  <tr key={c.id} style={{ ...s.tr, cursor: 'pointer' }}
+                    onClick={() => navigate(`/reports/closing/${c.id}`)}
+                    onMouseEnter={e => e.currentTarget.style.background = '#F0F4FF'}
+                    onMouseLeave={e => e.currentTarget.style.background = ''}>
+                    <td style={{ ...s.td, color: '#6B7280', fontSize: 13, whiteSpace: 'nowrap' }}>
+                      {new Date(c.createdAt).toLocaleString()}
+                    </td>
+                    <td style={{ ...s.td, fontWeight: 600, color: '#111827' }}>{c.username}</td>
+                    <td style={{ ...s.td, fontSize: 13, color: '#6B7280' }}>
+                      {fromLabel} → {new Date(c.toDate).toLocaleDateString()}
+                    </td>
+                    <td style={{ ...s.td, fontWeight: 600 }}>{c.expectedCash.toFixed(2)} ₾</td>
+                    <td style={{ ...s.td, fontWeight: 600 }}>{c.countedCash.toFixed(2)} ₾</td>
+                    <td style={{ ...s.td, textAlign: 'right', fontWeight: 700, color: dColor }}>
+                      {diff >= 0 ? '+' : ''}{diff.toFixed(2)} ₾
+                    </td>
+                  </tr>
+                );
+              })}
+              {closings.length === 0 && (
+                <tr><td colSpan={6} style={s.empty}>{t('cashClosing.history.noHistory')}</td></tr>
               )}
             </tbody>
           </table>

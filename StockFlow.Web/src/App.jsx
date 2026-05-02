@@ -11,6 +11,7 @@ import Users from './pages/Users';
 import Customers from './pages/Customers';
 import CustomerDetail from './pages/CustomerDetail';
 import CashClosing from './pages/CashClosing';
+import ClosingDetail from './pages/ClosingDetail';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -47,6 +48,7 @@ export default function App() {
                   <Route path="/customers" element={<AdminRoute><Customers /></AdminRoute>} />
                   <Route path="/customers/:id" element={<AdminRoute><CustomerDetail /></AdminRoute>} />
                   <Route path="/reports" element={<AdminRoute><Reports /></AdminRoute>} />
+                  <Route path="/reports/closing/:id" element={<AdminRoute><ClosingDetail /></AdminRoute>} />
                   <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
                   <Route path="*" element={<DefaultRedirect />} />
                 </Routes>

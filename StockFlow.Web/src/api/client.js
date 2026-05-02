@@ -67,4 +67,6 @@ export const reportsApi = {
   salesPerUser: (from, to) => api.get('/reports/sales-per-user', { params: { from, to } }),
   stock: () => api.get('/reports/stock'),
   detailed: (from, to) => api.get('/reports/detailed', { params: { from, to } }),
+  getClosings: () => api.get('/reports/closings'),
+  getClosingDetail: (id) => api.get(`/reports/closings/${id}`),
 };

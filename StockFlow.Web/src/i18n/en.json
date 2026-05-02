@@ -145,19 +145,21 @@
   },
   "reports": {
     "title": "Reports", "subtitle": "Sales, inventory, and cashier performance",
-    "tabs": { "detailed": "Detailed Sales", "daily": "Daily Summary", "users": "By Cashier", "stock": "Stock Report" },
+    "tabs": { "detailed": "Detailed Sales", "daily": "Daily Summary", "users": "By Cashier", "stock": "Stock Report", "closings": "Cash Closings" },
     "apply": "Apply", "refresh": "Refresh", "loading": "Loading…",
     "col": {
       "type": "Type", "productDesc": "Product / Description", "customer": "Customer",
       "qty": "Qty", "unitPrice": "Unit Price", "total": "Total",
       "date": "Date", "transactions": "Transactions", "totalRevenue": "Total Revenue",
-      "cashier": "Cashier", "product": "Product", "barcode": "Barcode", "currentStock": "Current Stock"
+      "cashier": "Cashier", "product": "Product", "barcode": "Barcode", "currentStock": "Current Stock",
+      "closingDate": "Closing Date", "period": "Period"
     },
     "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "expenses": "💸 Expenses", "cashTotal": "Cash Total" },
     "infoRevenue": "Total Revenue", "infoTransactions": "Transactions",
     "notCash": "not cash",
     "noData": { "transactions": "No transactions in this period.", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "reports": "Failed to load reports." },
-    "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "Payment": "Payment", "Expense": "Expense" }
+    "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "Payment": "Payment", "Expense": "Expense", "OpeningCash": "Opening" },
+    "closingDetail": { "title": "Cash Closing", "cashier": "Cashier", "period": "Period", "breakdown": "Financial Breakdown", "totals": "Totals", "transactions": "Transactions" }
   },
   "users": {
     "title": "User Management", "subtitle": "{{count}} user(s)",
