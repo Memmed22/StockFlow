@@ -61,6 +61,42 @@ timeout /t 2 >nul
 start "" "http://localhost:5000"
 echo  App is running at http://localhost:5000
 echo  Close this window to stop the server.
+echo  Database is stored in the data\ folder - do not delete it.
+echo.
+pause
+EOF
+
+# --- Write update.bat into the publish folder ---
+echo "  Writing update.bat..."
+cat > "$PUBLISH_DIR/update.bat" << 'EOF'
+@echo off
+title StockFlow Updater
+echo.
+echo  ==========================================
+echo       StockFlow - Update Installer
+echo  ==========================================
+echo.
+echo  This will copy the new version over your existing
+echo  installation. Your database (data\ folder) will
+echo  NOT be touched.
+echo.
+echo  IMPORTANT: Close StockFlow before continuing!
+echo.
+set /p "DEST=Enter the full path to your existing StockFlow folder: "
+if not exist "%DEST%" (
+    echo [ERROR] Folder not found: %DEST%
+    pause & exit /b 1
+)
+echo.
+echo  Copying new files to: %DEST%
+echo  Skipping: data\
+echo.
+robocopy "%~dp0" "%DEST%" /e /xd data /xf update.bat /njh /njs
+echo.
+echo  ==========================================
+echo   Update complete!
+echo   Run %DEST%\start.bat to launch StockFlow.
+echo  ==========================================
 echo.
 pause
 EOF
@@ -70,7 +106,10 @@ echo "  =========================================="
 echo "   Publish complete!"
 echo ""
 echo "   Output folder : publish/"
-echo "   Launch with   : publish/start.bat  (on Windows)"
+echo "   First install : copy publish/ to Windows PC, run start.bat"
+echo "   Update        : run publish/update.bat on the Windows PC"
+echo ""
+echo "   Database is stored in data/ and survives updates."
 echo ""
 echo "   Default login:"
 echo "     Username : admin"
