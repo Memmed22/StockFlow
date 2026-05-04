@@ -5,9 +5,17 @@ using StockFlow.API.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
 
+// Store database in data/ subfolder so it survives application updates.
+// If an old stockflow.db exists next to the exe (pre-update install), move it.
+var dataDir = Path.Combine(AppContext.BaseDirectory, "data");
+Directory.CreateDirectory(dataDir);
+var dbPath = Path.Combine(dataDir, "stockflow.db");
+var legacyDbPath = Path.Combine(AppContext.BaseDirectory, "stockflow.db");
+if (File.Exists(legacyDbPath) && !File.Exists(dbPath))
+    File.Move(legacyDbPath, dbPath);
+
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Data Source=stockflow.db"));
+    opt.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<StockService>();
