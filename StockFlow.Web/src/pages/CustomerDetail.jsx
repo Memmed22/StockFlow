@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { customersApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-const TYPE_COLORS = { CashSale: '#16a34a', DebitSale: '#dc2626', Return: '#f59e0b', Payment: '#2563eb' };
+const TYPE_COLORS = { CashSale: '#2563eb', DebitSale: '#dc2626', Return: '#d97706', Payment: '#16a34a' };
 
 export default function CustomerDetail() {
   const { id } = useParams();
@@ -139,7 +139,7 @@ export default function CustomerDetail() {
                       {t(`customerDetail.types.${tx.type}`) ?? tx.type}
                     </span>
                   </td>
-                  <td style={{ ...styles.td, textAlign: 'right', fontWeight: 600, color: isPositive ? '#dc2626' : '#16a34a' }}>
+                  <td style={{ ...styles.td, textAlign: 'right', fontWeight: 600, color: TYPE_COLORS[tx.type] ?? (isPositive ? '#dc2626' : '#16a34a') }}>
                     {isPositive ? '+' : ''}{tx.amount.toFixed(2)} ₾
                   </td>
                 </tr>
