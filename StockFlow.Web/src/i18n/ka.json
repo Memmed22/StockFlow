@@ -30,7 +30,7 @@
     "searchPlaceholder": "ძიება სახელით ან შტრიხკოდით...",
     "cartEmpty": "კალათა ცარიელია. სკანირება დასაწყებად.",
     "col": { "product": "პროდუქტი", "stock": "მარაგი", "basePrice": "ბაზური ფასი", "discount": "ფასდაკლება", "finalPrice": "საბოლოო ფასი", "qty": "რ-ბა", "lineTotal": "ჯამი" },
-    "summary": { "title": "შეკვეთის შეჯამება", "subtotal": "ჯამი", "cartDiscount": "ფასდაკლება", "total": "სულ" },
+    "summary": { "title": "შეკვეთის შეჯამება", "subtotal": "ჯამი", "setTotalTo": "დააყენეთ ჯამი", "discountApplied": "− {{amount}} ₾ ფასდაკლება გამოყენებულია", "total": "სულ" },
     "paymentType": "გადახდის ტიპი", "cash": "ნაღდი", "debit": "კრედიტი", "customer": "კლიენტი",
     "loadingCustomers": "კლიენტები იტვირთება...",
     "checkout": "გადახდა", "chargeToCustomer": "კლიენტზე ჩაწერა",
@@ -40,7 +40,8 @@
     "checkoutConfirm": {
       "title": "გაყიდვის დადასტურება",
       "subtitle": "დაასრულეთ გაყიდვამდე გადაამოწმეთ ჯამი.",
-      "confirmBtn": "დადასტურება და გადახდა"
+      "confirmBtn": "დადასტურება და გადახდა",
+      "processing": "მუშავდება…"
     },
     "confirm": {
       "totalLabel": "გადახდილი თანხა"
@@ -112,7 +113,7 @@
     "addStock": "მარაგის დამატება", "product": "პროდუქტი *",
     "searchPlaceholder": "ძიება სახელით ან შტრიხკოდით...",
     "currentStock": "მიმდინარე მარაგი", "note": "შენიშვნა", "notePlaceholder": "სურვილისამებრ (მომწოდებელი, პარტია…)",
-    "addButton": "მარაგის დამატება", "movements": "მარაგის მოძრაობა",
+    "addButton": "მარაგის დამატება", "saving": "ინახება…", "movements": "მარაგის მოძრაობა",
     "totalRecords": "{{count}} ჩანაწერი სულ",
     "searchMovements": "ძიება სახელით ან შტრიხკოდით…",
     "noMovements": "მოძრაობა ჯერ არ არის.", "noMovementsSearch": "\"{{query}}\" — ვერ მოიძებნა.",
@@ -132,11 +133,12 @@
     "searchCustomer": "კლიენტის ძიება სახელით ან ტელეფონით...",
     "remove": "ამოღება", "deductNote": "კლიენტის ბალანსი შემცირდება {{amount}} ₾-ით",
     "processReturn": "დაბრუნების დამუშავება",
+    "processing": "მუშავდება…",
     "errors": { "selectProduct": "გთხოვთ, აირჩიეთ პროდუქტი.", "quantity": "შეიყვანეთ სწორი რაოდენობა.", "price": "ფასი 0 ან მეტი უნდა იყოს.", "processing": "დაბრუნების დამუშავებისას შეცდომა." }
   },
   "cashClosing": {
-    "title": "სალაროს დახურვა",
-    "tabs": { "close": "სალაროს დახურვა", "activity": "ბოლო დახურვის შემდეგ" }, "subtitle": "პერიოდის ბოლოს ნაღდი ფულის დათვლა და სალაროს გადაყენება",
+    "title": "სალარო",
+    "tabs": { "close": "სალაროს დახურვა", "activity": "აქტივობა" }, "subtitle": "პერიოდის ბოლოს ნაღდი ფულის დათვლა და სალაროს გადაყენება",
     "periodFrom": "პერიოდი დან", "periodTo": "პერიოდი მდე",
     "openingCash": "საწყისი ნაღდი", "expectedCash": "მოსალოდნელი ნაღდი",
     "recordClosing": "დახურვის ჩაწერა", "countedCash": "დათვლილი ნაღდი (₾) *",

@@ -20,6 +20,7 @@ export default function Returns() {
   const [showCustomerList, setShowCustomerList] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => { customersApi.getAll().then(r => setCustomers(r.data)).catch(() => {}); }, []);
 
@@ -33,20 +34,27 @@ export default function Returns() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setError(''); setSuccess('');
+    e.preventDefault();
+    if (submitting) return;
+    setError(''); setSuccess('');
     if (!selectedProduct) { setError(t('returns.errors.selectProduct')); return; }
     const isDecimal = UNIT_IS_DECIMAL[selectedProduct.unitType ?? 0];
     const qty = isDecimal ? parseFloat(quantity) : parseInt(quantity);
     if (!qty || qty <= 0) { setError(t('returns.errors.quantity')); return; }
     const price = parseFloat(returnPrice);
     if (isNaN(price) || price < 0) { setError(t('returns.errors.price')); return; }
+    setSubmitting(true);
     try {
       await returnsApi.process({ productId: selectedProduct.id, quantity: qty, basePrice: selectedProduct.sellingPrice, returnPrice: price, note: note || null, customerId: selectedCustomer?.id ?? null, userId: user.id });
       const customerNote = selectedCustomer ? ` — ${selectedCustomer.name}` : '';
       setSuccess(`${t('returns.returnTotal')}: ${(qty * price).toFixed(2)} ₾${customerNote}`);
       setSelectedProduct(null); setQuantity(''); setReturnPrice(''); setNote('');
       setSelectedCustomer(null); setCustomerSearch('');
-    } catch (err) { setError(err.response?.data?.error || t('returns.errors.processing')); }
+    } catch (err) {
+      setError(err.response?.data?.error || t('returns.errors.processing'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const isDecimal = UNIT_IS_DECIMAL[selectedProduct?.unitType ?? 0];
@@ -167,7 +175,9 @@ export default function Returns() {
 
           {error && <div style={s.errorBox}>{error}</div>}
           {success && <div style={s.successBox}>{success}</div>}
-          <button style={s.primaryBtn} type="submit">{t('returns.processReturn')}</button>
+          <button style={{ ...s.primaryBtn, opacity: submitting ? 0.7 : 1 }} type="submit" disabled={submitting}>
+            {submitting ? t('returns.processing') : t('returns.processReturn')}
+          </button>
         </form>
       </div>
     </div>

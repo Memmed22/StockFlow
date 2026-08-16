@@ -22,6 +22,7 @@ export default function StockIn() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [searchKey, setSearchKey] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   const [movements, setMovements] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -78,11 +79,13 @@ export default function StockIn() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     setError(''); setMessage('');
     if (!selectedProduct) { setError(t('stock.errors.selectProduct')); return; }
     const isDecimal = UNIT_IS_DECIMAL[selectedProduct.unitType ?? 0];
     const qty = isDecimal ? parseFloat(quantity) : parseInt(quantity);
     if (!qty || qty <= 0) { setError(t('stock.errors.quantity')); return; }
+    setSubmitting(true);
     try {
       await stockApi.stockIn({ productId: selectedProduct.id, quantity: qty, note: note || null });
       setMessage(`+ ${qty} ${UNIT_LABELS[selectedProduct.unitType ?? 0]} — ${selectedProduct.name}`);
@@ -94,6 +97,8 @@ export default function StockIn() {
       loadMovements(search, 1);
     } catch (err) {
       setError(err.response?.data?.error || t('stock.errors.stockError'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -150,7 +155,9 @@ export default function StockIn() {
           {message && <div style={s.successBox}>{message}</div>}
           {error && <div style={s.errorBox}>{error}</div>}
 
-          <button style={s.submitBtn} type="submit">{t('stock.addButton')}</button>
+          <button style={{ ...s.submitBtn, opacity: submitting ? 0.7 : 1 }} type="submit" disabled={submitting}>
+            {submitting ? t('stock.saving') : t('stock.addButton')}
+          </button>
         </form>
       </div>
 

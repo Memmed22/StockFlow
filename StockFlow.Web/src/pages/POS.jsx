@@ -11,14 +11,14 @@ function loadCart() {
   try { return JSON.parse(localStorage.getItem('pos_cart') || '[]'); } catch { return []; }
 }
 function saveCart(cart) { localStorage.setItem('pos_cart', JSON.stringify(cart)); }
-function loadCartDiscount() { return parseFloat(localStorage.getItem('pos_cart_discount') || '0'); }
-function saveCartDiscount(v) { localStorage.setItem('pos_cart_discount', String(v)); }
 
 export default function POS() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [cart, setCart] = useState(loadCart);
-  const [cartDiscount, setCartDiscount] = useState(loadCartDiscount);
+  // Never persisted and always reset on any cart change (see effect below) — a discount
+  // computed for one set of items must never silently carry over onto a different sale.
+  const [cartDiscountAmount, setCartDiscountAmount] = useState(0);
   const [saleType, setSaleType] = useState('cash');
   const [customers, setCustomers] = useState([]);
   const [customerSearch, setCustomerSearch] = useState('');
@@ -26,9 +26,11 @@ export default function POS() {
   const [showCustomerList, setShowCustomerList] = useState(false);
   const [error, setError] = useState('');
   const [confirmModal, setConfirmModal] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [qtyDrafts, setQtyDrafts] = useState({});
   const [discountDrafts, setDiscountDrafts] = useState({});
   const [priceDrafts, setPriceDrafts] = useState({});
+  const [targetTotalDraft, setTargetTotalDraft] = useState(null);
   const searchRef = useRef();
 
   const [openingModal, setOpeningModal] = useState(false);
@@ -60,12 +62,16 @@ export default function POS() {
   }, []);
 
   useEffect(() => { saveCart(cart); }, [cart]);
-  useEffect(() => { saveCartDiscount(cartDiscount); }, [cartDiscount]);
+  // Any change to the cart's contents (add/remove/qty/price) invalidates a previously
+  // set discount, since it was computed against a different subtotal.
+  const isFirstCartEffect = useRef(true);
   useEffect(() => {
-    if (saleType === 'debit' && customers.length === 0) {
-      customersApi.getAll().then(r => setCustomers(r.data)).catch(() => {});
-    }
-  }, [saleType]);
+    if (isFirstCartEffect.current) { isFirstCartEffect.current = false; return; }
+    setCartDiscountAmount(0);
+  }, [cart]);
+  useEffect(() => {
+    customersApi.getAll().then(r => setCustomers(r.data)).catch(() => {});
+  }, []);
 
   const openPayModal = () => {
     setPayModal(true);
@@ -102,7 +108,18 @@ export default function POS() {
   );
 
   const subtotal = cart.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0);
-  const total = Math.max(0, subtotal * (1 - cartDiscount / 100));
+  const clampedDiscount = Math.min(subtotal, Math.max(0, cartDiscountAmount || 0));
+  const total = Math.max(0, subtotal - clampedDiscount);
+
+  const handleTargetTotalChange = (rawVal) => {
+    if (!/^\d*\.?\d*$/.test(rawVal)) return;
+    setTargetTotalDraft(rawVal);
+    if (rawVal === '' || rawVal === '.') return;
+    const targetTotal = parseFloat(rawVal);
+    setCartDiscountAmount(Math.min(subtotal, Math.max(0, subtotal - targetTotal)));
+  };
+
+  const handleTargetTotalBlur = () => setTargetTotalDraft(null);
 
   const handleProductSelected = (product) => {
     setError('');
@@ -205,7 +222,7 @@ export default function POS() {
   const removeItem = (productId) => setCart(prev => prev.filter(i => i.productId !== productId));
 
   const clearCart = () => {
-    setCart([]); setCartDiscount(0); setError('');
+    setCart([]); setCartDiscountAmount(0); setError('');
     setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
   };
 
@@ -216,14 +233,15 @@ export default function POS() {
     setConfirmModal(true);
   };
 
-  const closeCheckoutConfirm = () => setConfirmModal(false);
+  const closeCheckoutConfirm = () => { if (!checkoutLoading) setConfirmModal(false); };
 
   const handleCheckout = async () => {
-    setConfirmModal(false);
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
     try {
       const payload = {
         userId: user.id,
-        discountAmount: subtotal * cartDiscount / 100,
+        discountAmount: clampedDiscount,
         items: cart.map(i => ({
           productId: i.productId,
           quantity: i.quantity,
@@ -231,14 +249,18 @@ export default function POS() {
           discountAmount: i.basePrice * i.discount / 100,
         })),
         type: saleType === 'debit' ? 1 : 0,
-        customerId: saleType === 'debit' ? selectedCustomer?.id : null,
+        customerId: selectedCustomer?.id ?? null,
       };
       await salesApi.create(payload);
-      setCart([]); setCartDiscount(0);
+      setConfirmModal(false);
+      setCart([]); setCartDiscountAmount(0);
       setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
       searchRef.current?.focus();
     } catch (err) {
       setError(err.response?.data?.error || t('common.error'));
+      setConfirmModal(false);
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -391,14 +413,27 @@ export default function POS() {
           <span>{subtotal.toFixed(2)} ₾</span>
         </div>
         <div style={styles.summaryRow}>
-          <span>{t('pos.summary.cartDiscount')}</span>
+          <span>{t('pos.summary.setTotalTo')}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <input type="number" step="1" min="0" max="100" style={{ ...styles.smallInput, width: 70 }}
-              value={cartDiscount}
-              onChange={e => setCartDiscount(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))} />
-            <span style={{ fontSize: 13, color: '#64748b' }}>%</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              style={{
+                ...styles.smallInput, width: 70,
+                borderColor: targetTotalDraft === '' ? '#dc2626' : '#e2e8f0',
+              }}
+              value={targetTotalDraft ?? total.toFixed(2)}
+              onChange={e => handleTargetTotalChange(e.target.value)}
+              onBlur={handleTargetTotalBlur}
+            />
+            <span style={{ fontSize: 13, color: '#64748b' }}>₾</span>
           </div>
         </div>
+        {clampedDiscount > 0 && (
+          <div style={styles.discountHint}>
+            {t('pos.summary.discountApplied', { amount: clampedDiscount.toFixed(2) })}
+          </div>
+        )}
         <div style={styles.totalRow}>
           <span>{t('pos.summary.total')}</span>
           <span>{total.toFixed(2)} ₾</span>
@@ -409,7 +444,7 @@ export default function POS() {
           <div style={styles.payTypeRow}>
             <button
               style={{ ...styles.payTypeBtn, ...(saleType === 'cash' ? styles.payTypeBtnActive : {}) }}
-              onClick={() => { setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch(''); }}
+              onClick={() => setSaleType('cash')}
             >
               {t('pos.cash')}
             </button>
@@ -422,55 +457,55 @@ export default function POS() {
           </div>
         </div>
 
-        {saleType === 'debit' && (
-          <div style={styles.customerSection}>
-            <div style={styles.payTypeLabel}>{t('pos.customer')}</div>
-            {selectedCustomer ? (
-              <div style={styles.selectedCustomer}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{selectedCustomer.name}</div>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>{selectedCustomer.phoneNumber}</div>
-                  <div style={{ fontSize: 12, color: selectedCustomer.balance > 0 ? '#dc2626' : '#16a34a', fontWeight: 600 }}>
-                    Balance: {selectedCustomer.balance.toFixed(2)} ₾
-                  </div>
-                </div>
-                <button style={styles.changeBtn} onClick={() => { setSelectedCustomer(null); setCustomerSearch(''); }}>
-                  {t('pos.changeBtn')}
-                </button>
-              </div>
-            ) : (
-              <div style={{ position: 'relative' }}>
-                <input
-                  style={styles.customerSearchInput}
-                  placeholder={t('pos.payment.searchPlaceholder')}
-                  value={customerSearch}
-                  onChange={e => { setCustomerSearch(e.target.value); setShowCustomerList(true); }}
-                  onFocus={() => setShowCustomerList(true)}
-                  onBlur={() => setTimeout(() => setShowCustomerList(false), 150)}
-                />
-                {showCustomerList && filteredCustomers.length > 0 && (
-                  <div style={styles.customerDropdown}>
-                    {filteredCustomers.slice(0, 6).map(c => (
-                      <div key={c.id} style={styles.customerItem}
-                        onMouseDown={() => { setSelectedCustomer(c); setCustomerSearch(''); setShowCustomerList(false); }}>
-                        <div style={{ fontWeight: 600, fontSize: 13 }}>{c.name}</div>
-                        <div style={{ fontSize: 12, color: '#64748b' }}>{c.phoneNumber}
-                          &nbsp;·&nbsp;
-                          <span style={{ color: c.balance > 0 ? '#dc2626' : '#16a34a', fontWeight: 600 }}>
-                            {c.balance.toFixed(2)} ₾
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {customers.length === 0 && (
-                  <p style={{ fontSize: 12, color: '#94a3b8', margin: '4px 0 0' }}>{t('pos.loadingCustomers')}</p>
-                )}
-              </div>
-            )}
+        <div style={styles.customerSection}>
+          <div style={styles.payTypeLabel}>
+            {t('pos.customer')}{saleType === 'cash' && <span style={styles.optionalHint}> ({t('common.optional')})</span>}
           </div>
-        )}
+          {selectedCustomer ? (
+            <div style={styles.selectedCustomer}>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{selectedCustomer.name}</div>
+                <div style={{ fontSize: 12, color: '#64748b' }}>{selectedCustomer.phoneNumber}</div>
+                <div style={{ fontSize: 12, color: selectedCustomer.balance > 0 ? '#dc2626' : '#16a34a', fontWeight: 600 }}>
+                  Balance: {selectedCustomer.balance.toFixed(2)} ₾
+                </div>
+              </div>
+              <button style={styles.changeBtn} onClick={() => { setSelectedCustomer(null); setCustomerSearch(''); }}>
+                {t('pos.changeBtn')}
+              </button>
+            </div>
+          ) : (
+            <div style={{ position: 'relative' }}>
+              <input
+                style={styles.customerSearchInput}
+                placeholder={t('pos.payment.searchPlaceholder')}
+                value={customerSearch}
+                onChange={e => { setCustomerSearch(e.target.value); setShowCustomerList(true); }}
+                onFocus={() => setShowCustomerList(true)}
+                onBlur={() => setTimeout(() => setShowCustomerList(false), 150)}
+              />
+              {showCustomerList && filteredCustomers.length > 0 && (
+                <div style={styles.customerDropdown}>
+                  {filteredCustomers.slice(0, 6).map(c => (
+                    <div key={c.id} style={styles.customerItem}
+                      onMouseDown={() => { setSelectedCustomer(c); setCustomerSearch(''); setShowCustomerList(false); }}>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{c.name}</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>{c.phoneNumber}
+                        &nbsp;·&nbsp;
+                        <span style={{ color: c.balance > 0 ? '#dc2626' : '#16a34a', fontWeight: 600 }}>
+                          {c.balance.toFixed(2)} ₾
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {customers.length === 0 && (
+                <p style={{ fontSize: 12, color: '#94a3b8', margin: '4px 0 0' }}>{t('pos.loadingCustomers')}</p>
+              )}
+            </div>
+          )}
+        </div>
 
         <button style={styles.checkoutBtn} onClick={openCheckoutConfirm} disabled={cart.length === 0}>
           {saleType === 'debit' ? t('pos.chargeToCustomer') : t('pos.checkout')}
@@ -486,7 +521,7 @@ export default function POS() {
       {confirmModal && (
         <div style={styles.overlay} onClick={e => e.target === e.currentTarget && closeCheckoutConfirm()}>
           <div style={styles.modal}>
-            <button style={styles.confirmClose} onClick={closeCheckoutConfirm} aria-label={t('common.cancel')}>✕</button>
+            <button style={styles.confirmClose} onClick={closeCheckoutConfirm} disabled={checkoutLoading} aria-label={t('common.cancel')}>✕</button>
             <div style={{ textAlign: 'center' }}>
               <div style={{ ...styles.confirmIcon, background: '#EEF2FF', color: '#4F46E5' }}>₾</div>
               <h3 style={{ margin: '14px 0 4px', fontSize: 19, fontWeight: 700, color: '#111827' }}>
@@ -515,7 +550,7 @@ export default function POS() {
                 }}>
                   {saleType === 'debit' ? t('pos.debit') : t('pos.cash')}
                 </span>
-                {saleType === 'debit' && selectedCustomer && (
+                {selectedCustomer && (
                   <span style={{ fontSize: 13, color: '#374151', alignSelf: 'center', fontWeight: 600 }}>
                     {selectedCustomer.name}
                   </span>
@@ -523,11 +558,16 @@ export default function POS() {
               </div>
 
               <div style={{ display: 'flex', gap: 8 }}>
-                <button style={{ ...styles.clearBtn, flex: 1 }} onClick={closeCheckoutConfirm}>
+                <button style={{ ...styles.clearBtn, flex: 1 }} onClick={closeCheckoutConfirm} disabled={checkoutLoading}>
                   {t('common.cancel')}
                 </button>
-                <button style={{ ...styles.checkoutBtn, flex: 1, marginBottom: 0, marginTop: 0 }} onClick={handleCheckout} autoFocus>
-                  {t('pos.checkoutConfirm.confirmBtn')}
+                <button
+                  style={{ ...styles.checkoutBtn, flex: 1, marginBottom: 0, marginTop: 0, opacity: checkoutLoading ? 0.7 : 1 }}
+                  onClick={handleCheckout}
+                  disabled={checkoutLoading}
+                  autoFocus
+                >
+                  {checkoutLoading ? t('pos.checkoutConfirm.processing') : t('pos.checkoutConfirm.confirmBtn')}
                 </button>
               </div>
             </div>
@@ -739,9 +779,11 @@ const styles = {
   removeBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontWeight: 700, fontSize: 13 },
   summaryTitle: { margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#111827' },
   summaryRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, fontSize: 14, color: '#374151' },
+  discountHint: { fontSize: 12, color: '#D97706', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '4px 8px', marginBottom: 8, fontWeight: 600, textAlign: 'right' },
   totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 20, borderTop: '2px solid #E5E7EB', paddingTop: 12, marginTop: 8, marginBottom: 16, color: '#111827' },
   payTypeSection: { marginBottom: 12 },
   payTypeLabel: { fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 },
+  optionalHint: { textTransform: 'none', fontWeight: 500, color: '#9CA3AF', letterSpacing: 0 },
   payTypeRow: { display: 'flex', gap: 6 },
   payTypeBtn: { flex: 1, padding: '8px', border: '1px solid #E5E7EB', borderRadius: 8, background: '#F9FAFB', color: '#6B7280', cursor: 'pointer', fontWeight: 600, fontSize: 13 },
   payTypeBtnActive: { background: '#059669', color: '#fff', borderColor: '#059669' },

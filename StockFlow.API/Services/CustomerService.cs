@@ -21,7 +21,8 @@ public class CustomerService(AppDbContext db)
 
         var ids = customers.Select(c => c.Id).ToList();
         var allSales = await db.Sales
-            .Where(s => s.CustomerId.HasValue && ids.Contains(s.CustomerId.Value))
+            .Where(s => s.CustomerId.HasValue && ids.Contains(s.CustomerId.Value)
+                && s.Type != SaleType.CashSale)
             .Select(s => new { s.CustomerId, s.TotalAmount })
             .ToListAsync();
 
@@ -46,7 +47,9 @@ public class CustomerService(AppDbContext db)
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
 
-        var balance = sales.Sum(s => s.TotalAmount);
+        // A cash sale is paid in full immediately, so it's shown in the customer's
+        // history but must not count toward their outstanding balance.
+        var balance = sales.Where(s => s.Type != SaleType.CashSale).Sum(s => s.TotalAmount);
 
         var info = new CustomerDto(
             customer.Id, customer.Name, customer.PhoneNumber,
@@ -128,7 +131,7 @@ public class CustomerService(AppDbContext db)
     private async Task<decimal> GetBalanceAsync(int customerId)
     {
         var amounts = await db.Sales
-            .Where(s => s.CustomerId == customerId)
+            .Where(s => s.CustomerId == customerId && s.Type != SaleType.CashSale)
             .Select(s => s.TotalAmount)
             .ToListAsync();
         return amounts.Sum();

@@ -87,6 +87,7 @@ echo.
 echo  IMPORTANT: Close StockFlow before continuing!
 echo.
 set /p "DEST=Enter the full path to your existing StockFlow folder: "
+if "%DEST:~-1%"=="\" set "DEST=%DEST:~0,-1%"
 if not exist "%DEST%" (
     echo [ERROR] Folder not found: %DEST%
     pause & exit /b 1
@@ -95,7 +96,7 @@ echo.
 echo  Copying new files to: %DEST%
 echo  Skipping: data\
 echo.
-robocopy "%~dp0" "%DEST%" /e /xd data /xf update.bat /njh /njs
+robocopy "%~dp0." "%DEST%" /e /xd data /xf update.bat /njh /njs
 echo.
 echo  ==========================================
 echo   Update complete!

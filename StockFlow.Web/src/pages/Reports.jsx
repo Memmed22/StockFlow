@@ -162,7 +162,7 @@ export default function Reports() {
               <h4 style={s.summaryTitle}>{t('reports.summary.title')}</h4>
               {[
                 { key: 'cashSales', value: `+${detailed.summary.cashSalesTotal.toFixed(2)} ₾`, color: '#059669' },
-                { key: 'debitSales', value: `+${detailed.summary.debitSalesTotal.toFixed(2)} ₾`, color: '#92400E', muted: true },
+                { key: 'debitSales', value: `${detailed.summary.debitSalesTotal.toFixed(2)} ₾ (${t('reports.notCash')})`, color: '#92400E', muted: true },
                 { key: 'payments', value: `+${detailed.summary.paymentsTotal.toFixed(2)} ₾`, color: '#1D4ED8' },
                 { key: 'returns', value: `${detailed.summary.returnsTotal.toFixed(2)} ₾`, color: '#DC2626' },
                 ...(detailed.summary.expensesTotal < 0 ? [{ key: 'expenses', value: `${detailed.summary.expensesTotal.toFixed(2)} ₾`, color: '#9F1239' }] : []),
