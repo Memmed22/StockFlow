@@ -39,6 +39,14 @@
     "clearCart": "Clear Cart", "customerPayment": "Customer Payment", "addExpense": "💸 Add Expense",
     "itemsSaved": "{{count}} item(s) — cart saved",
     "changeBtn": "Change",
+    "checkoutConfirm": {
+      "title": "Confirm Sale",
+      "subtitle": "Review the total before completing this sale.",
+      "confirmBtn": "Confirm & Charge"
+    },
+    "confirm": {
+      "totalLabel": "Total Charged"
+    },
     "payment": {
       "title": "Customer Payment", "customer": "Customer", "amount": "Amount (₾) *",
       "searchPlaceholder": "Search by name or phone...",
@@ -132,6 +140,7 @@
   },
   "cashClosing": {
     "title": "Cash Closing",
+    "tabs": { "close": "Close Register", "activity": "Activity Since Last Close" },
     "subtitle": "Record the end-of-period cash count and reset the register",
     "periodFrom": "Period From", "periodTo": "Period To",
     "openingCash": "Opening Cash", "expectedCash": "Expected Cash",
@@ -185,6 +194,15 @@
   },
   "customerDetail": {
     "back": "← Back", "balance": "Current Balance (Debt)",
+    "deleteModal": {
+      "trigger": "Delete Customer",
+      "title": "Delete {{name}}?",
+      "warningWithBalance": "This will permanently delete this customer and clear their outstanding balance of {{balance}} ₾.",
+      "warningNoBalance": "This will permanently delete this customer.",
+      "keepHistoryNote": "Their past purchases, returns, and payments will be kept for reporting, but no longer linked to this customer. This cannot be undone.",
+      "confirmBtn": "Delete Customer",
+      "deleting": "Deleting…"
+    },
     "payment": { "title": "Record Payment", "amount": "Amount (₾)", "button": "Record Payment", "success": "Payment of {{amount}} ₾ recorded.", "errorInvalid": "Enter a valid amount.", "errorFailed": "Failed to record payment." },
     "history": "Transaction History", "netBalance": "Net Balance", "noTransactions": "No transactions yet.",
     "loading": "Loading...",

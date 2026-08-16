@@ -41,7 +41,7 @@ export default function Returns() {
     const price = parseFloat(returnPrice);
     if (isNaN(price) || price < 0) { setError(t('returns.errors.price')); return; }
     try {
-      await returnsApi.process({ productId: selectedProduct.id, quantity: qty, basePrice: selectedProduct.sellingPrice, returnPrice: price, note: note || null, customerId: selectedCustomer?.id ?? null, userId: selectedCustomer ? user.id : 0 });
+      await returnsApi.process({ productId: selectedProduct.id, quantity: qty, basePrice: selectedProduct.sellingPrice, returnPrice: price, note: note || null, customerId: selectedCustomer?.id ?? null, userId: user.id });
       const customerNote = selectedCustomer ? ` — ${selectedCustomer.name}` : '';
       setSuccess(`${t('returns.returnTotal')}: ${(qty * price).toFixed(2)} ₾${customerNote}`);
       setSelectedProduct(null); setQuantity(''); setReturnPrice(''); setNote('');
@@ -80,9 +80,16 @@ export default function Returns() {
           <div style={s.twoCol}>
             <div style={s.field}>
               <label style={s.label}>{t('returns.quantity')}{unitLabel ? ` (${unitLabel})` : ''} *</label>
-              <input style={s.input} type="number" min={isDecimal ? '0.01' : '1'} step={isDecimal ? '0.01' : '1'}
+              <input
+                style={{ ...s.input, borderColor: quantity.trim() === '' ? '#DC2626' : '#E5E7EB' }}
+                type="text" inputMode={isDecimal ? 'decimal' : 'numeric'}
                 required placeholder={isDecimal ? 'e.g. 1.5' : 'e.g. 1'}
-                value={quantity} onChange={e => setQuantity(e.target.value)} />
+                value={quantity}
+                onChange={e => {
+                  const v = e.target.value;
+                  if (isDecimal ? /^\d*\.?\d*$/.test(v) : /^\d*$/.test(v)) setQuantity(v);
+                }}
+              />
             </div>
             {selectedProduct && (
               <div style={s.field}>

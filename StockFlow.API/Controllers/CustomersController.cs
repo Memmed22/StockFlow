@@ -36,4 +36,13 @@ public class CustomersController(CustomerService customerService) : ControllerBa
         if (error != null) return BadRequest(new { error });
         return Ok(customer);
     }
+
+    [HttpDelete("{id:int}")]
+    [RequireAdmin]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var (ok, error) = await customerService.DeleteAsync(id);
+        if (!ok) return BadRequest(new { error });
+        return Ok();
+    }
 }

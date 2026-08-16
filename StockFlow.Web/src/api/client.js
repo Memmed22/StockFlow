@@ -51,6 +51,7 @@ export const customersApi = {
   getById: (id) => api.get(`/customers/${id}`),
   create: (data) => api.post('/customers', data),
   recordPayment: (id, data) => api.post(`/customers/${id}/payment`, data),
+  delete: (id) => api.delete(`/customers/${id}`),
 };
 
 export const cashClosingApi = {
@@ -58,6 +59,7 @@ export const cashClosingApi = {
   createOpening: (data) => api.post('/cashclosings/opening', data),
   createExpense: (data) => api.post('/cashclosings/expense', data),
   preview: () => api.get('/cashclosings/preview'),
+  currentPeriodDetail: () => api.get('/cashclosings/current-period-detail'),
   create: (data) => api.post('/cashclosings', data),
   getAll: () => api.get('/cashclosings'),
 };

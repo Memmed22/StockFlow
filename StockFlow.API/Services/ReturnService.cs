@@ -5,13 +5,15 @@ using StockFlow.API.Models;
 namespace StockFlow.API.Services;
 
 public class ReturnService(AppDbContext db)
-{   
+{
     public async Task<(StockMovementDto? movement, string? error)> ProcessReturnAsync(ReturnDto dto)
     {
         var product = await db.Products.FindAsync(dto.ProductId);
         if (product == null) return (null, "Product not found.");
         if (dto.Quantity <= 0) return (null, "Quantity must be greater than zero.");
         if (dto.ReturnPrice < 0) return (null, "Return price cannot be negative.");
+        var user = await db.Users.FindAsync(dto.UserId);
+        if (user == null) return (null, "User not found.");
 
         var movement = new StockMovement
         {
@@ -25,19 +27,18 @@ public class ReturnService(AppDbContext db)
 
         db.StockMovements.Add(movement);
 
-        if (dto.CustomerId.HasValue && dto.UserId > 0)
+        // Cash given back to the customer leaves the register regardless of whether
+        // the return is linked to a customer account, so it always reduces expected cash.
+        var returnAmount = -(dto.Quantity * dto.ReturnPrice);
+        db.Sales.Add(new Sale
         {
-            var returnAmount = -(dto.Quantity * dto.ReturnPrice);
-            db.Sales.Add(new Sale
-            {
-                UserId = dto.UserId,
-                CustomerId = dto.CustomerId.Value,
-                Type = SaleType.Return,
-                TotalAmount = returnAmount,
-                DiscountAmount = 0,
-                CreatedAt = DateTime.UtcNow
-            });
-        }
+            UserId = dto.UserId,
+            CustomerId = dto.CustomerId,
+            Type = SaleType.Return,
+            TotalAmount = returnAmount,
+            DiscountAmount = 0,
+            CreatedAt = DateTime.UtcNow
+        });
 
         await db.SaveChangesAsync();
 
