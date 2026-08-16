@@ -47,6 +47,10 @@ dotnet publish -c Release -r win-x64 --self-contained true \
   /p:DebugType=None \
   /p:DebugSymbols=false
 
+# --- Copy database ---
+echo "  Copying database..."
+cp "$API_DIR/stockflow.db" "$PUBLISH_DIR/stockflow.db"
+
 # --- Write start.bat into the publish folder ---
 echo "  Writing start.bat..."
 cat > "$PUBLISH_DIR/start.bat" << 'EOF'
@@ -56,12 +60,12 @@ echo.
 echo  Starting StockFlow...
 echo  This window must stay open while the app is running.
 echo.
-start "" "StockFlow.API.exe"
-timeout /t 2 >nul
+cd /d "%~dp0"
+start "" "%~dp0StockFlow.API.exe"
+timeout /t 4 >nul
 start "" "http://localhost:5000"
 echo  App is running at http://localhost:5000
 echo  Close this window to stop the server.
-echo  Database is stored in the data\ folder - do not delete it.
 echo.
 pause
 EOF
