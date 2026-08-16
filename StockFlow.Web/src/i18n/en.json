@@ -32,7 +32,7 @@
     "searchPlaceholder": "Search by name or scan barcode...",
     "cartEmpty": "Cart is empty. Scan a product to start.",
     "col": { "product": "Product", "stock": "Stock", "basePrice": "Base Price", "discount": "Discount", "finalPrice": "Final Price", "qty": "Qty", "lineTotal": "Line Total" },
-    "summary": { "title": "Order Summary", "subtotal": "Subtotal", "cartDiscount": "Cart Discount", "total": "Total" },
+    "summary": { "title": "Order Summary", "subtotal": "Subtotal", "setTotalTo": "Set Total To", "total": "Total" },
     "paymentType": "Payment Type", "cash": "Cash", "debit": "Debit", "customer": "Customer",
     "loadingCustomers": "Loading customers...",
     "checkout": "Checkout", "chargeToCustomer": "Charge to Customer",
@@ -42,7 +42,8 @@
     "checkoutConfirm": {
       "title": "Confirm Sale",
       "subtitle": "Review the total before completing this sale.",
-      "confirmBtn": "Confirm & Charge"
+      "confirmBtn": "Confirm & Charge",
+      "processing": "Processing…"
     },
     "confirm": {
       "totalLabel": "Total Charged"
@@ -115,7 +116,7 @@
     "addStock": "Add Stock", "product": "Product *",
     "searchPlaceholder": "Search by name or barcode...",
     "currentStock": "Current stock", "note": "Note", "notePlaceholder": "Optional (supplier, batch…)",
-    "addButton": "Add Stock", "movements": "Stock Movements",
+    "addButton": "Add Stock", "saving": "Saving…", "movements": "Stock Movements",
     "totalRecords": "{{count}} total record(s)",
     "searchMovements": "Search by name or barcode…",
     "noMovements": "No movements yet.", "noMovementsSearch": "No movements matching \"{{query}}\".",
@@ -136,6 +137,7 @@
     "searchCustomer": "Search customer by name or phone...",
     "remove": "Remove", "deductNote": "Customer balance will decrease by {{amount}} ₾",
     "processReturn": "Process Return",
+    "processing": "Processing…",
     "errors": { "selectProduct": "Please select a product.", "quantity": "Enter a valid quantity.", "price": "Return price must be 0 or greater.", "processing": "Error processing return." }
   },
   "cashClosing": {

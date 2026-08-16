@@ -11,14 +11,14 @@ function loadCart() {
   try { return JSON.parse(localStorage.getItem('pos_cart') || '[]'); } catch { return []; }
 }
 function saveCart(cart) { localStorage.setItem('pos_cart', JSON.stringify(cart)); }
-function loadCartDiscount() { return parseFloat(localStorage.getItem('pos_cart_discount') || '0'); }
-function saveCartDiscount(v) { localStorage.setItem('pos_cart_discount', String(v)); }
+function loadCartDiscountAmount() { return parseFloat(localStorage.getItem('pos_cart_discount') || '0'); }
+function saveCartDiscountAmount(v) { localStorage.setItem('pos_cart_discount', String(v)); }
 
 export default function POS() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [cart, setCart] = useState(loadCart);
-  const [cartDiscount, setCartDiscount] = useState(loadCartDiscount);
+  const [cartDiscountAmount, setCartDiscountAmount] = useState(loadCartDiscountAmount);
   const [saleType, setSaleType] = useState('cash');
   const [customers, setCustomers] = useState([]);
   const [customerSearch, setCustomerSearch] = useState('');
@@ -26,9 +26,11 @@ export default function POS() {
   const [showCustomerList, setShowCustomerList] = useState(false);
   const [error, setError] = useState('');
   const [confirmModal, setConfirmModal] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [qtyDrafts, setQtyDrafts] = useState({});
   const [discountDrafts, setDiscountDrafts] = useState({});
   const [priceDrafts, setPriceDrafts] = useState({});
+  const [targetTotalDraft, setTargetTotalDraft] = useState(null);
   const searchRef = useRef();
 
   const [openingModal, setOpeningModal] = useState(false);
@@ -60,7 +62,7 @@ export default function POS() {
   }, []);
 
   useEffect(() => { saveCart(cart); }, [cart]);
-  useEffect(() => { saveCartDiscount(cartDiscount); }, [cartDiscount]);
+  useEffect(() => { saveCartDiscountAmount(cartDiscountAmount); }, [cartDiscountAmount]);
   useEffect(() => {
     if (saleType === 'debit' && customers.length === 0) {
       customersApi.getAll().then(r => setCustomers(r.data)).catch(() => {});
@@ -102,7 +104,18 @@ export default function POS() {
   );
 
   const subtotal = cart.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0);
-  const total = Math.max(0, subtotal * (1 - cartDiscount / 100));
+  const clampedDiscount = Math.min(subtotal, Math.max(0, cartDiscountAmount || 0));
+  const total = Math.max(0, subtotal - clampedDiscount);
+
+  const handleTargetTotalChange = (rawVal) => {
+    if (!/^\d*\.?\d*$/.test(rawVal)) return;
+    setTargetTotalDraft(rawVal);
+    if (rawVal === '' || rawVal === '.') return;
+    const targetTotal = parseFloat(rawVal);
+    setCartDiscountAmount(Math.min(subtotal, Math.max(0, subtotal - targetTotal)));
+  };
+
+  const handleTargetTotalBlur = () => setTargetTotalDraft(null);
 
   const handleProductSelected = (product) => {
     setError('');
@@ -205,7 +218,7 @@ export default function POS() {
   const removeItem = (productId) => setCart(prev => prev.filter(i => i.productId !== productId));
 
   const clearCart = () => {
-    setCart([]); setCartDiscount(0); setError('');
+    setCart([]); setCartDiscountAmount(0); setError('');
     setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
   };
 
@@ -216,14 +229,15 @@ export default function POS() {
     setConfirmModal(true);
   };
 
-  const closeCheckoutConfirm = () => setConfirmModal(false);
+  const closeCheckoutConfirm = () => { if (!checkoutLoading) setConfirmModal(false); };
 
   const handleCheckout = async () => {
-    setConfirmModal(false);
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
     try {
       const payload = {
         userId: user.id,
-        discountAmount: subtotal * cartDiscount / 100,
+        discountAmount: clampedDiscount,
         items: cart.map(i => ({
           productId: i.productId,
           quantity: i.quantity,
@@ -234,11 +248,15 @@ export default function POS() {
         customerId: saleType === 'debit' ? selectedCustomer?.id : null,
       };
       await salesApi.create(payload);
-      setCart([]); setCartDiscount(0);
+      setConfirmModal(false);
+      setCart([]); setCartDiscountAmount(0);
       setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
       searchRef.current?.focus();
     } catch (err) {
       setError(err.response?.data?.error || t('common.error'));
+      setConfirmModal(false);
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -391,12 +409,20 @@ export default function POS() {
           <span>{subtotal.toFixed(2)} ₾</span>
         </div>
         <div style={styles.summaryRow}>
-          <span>{t('pos.summary.cartDiscount')}</span>
+          <span>{t('pos.summary.setTotalTo')}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <input type="number" step="1" min="0" max="100" style={{ ...styles.smallInput, width: 70 }}
-              value={cartDiscount}
-              onChange={e => setCartDiscount(Math.min(100, Math.max(0, parseFloat(e.target.value) || 0)))} />
-            <span style={{ fontSize: 13, color: '#64748b' }}>%</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              style={{
+                ...styles.smallInput, width: 70,
+                borderColor: targetTotalDraft === '' ? '#dc2626' : '#e2e8f0',
+              }}
+              value={targetTotalDraft ?? total.toFixed(2)}
+              onChange={e => handleTargetTotalChange(e.target.value)}
+              onBlur={handleTargetTotalBlur}
+            />
+            <span style={{ fontSize: 13, color: '#64748b' }}>₾</span>
           </div>
         </div>
         <div style={styles.totalRow}>
@@ -486,7 +512,7 @@ export default function POS() {
       {confirmModal && (
         <div style={styles.overlay} onClick={e => e.target === e.currentTarget && closeCheckoutConfirm()}>
           <div style={styles.modal}>
-            <button style={styles.confirmClose} onClick={closeCheckoutConfirm} aria-label={t('common.cancel')}>✕</button>
+            <button style={styles.confirmClose} onClick={closeCheckoutConfirm} disabled={checkoutLoading} aria-label={t('common.cancel')}>✕</button>
             <div style={{ textAlign: 'center' }}>
               <div style={{ ...styles.confirmIcon, background: '#EEF2FF', color: '#4F46E5' }}>₾</div>
               <h3 style={{ margin: '14px 0 4px', fontSize: 19, fontWeight: 700, color: '#111827' }}>
@@ -523,11 +549,16 @@ export default function POS() {
               </div>
 
               <div style={{ display: 'flex', gap: 8 }}>
-                <button style={{ ...styles.clearBtn, flex: 1 }} onClick={closeCheckoutConfirm}>
+                <button style={{ ...styles.clearBtn, flex: 1 }} onClick={closeCheckoutConfirm} disabled={checkoutLoading}>
                   {t('common.cancel')}
                 </button>
-                <button style={{ ...styles.checkoutBtn, flex: 1, marginBottom: 0, marginTop: 0 }} onClick={handleCheckout} autoFocus>
-                  {t('pos.checkoutConfirm.confirmBtn')}
+                <button
+                  style={{ ...styles.checkoutBtn, flex: 1, marginBottom: 0, marginTop: 0, opacity: checkoutLoading ? 0.7 : 1 }}
+                  onClick={handleCheckout}
+                  disabled={checkoutLoading}
+                  autoFocus
+                >
+                  {checkoutLoading ? t('pos.checkoutConfirm.processing') : t('pos.checkoutConfirm.confirmBtn')}
                 </button>
               </div>
             </div>

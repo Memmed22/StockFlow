@@ -26,47 +26,64 @@ public class SaleService(AppDbContext db)
             if (customer == null) return (null, "Customer not found.");
         }
 
+        var productIds = dto.Items.Select(i => i.ProductId).Distinct().ToList();
+        var products = await db.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id);
+
+        foreach (var item in dto.Items)
+        {
+            if (!products.ContainsKey(item.ProductId)) return (null, $"Product {item.ProductId} not found.");
+            if (item.Quantity <= 0) return (null, $"Invalid quantity for product {products[item.ProductId].Name}.");
+        }
+
+        // Aggregate requested quantity per product so multiple cart lines for the
+        // same product are checked against available stock together, not independently
+        // (checking each line separately against the same un-decremented stock figure
+        // could let a cart oversell a product across its own lines).
+        var requestedByProduct = dto.Items
+            .GroupBy(i => i.ProductId)
+            .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantity));
+
+        foreach (var (productId, requestedQuantity) in requestedByProduct)
+        {
+            var movements = await db.StockMovements
+                .Where(m => m.ProductId == productId)
+                .Select(m => new { m.Type, m.Quantity })
+                .ToListAsync();
+            var currentStock = movements.Sum(m => m.Type == MovementType.Sale ? -m.Quantity : m.Quantity);
+
+            if (currentStock < requestedQuantity)
+                return (null, $"Insufficient stock for {products[productId].Name}. Available: {currentStock}.");
+        }
+
+        var saleItems = dto.Items.Select(item =>
+        {
+            var product = products[item.ProductId];
+            return new SaleItem
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity,
+                BasePrice = product.SellingPrice,
+                FinalPrice = item.FinalPrice ?? product.SellingPrice,
+                DiscountAmount = item.DiscountAmount
+            };
+        }).ToList();
+
         var sale = new Sale
         {
             UserId = dto.UserId,
             Type = saleType,
             CustomerId = dto.CustomerId,
             DiscountAmount = dto.DiscountAmount,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            TotalAmount = saleItems.Sum(i => i.FinalPrice * i.Quantity) - dto.DiscountAmount,
+            Items = saleItems
         };
 
-        var saleItems = new List<SaleItem>();
-
-        foreach (var item in dto.Items)
-        {
-            var product = await db.Products.FindAsync(item.ProductId);
-            if (product == null) return (null, $"Product {item.ProductId} not found.");
-            if (item.Quantity <= 0) return (null, $"Invalid quantity for product {product.Name}.");
-
-            var movements = await db.StockMovements
-                .Where(m => m.ProductId == item.ProductId)
-                .Select(m => new { m.Type, m.Quantity })
-                .ToListAsync();
-            var currentStock = movements.Sum(m => m.Type == MovementType.Sale ? -m.Quantity : m.Quantity);
-
-            if (currentStock < item.Quantity)
-                return (null, $"Insufficient stock for {product.Name}. Available: {currentStock}.");
-
-            var finalPrice = item.FinalPrice ?? product.SellingPrice;
-
-            saleItems.Add(new SaleItem
-            {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity,
-                BasePrice = product.SellingPrice,
-                FinalPrice = finalPrice,
-                DiscountAmount = item.DiscountAmount
-            });
-        }
-
-        var subtotal = saleItems.Sum(i => i.FinalPrice * i.Quantity);
-        sale.TotalAmount = subtotal - dto.DiscountAmount;
-        sale.Items = saleItems;
+        // Both saves must succeed or fail together — otherwise a sale could be recorded
+        // without its stock ever being decremented (or vice versa).
+        await using var transaction = await db.Database.BeginTransactionAsync();
 
         db.Sales.Add(sale);
         await db.SaveChangesAsync();
@@ -82,6 +99,8 @@ public class SaleService(AppDbContext db)
             });
         }
         await db.SaveChangesAsync();
+
+        await transaction.CommitAsync();
 
         return (await GetSaleDtoAsync(sale.Id), null);
     }
