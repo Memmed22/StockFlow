@@ -6,8 +6,12 @@ namespace StockFlow.API.Controllers;
 
 [ApiController]
 [Route("api/cashclosings")]
-public class CashClosingsController(CashClosingService cashClosingService) : ControllerBase
+public class CashClosingsController(CashClosingService cashClosingService, ReportService reportService) : ControllerBase
 {
+    [HttpGet("current-period-detail")]
+    public async Task<IActionResult> CurrentPeriodDetail()
+        => Ok(await reportService.GetCurrentPeriodDetailAsync());
+
     [HttpGet("opening/status")]
     public async Task<IActionResult> OpeningStatus()
         => Ok(await cashClosingService.GetOpeningStatusAsync());

@@ -25,7 +25,10 @@ export default function POS() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCustomerList, setShowCustomerList] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [qtyDrafts, setQtyDrafts] = useState({});
+  const [discountDrafts, setDiscountDrafts] = useState({});
+  const [priceDrafts, setPriceDrafts] = useState({});
   const searchRef = useRef();
 
   const [openingModal, setOpeningModal] = useState(false);
@@ -136,11 +139,15 @@ export default function POS() {
     });
   };
 
-  const updateQty = (productId, rawVal) => {
+  const handleQtyChange = (productId, rawVal) => {
     const item = cart.find(i => i.productId === productId);
     if (!item) return;
     const isDecimal = UNIT_IS_DECIMAL[item.unitType];
-    const qty = isDecimal ? parseFloat(rawVal) : parseInt(rawVal);
+    if (!(isDecimal ? /^\d*\.?\d*$/.test(rawVal) : /^\d*$/.test(rawVal))) return;
+
+    setQtyDrafts(prev => ({ ...prev, [productId]: rawVal }));
+
+    const qty = isDecimal ? parseFloat(rawVal) : parseInt(rawVal, 10);
     if (!qty || qty <= 0) return;
     if (qty > item.maxStock) {
       setError(`${item.name}: ${t('pos.notEnoughStock', { available: item.maxStock })}`);
@@ -150,30 +157,69 @@ export default function POS() {
     setCart(prev => prev.map(i => i.productId === productId ? { ...i, quantity: qty } : i));
   };
 
-  const updatePrice = (productId, price) => {
-    setCart(prev => prev.map(i => i.productId === productId
-      ? { ...i, finalPrice: parseFloat(price) || 0 } : i));
+  const handleQtyBlur = (productId) => {
+    setQtyDrafts(prev => {
+      if (!(productId in prev)) return prev;
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
   };
 
-  const updateItemDiscount = (productId, discount) => {
-    setCart(prev => prev.map(i => {
-      if (i.productId !== productId) return i;
-      const d = Math.min(100, Math.max(0, parseFloat(discount) || 0));
-      return { ...i, discount: d, finalPrice: Math.max(0, i.basePrice * (1 - d / 100)) };
-    }));
+  const handlePriceChange = (productId, rawVal) => {
+    if (!/^\d*\.?\d*$/.test(rawVal)) return;
+    setPriceDrafts(prev => ({ ...prev, [productId]: rawVal }));
+    if (rawVal === '' || rawVal === '.') return;
+    const price = parseFloat(rawVal);
+    setCart(prev => prev.map(i => i.productId === productId ? { ...i, finalPrice: price } : i));
+  };
+
+  const handlePriceBlur = (productId) => {
+    setPriceDrafts(prev => {
+      if (!(productId in prev)) return prev;
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
+  };
+
+  const handleDiscountChange = (productId, rawVal) => {
+    if (!/^\d*\.?\d*$/.test(rawVal)) return;
+    setDiscountDrafts(prev => ({ ...prev, [productId]: rawVal }));
+    if (rawVal === '' || rawVal === '.') return;
+    const d = Math.min(100, Math.max(0, parseFloat(rawVal)));
+    setCart(prev => prev.map(i => i.productId === productId
+      ? { ...i, discount: d, finalPrice: Math.max(0, i.basePrice * (1 - d / 100)) }
+      : i));
+  };
+
+  const handleDiscountBlur = (productId) => {
+    setDiscountDrafts(prev => {
+      if (!(productId in prev)) return prev;
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
   };
 
   const removeItem = (productId) => setCart(prev => prev.filter(i => i.productId !== productId));
 
   const clearCart = () => {
-    setCart([]); setCartDiscount(0); setError(''); setSuccess('');
+    setCart([]); setCartDiscount(0); setError('');
     setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
   };
 
-  const handleCheckout = async () => {
+  const openCheckoutConfirm = () => {
     if (cart.length === 0) { setError(t('pos.cartEmptyError')); return; }
     if (saleType === 'debit' && !selectedCustomer) { setError(t('pos.selectCustomerError')); return; }
-    setError(''); setSuccess('');
+    setError('');
+    setConfirmModal(true);
+  };
+
+  const closeCheckoutConfirm = () => setConfirmModal(false);
+
+  const handleCheckout = async () => {
+    setConfirmModal(false);
     try {
       const payload = {
         userId: user.id,
@@ -187,9 +233,7 @@ export default function POS() {
         type: saleType === 'debit' ? 1 : 0,
         customerId: saleType === 'debit' ? selectedCustomer?.id : null,
       };
-      const { data: sale } = await salesApi.create(payload);
-      const customerNote = saleType === 'debit' ? ` — ${selectedCustomer.name}` : '';
-      setSuccess(`#${sale.id} · ${sale.totalAmount.toFixed(2)} ₾${customerNote}`);
+      await salesApi.create(payload);
       setCart([]); setCartDiscount(0);
       setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
       searchRef.current?.focus();
@@ -251,7 +295,6 @@ export default function POS() {
         </div>
 
         {error && <p style={styles.error}>{error}</p>}
-        {success && <p style={styles.success}>{success}</p>}
 
         {cart.length === 0 ? (
           <div style={styles.empty}>{t('pos.cartEmpty')}</div>
@@ -274,6 +317,12 @@ export default function POS() {
                 const isDecimal = UNIT_IS_DECIMAL[item.unitType];
                 const unit = UNIT_LABELS[item.unitType] ?? 'pcs';
                 const stockWarn = item.quantity > item.maxStock;
+                const qtyDraft = qtyDrafts[item.productId];
+                const qtyEmpty = qtyDraft !== undefined && qtyDraft.trim() === '';
+                const discountDraft = discountDrafts[item.productId];
+                const discountEmpty = discountDraft !== undefined && discountDraft.trim() === '';
+                const priceDraft = priceDrafts[item.productId];
+                const priceEmpty = priceDraft !== undefined && priceDraft.trim() === '';
                 return (
                   <tr key={item.productId} style={styles.tr}>
                     <td style={styles.td}>
@@ -286,27 +335,36 @@ export default function POS() {
                     <td style={styles.td}>{item.basePrice.toFixed(2)} ₾</td>
                     <td style={styles.td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <input type="number" step="1" min="0" max="100" style={styles.smallInput}
-                          value={item.discount}
-                          onChange={e => updateItemDiscount(item.productId, e.target.value)} />
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          style={{ ...styles.smallInput, borderColor: discountEmpty ? '#dc2626' : '#e2e8f0' }}
+                          value={discountDraft ?? item.discount}
+                          onChange={e => handleDiscountChange(item.productId, e.target.value)}
+                          onBlur={() => handleDiscountBlur(item.productId)}
+                        />
                         <span style={{ fontSize: 12, color: '#64748b' }}>%</span>
                       </div>
                     </td>
                     <td style={styles.td}>
-                      <input type="number" step="0.5" min="0" style={styles.smallInput}
-                        value={item.finalPrice}
-                        onChange={e => updatePrice(item.productId, e.target.value)} />
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        style={{ ...styles.smallInput, borderColor: priceEmpty ? '#dc2626' : '#e2e8f0' }}
+                        value={priceDraft ?? item.finalPrice}
+                        onChange={e => handlePriceChange(item.productId, e.target.value)}
+                        onBlur={() => handlePriceBlur(item.productId)}
+                      />
                     </td>
                     <td style={styles.td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <input
-                          type="number"
-                          step={isDecimal ? '0.01' : '1'}
-                          min={isDecimal ? '0.01' : '1'}
-                          max={item.maxStock}
-                          style={{ ...styles.smallInput, width: 70, borderColor: stockWarn ? '#dc2626' : '#e2e8f0' }}
-                          value={item.quantity}
-                          onChange={e => updateQty(item.productId, e.target.value)}
+                          type="text"
+                          inputMode={isDecimal ? 'decimal' : 'numeric'}
+                          style={{ ...styles.smallInput, width: 70, borderColor: (stockWarn || qtyEmpty) ? '#dc2626' : '#e2e8f0' }}
+                          value={qtyDraft ?? item.quantity}
+                          onChange={e => handleQtyChange(item.productId, e.target.value)}
+                          onBlur={() => handleQtyBlur(item.productId)}
                         />
                         <span style={{ fontSize: 12, color: '#64748b' }}>{unit}</span>
                       </div>
@@ -414,7 +472,7 @@ export default function POS() {
           </div>
         )}
 
-        <button style={styles.checkoutBtn} onClick={handleCheckout} disabled={cart.length === 0}>
+        <button style={styles.checkoutBtn} onClick={openCheckoutConfirm} disabled={cart.length === 0}>
           {saleType === 'debit' ? t('pos.chargeToCustomer') : t('pos.checkout')}
         </button>
         <button style={styles.clearBtn} onClick={clearCart}>{t('pos.clearCart')}</button>
@@ -424,6 +482,58 @@ export default function POS() {
           <p style={styles.cartHint}>{t('pos.itemsSaved', { count: cart.length })}</p>
         )}
       </div>
+
+      {confirmModal && (
+        <div style={styles.overlay} onClick={e => e.target === e.currentTarget && closeCheckoutConfirm()}>
+          <div style={styles.modal}>
+            <button style={styles.confirmClose} onClick={closeCheckoutConfirm} aria-label={t('common.cancel')}>✕</button>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ ...styles.confirmIcon, background: '#EEF2FF', color: '#4F46E5' }}>₾</div>
+              <h3 style={{ margin: '14px 0 4px', fontSize: 19, fontWeight: 700, color: '#111827' }}>
+                {t('pos.checkoutConfirm.title')}
+              </h3>
+              <p style={{ margin: '0 0 18px', fontSize: 13, color: '#6B7280' }}>
+                {t('pos.checkoutConfirm.subtitle')}
+              </p>
+
+              <div style={styles.confirmTotalBox}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  {t('pos.confirm.totalLabel')}
+                </div>
+                <div style={{ fontSize: 34, fontWeight: 800, color: '#111827', marginTop: 4 }}>
+                  {total.toFixed(2)} ₾
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '16px 0 22px' }}>
+                <span style={{
+                  ...styles.payTypeBtn,
+                  flex: 'none',
+                  padding: '6px 14px',
+                  cursor: 'default',
+                  ...(saleType === 'debit' ? styles.payTypeBtnDebit : styles.payTypeBtnActive),
+                }}>
+                  {saleType === 'debit' ? t('pos.debit') : t('pos.cash')}
+                </span>
+                {saleType === 'debit' && selectedCustomer && (
+                  <span style={{ fontSize: 13, color: '#374151', alignSelf: 'center', fontWeight: 600 }}>
+                    {selectedCustomer.name}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button style={{ ...styles.clearBtn, flex: 1 }} onClick={closeCheckoutConfirm}>
+                  {t('common.cancel')}
+                </button>
+                <button style={{ ...styles.checkoutBtn, flex: 1, marginBottom: 0, marginTop: 0 }} onClick={handleCheckout} autoFocus>
+                  {t('pos.checkoutConfirm.confirmBtn')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {openingModal && (
         <div style={styles.overlay}>
@@ -619,7 +729,6 @@ const styles = {
   searchRow: { marginBottom: 14 },
   searchInput: { fontSize: 15, padding: '11px 14px' },
   error: { background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 8, padding: '8px 12px', color: '#B91C1C', fontSize: 13, fontWeight: 500, marginBottom: 10 },
-  success: { background: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: 8, padding: '8px 12px', color: '#065F46', fontSize: 13, fontWeight: 600, marginBottom: 10 },
   empty: { background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 10, padding: '40px 20px', textAlign: 'center', color: '#9CA3AF', fontSize: 15 },
   table: { width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: 10, overflow: 'hidden', border: '1px solid #E5E7EB', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   thead: { background: '#F9FAFB' },
@@ -649,11 +758,14 @@ const styles = {
   payModalBtn: { width: '100%', padding: 9, background: '#EEF2FF', color: '#4F46E5', border: '1px solid #C7D2FE', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14, marginTop: 6 },
   expenseBtn: { width: '100%', padding: 9, background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: 14, marginTop: 6 },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modal: { background: '#fff', borderRadius: 14, padding: 28, width: 430, maxWidth: '95vw', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' },
+  modal: { background: '#fff', borderRadius: 14, padding: 28, width: 430, maxWidth: '95vw', boxShadow: '0 16px 48px rgba(0,0,0,0.18)', position: 'relative' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   modalTitle: { margin: 0, fontSize: 17, fontWeight: 700, color: '#111827' },
   modalClose: { background: '#F3F4F8', border: 'none', borderRadius: 6, width: 28, height: 28, fontSize: 16, cursor: 'pointer', color: '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   modalLabel: { fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 },
   modalInput: { width: '100%', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, boxSizing: 'border-box', background: '#F9FAFB' },
   openingIcon: { width: 56, height: 56, borderRadius: '50%', background: '#EEF2FF', color: '#4F46E5', fontSize: 24, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' },
+  confirmIcon: { width: 56, height: 56, borderRadius: '50%', background: '#D1FAE5', color: '#059669', fontSize: 28, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' },
+  confirmTotalBox: { background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 10, padding: '14px 12px' },
+  confirmClose: { position: 'absolute', top: 14, right: 14, background: '#F3F4F8', border: 'none', borderRadius: 6, width: 28, height: 28, fontSize: 16, cursor: 'pointer', color: '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center' },
 };

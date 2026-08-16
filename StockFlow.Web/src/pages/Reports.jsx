@@ -117,6 +117,7 @@ export default function Reports() {
                 <tr>
                   <th style={s.th}>{t('reports.col.type')}</th>
                   <th style={s.th}>{t('reports.col.productDesc')}</th>
+                  <th style={s.th}>{t('reports.col.barcode')}</th>
                   <th style={s.th}>{t('reports.col.customer')}</th>
                   <th style={s.th}>{t('reports.col.qty')}</th>
                   <th style={s.th}>{t('reports.col.unitPrice')}</th>
@@ -136,6 +137,7 @@ export default function Reports() {
                         <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>{t(`reports.types.${cfg.key}`)}</span>
                       </td>
                       <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>{r.label}</td>
+                      <td style={s.td}>{r.barcode ? <code style={s.code}>{r.barcode}</code> : '—'}</td>
                       <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || '—'}</td>
                       <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
                         {r.quantity != null ? (isReturn ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
@@ -149,7 +151,7 @@ export default function Reports() {
                   );
                 })}
                 {detailed.items.length === 0 && !loading && (
-                  <tr><td colSpan={6} style={s.empty}>{t('reports.noData.transactions')}</td></tr>
+                  <tr><td colSpan={7} style={s.empty}>{t('reports.noData.transactions')}</td></tr>
                 )}
               </tbody>
             </table>

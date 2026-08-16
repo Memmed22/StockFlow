@@ -16,6 +16,9 @@ export default function CustomerDetail() {
   const [paySuccess, setPaySuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(new Set());
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => { load(); }, [id]);
 
@@ -43,6 +46,17 @@ export default function CustomerDetail() {
     }
   };
 
+  const handleDelete = async () => {
+    setDeleteError(''); setDeleteLoading(true);
+    try {
+      await customersApi.delete(id);
+      navigate('/customers');
+    } catch (err) {
+      setDeleteError(err.response?.data?.error || t('common.error'));
+      setDeleteLoading(false);
+    }
+  };
+
   const toggleExpand = (txId) => {
     setExpanded(prev => {
       const next = new Set(prev);
@@ -59,7 +73,10 @@ export default function CustomerDetail() {
 
   return (
     <div>
-      <button style={styles.backBtn} onClick={() => navigate('/customers')}>{t('customerDetail.back')}</button>
+      <div style={styles.topBar}>
+        <button style={styles.backBtn} onClick={() => navigate('/customers')}>{t('customerDetail.back')}</button>
+        <button style={styles.deleteBtn} onClick={() => setDeleteModal(true)}>{t('customerDetail.deleteModal.trigger')}</button>
+      </div>
 
       <div style={styles.topRow}>
         <div style={styles.infoCard}>
@@ -170,12 +187,45 @@ export default function CustomerDetail() {
           </tfoot>
         )}
       </table>
+
+      {deleteModal && (
+        <div style={styles.overlay} onClick={e => e.target === e.currentTarget && !deleteLoading && setDeleteModal(false)}>
+          <div style={styles.modal}>
+            <h3 style={styles.modalTitle}>{t('customerDetail.deleteModal.title', { name: info.name })}</h3>
+            <p style={styles.modalBody}>
+              {balance > 0
+                ? t('customerDetail.deleteModal.warningWithBalance', { balance: balance.toFixed(2) })
+                : t('customerDetail.deleteModal.warningNoBalance')}
+            </p>
+            <p style={styles.modalNote}>{t('customerDetail.deleteModal.keepHistoryNote')}</p>
+            {deleteError && <p style={styles.error}>{deleteError}</p>}
+            <div style={styles.modalActions}>
+              <button style={styles.cancelBtn} onClick={() => setDeleteModal(false)} disabled={deleteLoading}>
+                {t('common.cancel')}
+              </button>
+              <button style={{ ...styles.confirmDeleteBtn, opacity: deleteLoading ? 0.7 : 1 }} onClick={handleDelete} disabled={deleteLoading}>
+                {deleteLoading ? t('customerDetail.deleteModal.deleting') : t('customerDetail.deleteModal.confirmBtn')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 const styles = {
-  backBtn: { background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: '0 0 16px', display: 'block' },
+  topBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  backBtn: { background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: 14, fontWeight: 500, padding: 0 },
+  deleteBtn: { background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', fontWeight: 600, fontSize: 13 },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
+  modal: { background: '#fff', borderRadius: 14, padding: 28, width: 440, maxWidth: '95vw', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' },
+  modalTitle: { margin: '0 0 12px', fontSize: 18, fontWeight: 700, color: '#111827' },
+  modalBody: { margin: '0 0 10px', fontSize: 14, color: '#374151', lineHeight: 1.5 },
+  modalNote: { margin: '0 0 18px', fontSize: 13, color: '#6B7280', lineHeight: 1.5 },
+  modalActions: { display: 'flex', gap: 8, justifyContent: 'flex-end' },
+  cancelBtn: { background: '#F3F4F8', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', fontWeight: 600, fontSize: 14 },
+  confirmDeleteBtn: { background: '#DC2626', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', fontWeight: 700, fontSize: 14 },
   topRow: { display: 'flex', gap: 20, marginBottom: 28, alignItems: 'flex-start' },
   infoCard: { flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: 24 },
   customerName: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#1e293b' },

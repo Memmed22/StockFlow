@@ -109,6 +109,22 @@ public class CustomerService(AppDbContext db)
             customer.Description, balance, customer.CreatedAt), null);
     }
 
+    public async Task<(bool ok, string? error)> DeleteAsync(int id)
+    {
+        var customer = await db.Customers.FindAsync(id);
+        if (customer == null) return (false, "Customer not found.");
+
+        // Keep purchase/return/payment history for reporting, just detach it from the
+        // deleted customer (anonymize) so their outstanding balance no longer appears anywhere.
+        await db.Sales
+            .Where(s => s.CustomerId == id)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.CustomerId, (int?)null));
+
+        db.Customers.Remove(customer);
+        await db.SaveChangesAsync();
+        return (true, null);
+    }
+
     private async Task<decimal> GetBalanceAsync(int customerId)
     {
         var amounts = await db.Sales

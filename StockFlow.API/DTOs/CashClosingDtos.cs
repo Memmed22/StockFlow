@@ -29,3 +29,13 @@ public record CashClosingDto(
     string? Note,
     DateTime CreatedAt
 );
+
+public record CurrentPeriodDetailDto(
+    decimal OpeningCash,
+    decimal CashSalesTotal,
+    decimal DebitSalesTotal,
+    decimal PaymentsTotal,
+    decimal ReturnsTotal,
+    decimal ExpensesTotal,
+    List<DetailedReportItemDto> Items
+);

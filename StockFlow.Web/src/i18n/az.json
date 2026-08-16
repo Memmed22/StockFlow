@@ -37,6 +37,14 @@
     "clearCart": "Səbəti təmizlə", "customerPayment": "Müştəri ödənişi", "addExpense": "💸 Xərc əlavə et",
     "itemsSaved": "{{count}} məhsul — saxlanıldı",
     "changeBtn": "Dəyiş",
+    "checkoutConfirm": {
+      "title": "Satışı təsdiqlə",
+      "subtitle": "Satışı tamamlamazdan əvvəl cəmi yoxlayın.",
+      "confirmBtn": "Təsdiqlə və yekunlaşdır"
+    },
+    "confirm": {
+      "totalLabel": "Ödənilən məbləğ"
+    },
     "payment": {
       "title": "Müştəri ödənişi", "customer": "Müştəri", "amount": "Məbləğ (₾) *",
       "searchPlaceholder": "Ad və ya telefon...",
@@ -127,7 +135,8 @@
     "errors": { "selectProduct": "Zəhmət olmasa məhsul seçin.", "quantity": "Düzgün miqdar daxil edin.", "price": "Qiymət 0 və ya daha çox olmalıdır.", "processing": "Qaytarma emal edilərkən xəta." }
   },
   "cashClosing": {
-    "title": "Kassa bağlama", "subtitle": "Dövrün sonunda nağd pulunu sayın və kassanı sıfırlayın",
+    "title": "Kassa bağlama",
+    "tabs": { "close": "Kassanı bağla", "activity": "Son bağlamadan bəri hərəkət" }, "subtitle": "Dövrün sonunda nağd pulunu sayın və kassanı sıfırlayın",
     "periodFrom": "Dövr başlanğıcı", "periodTo": "Dövr sonu",
     "openingCash": "Açılış kassası", "expectedCash": "Gözlənilən nağd",
     "recordClosing": "Bağlamanı qeyd et", "countedCash": "Sayılan nağd (₾) *",
@@ -180,6 +189,15 @@
   },
   "customerDetail": {
     "back": "← Geri", "balance": "Cari balans (Borc)",
+    "deleteModal": {
+      "trigger": "Müştərini sil",
+      "title": "{{name}} silinsin?",
+      "warningWithBalance": "Bu, müştərini həmişəlik siləcək və {{balance}} ₾ məbləğindəki borcunu təmizləyəcək.",
+      "warningNoBalance": "Bu, müştərini həmişəlik siləcək.",
+      "keepHistoryNote": "Keçmiş alış-verişləri, qaytarmaları və ödənişləri hesabatlar üçün saxlanılacaq, lakin artıq bu müştəriyə bağlı olmayacaq. Bu geri qaytarıla bilməz.",
+      "confirmBtn": "Müştərini sil",
+      "deleting": "Silinir…"
+    },
     "payment": { "title": "Ödənişi qeyd et", "amount": "Məbləğ (₾)", "button": "Ödənişi qeyd et", "success": "{{amount}} ₾ ödəniş qeyd edildi.", "errorInvalid": "Düzgün məbləğ daxil edin.", "errorFailed": "Ödəniş qeyd edilmədi." },
     "history": "Əməliyyat tarixçəsi", "netBalance": "Xalis balans", "noTransactions": "Əməliyyat yoxdur.",
     "loading": "Yüklənir...",

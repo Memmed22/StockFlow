@@ -128,14 +128,16 @@ export default function StockIn() {
             <div style={s.field}>
               <label style={s.label}>{t('common.quantity')}{unitLabel ? ` (${unitLabel})` : ''} *</label>
               <input
-                style={s.input}
-                type="number"
-                min={isDecimal ? '0.01' : '1'}
-                step={isDecimal ? '0.01' : '1'}
+                style={{ ...s.input, borderColor: quantity.trim() === '' ? '#DC2626' : '#E5E7EB' }}
+                type="text"
+                inputMode={isDecimal ? 'decimal' : 'numeric'}
                 required
                 placeholder={isDecimal ? 'e.g. 12.5' : 'e.g. 10'}
                 value={quantity}
-                onChange={e => setQuantity(e.target.value)}
+                onChange={e => {
+                  const v = e.target.value;
+                  if (isDecimal ? /^\d*\.?\d*$/.test(v) : /^\d*$/.test(v)) setQuantity(v);
+                }}
               />
             </div>
             <div style={s.field}>
