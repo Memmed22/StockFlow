@@ -66,8 +66,10 @@ public class ReportService(AppDbContext db)
 
         var items = BuildDetailItems(sales, returns);
 
-        var cashSalesTotal  = items.Where(i => i.Type == "CashSale").Sum(i => i.Total);
-        var debitSalesTotal = items.Where(i => i.Type == "DebitSale").Sum(i => i.Total);
+        // Summed from the sale record itself (not its line items) so a per-sale
+        // cart-level discount is correctly netted out of the reported total.
+        var cashSalesTotal  = sales.Where(s => s.Type == SaleType.CashSale).Sum(s => s.TotalAmount);
+        var debitSalesTotal = sales.Where(s => s.Type == SaleType.DebitSale).Sum(s => s.TotalAmount);
         var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
         var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
         var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);
@@ -116,8 +118,8 @@ public class ReportService(AppDbContext db)
         items.AddRange(BuildDetailItems(sales, returns));
 
         var openingCash    = sales.Where(s => s.Type == SaleType.OpeningCash).Sum(s => s.TotalAmount);
-        var cashSalesTotal  = items.Where(i => i.Type == "CashSale").Sum(i => i.Total);
-        var debitSalesTotal = items.Where(i => i.Type == "DebitSale").Sum(i => i.Total);
+        var cashSalesTotal  = sales.Where(s => s.Type == SaleType.CashSale).Sum(s => s.TotalAmount);
+        var debitSalesTotal = sales.Where(s => s.Type == SaleType.DebitSale).Sum(s => s.TotalAmount);
         var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
         var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
         var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);
@@ -152,8 +154,8 @@ public class ReportService(AppDbContext db)
         var items = BuildDetailItems(sales, returns);
 
         var openingCash     = sales.Where(s => s.Type == SaleType.OpeningCash).Sum(s => s.TotalAmount);
-        var cashSalesTotal  = items.Where(i => i.Type == "CashSale").Sum(i => i.Total);
-        var debitSalesTotal = items.Where(i => i.Type == "DebitSale").Sum(i => i.Total);
+        var cashSalesTotal  = sales.Where(s => s.Type == SaleType.CashSale).Sum(s => s.TotalAmount);
+        var debitSalesTotal = sales.Where(s => s.Type == SaleType.DebitSale).Sum(s => s.TotalAmount);
         var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
         var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
         var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);

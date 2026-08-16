@@ -1,6 +1,6 @@
 {
   "nav": {
-    "pos": "POS", "returns": "Returns", "cashClose": "Cash Close",
+    "pos": "POS", "returns": "Returns", "cashClose": "Cash Register",
     "products": "Products", "stockIn": "Stock In", "customers": "Customers",
     "reports": "Reports", "users": "Users", "signOut": "Sign out"
   },
@@ -32,7 +32,7 @@
     "searchPlaceholder": "Search by name or scan barcode...",
     "cartEmpty": "Cart is empty. Scan a product to start.",
     "col": { "product": "Product", "stock": "Stock", "basePrice": "Base Price", "discount": "Discount", "finalPrice": "Final Price", "qty": "Qty", "lineTotal": "Line Total" },
-    "summary": { "title": "Order Summary", "subtotal": "Subtotal", "setTotalTo": "Set Total To", "total": "Total" },
+    "summary": { "title": "Order Summary", "subtotal": "Subtotal", "setTotalTo": "Set Total To", "discountApplied": "− {{amount}} ₾ discount applied", "total": "Total" },
     "paymentType": "Payment Type", "cash": "Cash", "debit": "Debit", "customer": "Customer",
     "loadingCustomers": "Loading customers...",
     "checkout": "Checkout", "chargeToCustomer": "Charge to Customer",
@@ -141,8 +141,8 @@
     "errors": { "selectProduct": "Please select a product.", "quantity": "Enter a valid quantity.", "price": "Return price must be 0 or greater.", "processing": "Error processing return." }
   },
   "cashClosing": {
-    "title": "Cash Closing",
-    "tabs": { "close": "Close Register", "activity": "Activity Since Last Close" },
+    "title": "Cash Register",
+    "tabs": { "close": "Close Register", "activity": "Activity" },
     "subtitle": "Record the end-of-period cash count and reset the register",
     "periodFrom": "Period From", "periodTo": "Period To",
     "openingCash": "Opening Cash", "expectedCash": "Expected Cash",

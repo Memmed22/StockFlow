@@ -89,6 +89,7 @@ echo Writing update.bat into publish folder...
     echo echo  IMPORTANT: Close StockFlow before continuing^^!
     echo echo.
     echo set /p "DEST=Enter the full path to your existing StockFlow folder: "
+    echo if "%%DEST:~-1%%"=="\" set "DEST=%%DEST:~0,-1%%"
     echo if not exist "%%DEST%%" ^(
     echo     echo [ERROR] Folder not found: %%DEST%%
     echo     pause ^& exit /b 1
@@ -97,7 +98,7 @@ echo Writing update.bat into publish folder...
     echo echo  Copying new files to: %%DEST%%
     echo echo  Skipping: data\
     echo echo.
-    echo robocopy "%%~dp0" "%%DEST%%" /e /xd data /xf update.bat /njh /njs
+    echo robocopy "%%~dp0." "%%DEST%%" /e /xd data /xf update.bat /njh /njs
     echo echo.
     echo echo  ==========================================
     echo echo   Update complete^^!

@@ -79,7 +79,7 @@ export default function ClosingDetail() {
           {[
             { label: t('cashClosing.openingCash'),         value: currency(data.openingCash),        color: '#374151' },
             { label: t('reports.summary.cashSales'),       value: `+${currency(data.cashSalesTotal)}`, color: '#059669' },
-            { label: t('reports.summary.debitSales'),      value: `+${currency(data.debitSalesTotal)}`, color: '#92400E', muted: true },
+            { label: t('reports.summary.debitSales'),      value: `${currency(data.debitSalesTotal)} (${t('reports.notCash')})`, color: '#92400E', muted: true },
             { label: t('reports.summary.payments'),        value: `+${currency(data.paymentsTotal)}`, color: '#1D4ED8' },
             { label: t('reports.summary.returns'),         value: currency(data.returnsTotal),       color: '#DC2626' },
             ...(data.expensesTotal < 0 ? [{ label: t('reports.summary.expenses'), value: currency(data.expensesTotal), color: '#9F1239' }] : []),

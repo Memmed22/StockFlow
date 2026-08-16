@@ -21,7 +21,7 @@ export default function CashClosing() {
     const d = new Date(dt);
     return d.getTime() === new Date('0001-01-01').getTime() ? t('cashClosing.beginning') : d.toLocaleDateString();
   };
-  const [tab, setTab] = useState('close');
+  const [tab, setTab] = useState('activity');
   const [preview, setPreview] = useState(null);
   const [openingStatus, setOpeningStatus] = useState(null);
   const [periodDetail, setPeriodDetail] = useState(null);
@@ -123,7 +123,7 @@ export default function CashClosing() {
 
       {/* Tab bar */}
       <div style={s.tabBar}>
-        {['close', 'activity'].map(key => (
+        {['activity', 'close'].map(key => (
           <button key={key}
             style={{ ...s.tab, ...(tab === key ? s.activeTab : {}) }}
             onClick={() => setTab(key)}>
@@ -192,7 +192,7 @@ export default function CashClosing() {
               {[
                 { label: t('cashClosing.openingCash'), value: currency(periodDetail.openingCash), color: '#374151' },
                 { label: t('reports.summary.cashSales'), value: `+${currency(periodDetail.cashSalesTotal)}`, color: '#059669' },
-                { label: t('reports.summary.debitSales'), value: `+${currency(periodDetail.debitSalesTotal)}`, color: '#92400E', muted: true },
+                { label: t('reports.summary.debitSales'), value: `${currency(periodDetail.debitSalesTotal)} (${t('reports.notCash')})`, color: '#92400E', muted: true },
                 { label: t('reports.summary.payments'), value: `+${currency(periodDetail.paymentsTotal)}`, color: '#1D4ED8' },
                 { label: t('reports.summary.returns'), value: currency(periodDetail.returnsTotal), color: '#DC2626' },
                 ...(periodDetail.expensesTotal < 0 ? [{ label: t('reports.summary.expenses'), value: currency(periodDetail.expensesTotal), color: '#9F1239' }] : []),
