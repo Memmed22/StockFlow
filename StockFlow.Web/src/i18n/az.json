@@ -30,11 +30,11 @@
     "searchPlaceholder": "Ad və ya barkodla axtarın...",
     "cartEmpty": "Səbət boşdur. Başlamaq üçün məhsul skan edin.",
     "col": { "product": "Məhsul", "stock": "Anbar", "basePrice": "Əsas qiymət", "discount": "Endirim", "finalPrice": "Son qiymət", "qty": "Miqdar", "lineTotal": "Cəmi" },
-    "summary": { "title": "Sifariş xülasəsi", "subtotal": "Arajam", "setTotalTo": "Cəmini təyin et", "discountApplied": "− {{amount}} ₾ endirim tətbiq edilib", "total": "Cəmi" },
+    "summary": { "total": "Cəmi" },
     "paymentType": "Ödəniş növü", "cash": "Nağd", "debit": "Borc", "customer": "Müştəri",
     "loadingCustomers": "Müştərilər yüklənir...",
     "checkout": "Ödəniş", "chargeToCustomer": "Müştəriyə yaz",
-    "clearCart": "Səbəti təmizlə", "customerPayment": "Müştəri ödənişi", "addExpense": "💸 Xərc əlavə et",
+    "clearCart": "Səbəti təmizlə", "reset": "Sıfırla", "customerPayment": "Müştəri ödənişi", "addExpense": "💸 Xərc əlavə et",
     "itemsSaved": "{{count}} məhsul — saxlanıldı",
     "changeBtn": "Dəyiş",
     "checkoutConfirm": {

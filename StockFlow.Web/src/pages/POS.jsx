@@ -16,9 +16,6 @@ export default function POS() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [cart, setCart] = useState(loadCart);
-  // Never persisted and always reset on any cart change (see effect below) — a discount
-  // computed for one set of items must never silently carry over onto a different sale.
-  const [cartDiscountAmount, setCartDiscountAmount] = useState(0);
   const [saleType, setSaleType] = useState('cash');
   const [customers, setCustomers] = useState([]);
   const [customerSearch, setCustomerSearch] = useState('');
@@ -30,7 +27,6 @@ export default function POS() {
   const [qtyDrafts, setQtyDrafts] = useState({});
   const [discountDrafts, setDiscountDrafts] = useState({});
   const [priceDrafts, setPriceDrafts] = useState({});
-  const [targetTotalDraft, setTargetTotalDraft] = useState(null);
   const searchRef = useRef();
 
   const [openingModal, setOpeningModal] = useState(false);
@@ -63,13 +59,6 @@ export default function POS() {
   }, []);
 
   useEffect(() => { saveCart(cart); }, [cart]);
-  // Any change to the cart's contents (add/remove/qty/price) invalidates a previously
-  // set discount, since it was computed against a different subtotal.
-  const isFirstCartEffect = useRef(true);
-  useEffect(() => {
-    if (isFirstCartEffect.current) { isFirstCartEffect.current = false; return; }
-    setCartDiscountAmount(0);
-  }, [cart]);
   useEffect(() => {
     customersApi.getAll().then(r => setCustomers(r.data)).catch(() => {});
   }, []);
@@ -114,18 +103,7 @@ export default function POS() {
   );
 
   const subtotal = cart.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0);
-  const clampedDiscount = Math.min(subtotal, Math.max(0, cartDiscountAmount || 0));
-  const total = Math.max(0, subtotal - clampedDiscount);
-
-  const handleTargetTotalChange = (rawVal) => {
-    if (!/^\d*\.?\d*$/.test(rawVal)) return;
-    setTargetTotalDraft(rawVal);
-    if (rawVal === '' || rawVal === '.') return;
-    const targetTotal = parseFloat(rawVal);
-    setCartDiscountAmount(Math.min(subtotal, Math.max(0, subtotal - targetTotal)));
-  };
-
-  const handleTargetTotalBlur = () => setTargetTotalDraft(null);
+  const total = subtotal;
 
   const handleProductSelected = (product) => {
     setError('');
@@ -228,7 +206,7 @@ export default function POS() {
   const removeItem = (productId) => setCart(prev => prev.filter(i => i.productId !== productId));
 
   const clearCart = () => {
-    setCart([]); setCartDiscountAmount(0); setError('');
+    setCart([]); setError('');
     setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
   };
 
@@ -247,7 +225,7 @@ export default function POS() {
     try {
       const payload = {
         userId: user.id,
-        discountAmount: clampedDiscount,
+        discountAmount: 0,
         items: cart.map(i => ({
           productId: i.productId,
           quantity: i.quantity,
@@ -259,7 +237,7 @@ export default function POS() {
       };
       await salesApi.create(payload);
       setConfirmModal(false);
-      setCart([]); setCartDiscountAmount(0);
+      setCart([]);
       setSaleType('cash'); setSelectedCustomer(null); setCustomerSearch('');
       searchRef.current?.focus();
     } catch (err) {
@@ -412,47 +390,18 @@ export default function POS() {
       </div>
 
       <div style={styles.right}>
-        <div style={styles.summaryHeaderRow}>
-          <h3 style={styles.summaryTitle}>{t('pos.summary.title')}</h3>
-          <button
-            style={styles.clearIconBtn}
-            onClick={clearCart}
-            title={t('pos.clearCart')}
-            aria-label={t('pos.clearCart')}
-          >
-            🗑️
-          </button>
-        </div>
-
-        <div style={styles.summaryRow}>
-          <span>{t('pos.summary.subtotal')}</span>
-          <span>{subtotal.toFixed(2)} ₾</span>
-        </div>
-        <div style={styles.summaryRow}>
-          <span>{t('pos.summary.setTotalTo')}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <input
-              type="text"
-              inputMode="decimal"
-              style={{
-                ...styles.smallInput, width: 70,
-                borderColor: targetTotalDraft === '' ? '#dc2626' : '#e2e8f0',
-              }}
-              value={targetTotalDraft ?? total.toFixed(2)}
-              onChange={e => handleTargetTotalChange(e.target.value)}
-              onBlur={handleTargetTotalBlur}
-            />
-            <span style={{ fontSize: 13, color: '#64748b' }}>₾</span>
-          </div>
-        </div>
-        {clampedDiscount > 0 && (
-          <div style={styles.discountHint}>
-            {t('pos.summary.discountApplied', { amount: clampedDiscount.toFixed(2) })}
-          </div>
-        )}
         <div style={styles.totalRow}>
           <span>{t('pos.summary.total')}</span>
-          <span>{total.toFixed(2)} ₾</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span>{total.toFixed(2)} ₾</span>
+            <button
+              style={styles.resetLink}
+              onClick={clearCart}
+              title={t('pos.clearCart')}
+            >
+              {t('pos.reset')}
+            </button>
+          </div>
         </div>
 
         <div style={styles.payTypeSection}>
@@ -806,12 +755,8 @@ const styles = {
   td: { padding: '10px 12px', fontSize: 14, color: '#374151' },
   smallInput: { padding: '5px 8px', border: '1px solid #E5E7EB', borderRadius: 6, fontSize: 14, width: 90, boxSizing: 'border-box', background: '#F9FAFB' },
   removeBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontWeight: 700, fontSize: 13 },
-  summaryHeaderRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  summaryTitle: { margin: 0, fontSize: 15, fontWeight: 700, color: '#111827' },
-  clearIconBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, padding: 0, lineHeight: 1 },
-  summaryRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, fontSize: 14, color: '#374151' },
-  discountHint: { fontSize: 12, color: '#D97706', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '4px 8px', marginBottom: 8, fontWeight: 600, textAlign: 'right' },
-  totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 20, borderTop: '2px solid #E5E7EB', paddingTop: 12, marginTop: 8, marginBottom: 16, color: '#111827' },
+  resetLink: { background: 'none', border: 'none', color: '#9CA3AF', cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: 0, textDecoration: 'underline' },
+  totalRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 800, fontSize: 20, marginBottom: 16, color: '#111827' },
   payTypeSection: { marginBottom: 12 },
   payTypeLabel: { fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 },
   optionalHint: { textTransform: 'none', fontWeight: 500, color: '#9CA3AF', letterSpacing: 0 },
