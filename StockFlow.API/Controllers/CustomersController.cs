@@ -29,6 +29,13 @@ public class CustomersController(CustomerService customerService) : ControllerBa
         return CreatedAtAction(nameof(GetById), new { id = customer!.Id }, customer);
     }
 
+    [HttpGet("{id:int}/purchased/{productId:int}")]
+    public async Task<IActionResult> HasPurchasedProduct(int id, int productId)
+    {
+        var (purchased, lastPrice) = await customerService.GetProductPurchaseInfoAsync(id, productId);
+        return Ok(new CustomerPurchaseCheckDto(purchased, lastPrice));
+    }
+
     [HttpPost("{id:int}/payment")]
     public async Task<IActionResult> RecordPayment(int id, [FromBody] RecordPaymentDto dto)
     {

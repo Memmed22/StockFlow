@@ -133,9 +133,14 @@
     "returnPrice": "Return Price (₾)", "modified": "modified",
     "reset": "Reset", "defaultPrice": "Default: {{price}} ₾",
     "returnTotal": "Return Total", "note": "Note", "notePlaceholder": "Reason for return (optional)",
-    "linkCustomer": "Link to Customer", "linkCustomerNote": "(optional — deducts from balance)",
+    "linkCustomer": "Link to Customer", "linkCustomerNote": "(optional)",
     "searchCustomer": "Search customer by name or phone...",
-    "remove": "Remove", "deductNote": "Customer balance will decrease by {{amount}} ₾",
+    "remove": "Remove",
+    "refundMethod": "Settlement Method",
+    "refundCash": "Cash Refund", "refundCredit": "Store Credit",
+    "cashRefundNote": "{{amount}} ₾ will be paid out from the cash register. Customer balance is not affected.",
+    "deductNote": "Customer balance will decrease by {{amount}} ₾ (or add credit if already paid off). Cash register is not affected.",
+    "neverPurchasedWarning": "This customer has no purchase record for this product.",
     "processReturn": "Process Return",
     "processing": "Processing…",
     "errors": { "selectProduct": "Please select a product.", "quantity": "Enter a valid quantity.", "price": "Return price must be 0 or greater.", "processing": "Error processing return." }
@@ -158,6 +163,7 @@
     "title": "Reports", "subtitle": "Sales, inventory, and cashier performance",
     "tabs": { "detailed": "Detailed Sales", "daily": "Daily Summary", "users": "By Cashier", "stock": "Stock Report", "closings": "Cash Closings" },
     "apply": "Apply", "refresh": "Refresh", "loading": "Loading…",
+    "searchTransactions": "Search by name or barcode…",
     "col": {
       "type": "Type", "productDesc": "Product / Description", "customer": "Customer",
       "qty": "Qty", "unitPrice": "Unit Price", "total": "Total",
@@ -165,11 +171,11 @@
       "cashier": "Cashier", "product": "Product", "barcode": "Barcode", "currentStock": "Current Stock",
       "closingDate": "Closing Date", "period": "Period"
     },
-    "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "expenses": "💸 Expenses", "cashTotal": "Cash Total" },
+    "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "creditReturns": "Store Credit Returns", "expenses": "💸 Expenses", "cashTotal": "Cash Total" },
     "infoRevenue": "Total Revenue", "infoTransactions": "Transactions",
     "notCash": "not cash",
-    "noData": { "transactions": "No transactions in this period.", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "reports": "Failed to load reports." },
-    "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "Payment": "Payment", "Expense": "Expense", "OpeningCash": "Opening" },
+    "noData": { "transactions": "No transactions in this period.", "transactionsSearch": "No transactions matching \"{{query}}\".", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "reports": "Failed to load reports." },
+    "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "CreditReturn": "Store Credit", "Payment": "Payment", "Expense": "Expense", "OpeningCash": "Opening" },
     "closingDetail": { "title": "Cash Closing", "cashier": "Cashier", "period": "Period", "breakdown": "Financial Breakdown", "totals": "Totals", "transactions": "Transactions" }
   },
   "users": {
@@ -209,7 +215,7 @@
     "history": "Transaction History", "netBalance": "Net Balance", "noTransactions": "No transactions yet.",
     "loading": "Loading...",
     "col": { "date": "Date", "type": "Type", "amount": "Amount" },
-    "items": { "product": "Product", "qty": "Qty", "unitPrice": "Unit Price", "total": "Total" },
-    "types": { "CashSale": "Cash Sale", "DebitSale": "Debit Sale", "Return": "Return", "Payment": "Payment" }
+    "items": { "product": "Product", "barcode": "Barcode", "qty": "Qty", "unitPrice": "Unit Price", "total": "Total" },
+    "types": { "CashSale": "Cash Sale", "DebitSale": "Debit Sale", "Return": "Return", "CreditReturn": "Store Credit", "Payment": "Payment" }
   }
 }

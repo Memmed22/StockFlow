@@ -49,6 +49,7 @@ export const usersApi = {
 export const customersApi = {
   getAll: (search) => api.get('/customers', { params: { search } }),
   getById: (id) => api.get(`/customers/${id}`),
+  hasPurchased: (id, productId) => api.get(`/customers/${id}/purchased/${productId}`),
   create: (data) => api.post('/customers', data),
   recordPayment: (id, data) => api.post(`/customers/${id}/payment`, data),
   delete: (id) => api.delete(`/customers/${id}`),

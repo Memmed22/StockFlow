@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { customersApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-const TYPE_COLORS = { CashSale: '#2563eb', DebitSale: '#dc2626', Return: '#d97706', Payment: '#16a34a' };
+const TYPE_COLORS = { CashSale: '#2563eb', DebitSale: '#dc2626', Return: '#d97706', CreditReturn: '#7c3aed', Payment: '#16a34a' };
 
 export default function CustomerDetail() {
   const { id } = useParams();
@@ -150,6 +150,7 @@ export default function CustomerDetail() {
                         <thead>
                           <tr>
                             <th style={styles.itemTh}>{t('customerDetail.items.product')}</th>
+                            <th style={styles.itemTh}>{t('customerDetail.items.barcode')}</th>
                             <th style={styles.itemTh}>{t('customerDetail.items.qty')}</th>
                             <th style={styles.itemTh}>{t('customerDetail.items.unitPrice')}</th>
                             <th style={{ ...styles.itemTh, textAlign: 'right' }}>{t('customerDetail.items.total')}</th>
@@ -159,6 +160,7 @@ export default function CustomerDetail() {
                           {tx.items.map((item, idx) => (
                             <tr key={idx}>
                               <td style={styles.itemTd}>{item.productName}</td>
+                              <td style={styles.itemTd}>{item.barcode ? <code style={styles.code}>{item.barcode}</code> : '—'}</td>
                               <td style={styles.itemTd}>{item.quantity}</td>
                               <td style={styles.itemTd}>{item.unitPrice.toFixed(2)} ₾</td>
                               <td style={{ ...styles.itemTd, textAlign: 'right', fontWeight: 600 }}>{item.total.toFixed(2)} ₾</td>
@@ -253,4 +255,5 @@ const styles = {
   itemsTable: { width: '100%', borderCollapse: 'collapse', fontSize: 13 },
   itemTh: { padding: '5px 10px', textAlign: 'left', fontWeight: 600, color: '#64748b', borderBottom: '1px solid #e2e8f0' },
   itemTd: { padding: '5px 10px', color: '#475569' },
+  code: { background: '#F3F4F8', padding: '2px 6px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace', color: '#6B7280' },
 };
