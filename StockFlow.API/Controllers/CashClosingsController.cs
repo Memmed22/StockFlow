@@ -24,6 +24,14 @@ public class CashClosingsController(CashClosingService cashClosingService, Repor
         return Ok();
     }
 
+    [HttpPost("payment")]
+    public async Task<IActionResult> RecordPayment([FromBody] RecordCashPaymentDto dto)
+    {
+        var (ok, error) = await cashClosingService.RecordAnonymousPaymentAsync(dto);
+        if (!ok) return BadRequest(new { error });
+        return Ok();
+    }
+
     [HttpPost("opening")]
     public async Task<IActionResult> CreateOpening([FromBody] CreateOpeningCashDto dto)
     {

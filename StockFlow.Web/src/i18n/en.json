@@ -52,7 +52,8 @@
       "title": "Customer Payment", "customer": "Customer", "amount": "Amount (₾) *",
       "searchPlaceholder": "Search by name or phone...",
       "record": "Record Payment", "recording": "Recording...", "done": "Done",
-      "selectCustomer": "Select a customer.", "invalidAmount": "Enter a valid amount."
+      "selectCustomer": "Select a customer.", "invalidAmount": "Enter a valid amount.",
+      "useNoCustomer": "No customer (cash only)", "noCustomer": "No customer"
     },
     "expense": {
       "title": "Add Cash Expense",
@@ -173,7 +174,7 @@
     },
     "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "creditReturns": "Store Credit Returns", "expenses": "💸 Expenses", "cashTotal": "Cash Total" },
     "infoRevenue": "Total Revenue", "infoTransactions": "Transactions",
-    "notCash": "not cash",
+    "notCash": "not cash", "unknownCustomer": "Unknown",
     "noData": { "transactions": "No transactions in this period.", "transactionsSearch": "No transactions matching \"{{query}}\".", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "reports": "Failed to load reports." },
     "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "CreditReturn": "Store Credit", "Payment": "Payment", "Expense": "Expense", "OpeningCash": "Opening" },
     "closingDetail": { "title": "Cash Closing", "cashier": "Cashier", "period": "Period", "breakdown": "Financial Breakdown", "totals": "Totals", "transactions": "Transactions" }

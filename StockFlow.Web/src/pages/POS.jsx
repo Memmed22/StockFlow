@@ -42,6 +42,7 @@ export default function POS() {
   const [pmCustomers, setPmCustomers] = useState([]);
   const [pmSearch, setPmSearch] = useState('');
   const [pmCustomer, setPmCustomer] = useState(null);
+  const [pmNoCustomer, setPmNoCustomer] = useState(false);
   const [pmShowList, setPmShowList] = useState(false);
   const [pmAmount, setPmAmount] = useState('');
   const [pmError, setPmError] = useState('');
@@ -75,7 +76,7 @@ export default function POS() {
 
   const openPayModal = () => {
     setPayModal(true);
-    setPmCustomers([]); setPmSearch(''); setPmCustomer(null);
+    setPmCustomers([]); setPmSearch(''); setPmCustomer(null); setPmNoCustomer(false);
     setPmAmount(''); setPmError(''); setPmSuccess('');
     customersApi.getAll().then(r => setPmCustomers(r.data)).catch(() => {});
   };
@@ -89,14 +90,19 @@ export default function POS() {
 
   const handleModalPayment = async (e) => {
     e.preventDefault();
-    if (!pmCustomer) { setPmError(t('pos.payment.selectCustomer')); return; }
+    if (!pmCustomer && !pmNoCustomer) { setPmError(t('pos.payment.selectCustomer')); return; }
     const amount = parseFloat(pmAmount);
     if (!amount || amount <= 0) { setPmError(t('pos.payment.invalidAmount')); return; }
     setPmError(''); setPmLoading(true);
     try {
-      await customersApi.recordPayment(pmCustomer.id, { userId: user.id, amount });
-      setPmSuccess(`${amount.toFixed(2)} ₾ — ${pmCustomer.name}`);
-      setPmCustomer(null); setPmSearch(''); setPmAmount('');
+      if (pmCustomer) {
+        await customersApi.recordPayment(pmCustomer.id, { userId: user.id, amount });
+        setPmSuccess(`${amount.toFixed(2)} ₾ — ${pmCustomer.name}`);
+      } else {
+        await cashClosingApi.recordPayment({ userId: user.id, amount });
+        setPmSuccess(`${amount.toFixed(2)} ₾ — ${t('pos.payment.noCustomer')}`);
+      }
+      setPmCustomer(null); setPmNoCustomer(false); setPmSearch(''); setPmAmount('');
     } catch (err) {
       setPmError(err.response?.data?.error || t('common.error'));
     } finally { setPmLoading(false); }
@@ -406,7 +412,17 @@ export default function POS() {
       </div>
 
       <div style={styles.right}>
-        <h3 style={styles.summaryTitle}>{t('pos.summary.title')}</h3>
+        <div style={styles.summaryHeaderRow}>
+          <h3 style={styles.summaryTitle}>{t('pos.summary.title')}</h3>
+          <button
+            style={styles.clearIconBtn}
+            onClick={clearCart}
+            title={t('pos.clearCart')}
+            aria-label={t('pos.clearCart')}
+          >
+            🗑️
+          </button>
+        </div>
 
         <div style={styles.summaryRow}>
           <span>{t('pos.summary.subtotal')}</span>
@@ -510,7 +526,6 @@ export default function POS() {
         <button style={styles.checkoutBtn} onClick={openCheckoutConfirm} disabled={cart.length === 0}>
           {saleType === 'debit' ? t('pos.chargeToCustomer') : t('pos.checkout')}
         </button>
-        <button style={styles.clearBtn} onClick={clearCart}>{t('pos.clearCart')}</button>
         <button style={styles.payModalBtn} onClick={openPayModal}>{t('pos.customerPayment')}</button>
         <button style={styles.expenseBtn} onClick={openExpenseModal}>{t('pos.addExpense')}</button>
         {cart.length > 0 && (
@@ -687,7 +702,14 @@ export default function POS() {
             ) : (
               <form onSubmit={handleModalPayment} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>
-                  <label style={styles.modalLabel}>{t('pos.payment.customer')}</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label style={styles.modalLabel}>{t('pos.payment.customer')}</label>
+                    {!pmCustomer && !pmNoCustomer && (
+                      <button type="button" style={styles.noCustomerLink} onClick={() => { setPmNoCustomer(true); setPmSearch(''); setPmShowList(false); }}>
+                        {t('pos.payment.useNoCustomer')}
+                      </button>
+                    )}
+                  </div>
                   {pmCustomer ? (
                     <div style={styles.selectedCustomer}>
                       <div>
@@ -700,6 +722,13 @@ export default function POS() {
                         </div>
                       </div>
                       <button type="button" style={styles.changeBtn} onClick={() => { setPmCustomer(null); setPmSearch(''); }}>
+                        {t('pos.changeBtn')}
+                      </button>
+                    </div>
+                  ) : pmNoCustomer ? (
+                    <div style={styles.selectedCustomer}>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: '#64748b' }}>{t('pos.payment.noCustomer')}</div>
+                      <button type="button" style={styles.changeBtn} onClick={() => setPmNoCustomer(false)}>
                         {t('pos.changeBtn')}
                       </button>
                     </div>
@@ -777,7 +806,9 @@ const styles = {
   td: { padding: '10px 12px', fontSize: 14, color: '#374151' },
   smallInput: { padding: '5px 8px', border: '1px solid #E5E7EB', borderRadius: 6, fontSize: 14, width: 90, boxSizing: 'border-box', background: '#F9FAFB' },
   removeBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontWeight: 700, fontSize: 13 },
-  summaryTitle: { margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#111827' },
+  summaryHeaderRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  summaryTitle: { margin: 0, fontSize: 15, fontWeight: 700, color: '#111827' },
+  clearIconBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 13, padding: 0, lineHeight: 1 },
   summaryRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, fontSize: 14, color: '#374151' },
   discountHint: { fontSize: 12, color: '#D97706', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '4px 8px', marginBottom: 8, fontWeight: 600, textAlign: 'right' },
   totalRow: { display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 20, borderTop: '2px solid #E5E7EB', paddingTop: 12, marginTop: 8, marginBottom: 16, color: '#111827' },
@@ -794,6 +825,7 @@ const styles = {
   customerItem: { padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #F3F4F6' },
   selectedCustomer: { background: '#EEF2FF', border: '1px solid #C7D2FE', borderRadius: 8, padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   changeBtn: { background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', fontSize: 12, fontWeight: 600 },
+  noCustomerLink: { background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 12, fontWeight: 600, padding: 0, textDecoration: 'underline' },
   checkoutBtn: { width: '100%', padding: 13, background: '#059669', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 15, marginBottom: 8, marginTop: 4 },
   clearBtn: { width: '100%', padding: 9, background: '#F3F4F8', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 8, cursor: 'pointer', fontWeight: 500, fontSize: 14 },
   cartHint: { textAlign: 'center', fontSize: 12, color: '#9CA3AF', margin: '8px 0 0' },
