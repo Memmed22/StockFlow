@@ -47,10 +47,6 @@ dotnet publish -c Release -r win-x64 --self-contained true \
   /p:DebugType=None \
   /p:DebugSymbols=false
 
-# --- Copy database ---
-echo "  Copying database..."
-cp "$API_DIR/stockflow.db" "$PUBLISH_DIR/stockflow.db"
-
 # --- Write start.bat into the publish folder ---
 echo "  Writing start.bat..."
 cat > "$PUBLISH_DIR/start.bat" << 'EOF'
@@ -61,6 +57,12 @@ echo  Starting StockFlow...
 echo  This window must stay open while the app is running.
 echo.
 cd /d "%~dp0"
+
+:: Free port 5000 if a previous StockFlow instance is still running
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr /c:":5000 " ^| findstr "LISTENING"') do (
+    taskkill /PID %%p /F >nul 2>&1
+)
+
 start "" "%~dp0StockFlow.API.exe"
 timeout /t 4 >nul
 start "" "http://localhost:5000"
@@ -84,7 +86,10 @@ echo  This will copy the new version over your existing
 echo  installation. Your database (data\ folder) will
 echo  NOT be touched.
 echo.
-echo  IMPORTANT: Close StockFlow before continuing!
+echo  Closing any running StockFlow instance...
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr /c:":5000 " ^| findstr "LISTENING"') do (
+    taskkill /PID %%p /F >nul 2>&1
+)
 echo.
 set /p "DEST=Enter the full path to your existing StockFlow folder: "
 if "%DEST:~-1%"=="\" set "DEST=%DEST:~0,-1%"
@@ -97,10 +102,24 @@ echo  Copying new files to: %DEST%
 echo  Skipping: data\
 echo.
 robocopy "%~dp0." "%DEST%" /e /xd data /xf update.bat /njh /njs
+if %ERRORLEVEL% GEQ 8 (
+    echo.
+    echo  ==========================================
+    echo   [ERROR] Copy failed - nothing was updated!
+    echo   See the robocopy output above for details.
+    echo  ==========================================
+    echo.
+    pause
+    exit /b 1
+)
+echo.
+echo  Restarting StockFlow...
+start "" "%DEST%\StockFlow.API.exe"
+timeout /t 4 >nul
+start "" "http://localhost:5000"
 echo.
 echo  ==========================================
-echo   Update complete!
-echo   Run %DEST%\start.bat to launch StockFlow.
+echo   Update complete! StockFlow is restarting.
 echo  ==========================================
 echo.
 pause

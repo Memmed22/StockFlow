@@ -62,6 +62,10 @@ echo Writing start.bat into publish folder...
     echo echo  Starting StockFlow...
     echo echo  This window must stay open while the app is running.
     echo echo.
+    echo :: Free port 5000 if a previous StockFlow instance is still running
+    echo for /f "tokens=5" %%%%p in ^('netstat -ano ^^^| findstr /c:":5000 " ^^^| findstr "LISTENING"'^) do ^(
+    echo     taskkill /PID %%%%p /F ^>nul 2^>^&1
+    echo ^)
     echo start "" "StockFlow.API.exe"
     echo timeout /t 2 ^>nul
     echo start "" "http://localhost:5000"
@@ -86,7 +90,10 @@ echo Writing update.bat into publish folder...
     echo echo  installation. Your database ^(data\ folder^) will
     echo echo  NOT be touched.
     echo echo.
-    echo echo  IMPORTANT: Close StockFlow before continuing^^!
+    echo echo  Closing any running StockFlow instance...
+    echo for /f "tokens=5" %%%%p in ^('netstat -ano ^^^| findstr /c:":5000 " ^^^| findstr "LISTENING"'^) do ^(
+    echo     taskkill /PID %%%%p /F ^>nul 2^>^&1
+    echo ^)
     echo echo.
     echo set /p "DEST=Enter the full path to your existing StockFlow folder: "
     echo if "%%DEST:~-1%%"=="\" set "DEST=%%DEST:~0,-1%%"
@@ -99,10 +106,23 @@ echo Writing update.bat into publish folder...
     echo echo  Skipping: data\
     echo echo.
     echo robocopy "%%~dp0." "%%DEST%%" /e /xd data /xf update.bat /njh /njs
+    echo if %%ERRORLEVEL%% GEQ 8 ^(
+    echo     echo.
+    echo     echo  ==========================================
+    echo     echo   [ERROR] Copy failed - nothing was updated^^!
+    echo     echo   See the robocopy output above for details.
+    echo     echo  ==========================================
+    echo     echo.
+    echo     pause ^& exit /b 1
+    echo ^)
+    echo echo.
+    echo echo  Restarting StockFlow...
+    echo start "" "%%DEST%%\StockFlow.API.exe"
+    echo timeout /t 4 ^>nul
+    echo start "" "http://localhost:5000"
     echo echo.
     echo echo  ==========================================
-    echo echo   Update complete^^!
-    echo echo   Run %%DEST%%\start.bat to launch StockFlow.
+    echo echo   Update complete^^! StockFlow is restarting.
     echo echo  ==========================================
     echo echo.
     echo pause
