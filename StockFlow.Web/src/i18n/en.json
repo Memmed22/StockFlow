@@ -32,11 +32,11 @@
     "searchPlaceholder": "Search by name or scan barcode...",
     "cartEmpty": "Cart is empty. Scan a product to start.",
     "col": { "product": "Product", "stock": "Stock", "basePrice": "Base Price", "discount": "Discount", "finalPrice": "Final Price", "qty": "Qty", "lineTotal": "Line Total" },
-    "summary": { "title": "Order Summary", "subtotal": "Subtotal", "setTotalTo": "Set Total To", "discountApplied": "− {{amount}} ₾ discount applied", "total": "Total" },
+    "summary": { "total": "Total" },
     "paymentType": "Payment Type", "cash": "Cash", "debit": "Debit", "customer": "Customer",
     "loadingCustomers": "Loading customers...",
     "checkout": "Checkout", "chargeToCustomer": "Charge to Customer",
-    "clearCart": "Clear Cart", "customerPayment": "Customer Payment", "addExpense": "💸 Add Expense",
+    "clearCart": "Clear Cart", "reset": "Reset", "customerPayment": "Customer Payment", "addExpense": "💸 Add Expense",
     "itemsSaved": "{{count}} item(s) — cart saved",
     "changeBtn": "Change",
     "checkoutConfirm": {

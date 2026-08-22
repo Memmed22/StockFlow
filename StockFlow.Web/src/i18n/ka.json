@@ -30,11 +30,11 @@
     "searchPlaceholder": "ძიება სახელით ან შტრიხკოდით...",
     "cartEmpty": "კალათა ცარიელია. სკანირება დასაწყებად.",
     "col": { "product": "პროდუქტი", "stock": "მარაგი", "basePrice": "ბაზური ფასი", "discount": "ფასდაკლება", "finalPrice": "საბოლოო ფასი", "qty": "რ-ბა", "lineTotal": "ჯამი" },
-    "summary": { "title": "შეკვეთის შეჯამება", "subtotal": "ჯამი", "setTotalTo": "დააყენეთ ჯამი", "discountApplied": "− {{amount}} ₾ ფასდაკლება გამოყენებულია", "total": "სულ" },
+    "summary": { "total": "სულ" },
     "paymentType": "გადახდის ტიპი", "cash": "ნაღდი", "debit": "კრედიტი", "customer": "კლიენტი",
     "loadingCustomers": "კლიენტები იტვირთება...",
     "checkout": "გადახდა", "chargeToCustomer": "კლიენტზე ჩაწერა",
-    "clearCart": "კალათის გასუფთავება", "customerPayment": "კლიენტის გადახდა", "addExpense": "💸 ხარჯის დამატება",
+    "clearCart": "კალათის გასუფთავება", "reset": "გადატვირთვა", "customerPayment": "კლიენტის გადახდა", "addExpense": "💸 ხარჯის დამატება",
     "itemsSaved": "{{count}} ნივთი — შენახულია",
     "changeBtn": "შეცვლა",
     "checkoutConfirm": {
