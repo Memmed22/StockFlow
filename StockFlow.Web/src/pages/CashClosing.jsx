@@ -258,7 +258,7 @@ export default function CashClosing() {
                       </td>
                       <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>{r.label}</td>
                       <td style={s.td}>{r.barcode ? <code style={s.code}>{r.barcode}</code> : '—'}</td>
-                      <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || '—'}</td>
+                      <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || (r.type === 'Payment' ? t('reports.unknownCustomer') : '—')}</td>
                       <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
                         {r.quantity != null ? (isReturnQty ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
                       </td>

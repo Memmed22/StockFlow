@@ -50,7 +50,8 @@
       "title": "Müştəri ödənişi", "customer": "Müştəri", "amount": "Məbləğ (₾) *",
       "searchPlaceholder": "Ad və ya telefon...",
       "record": "Ödənişi qeyd et", "recording": "Qeyd edilir...", "done": "Bitdi",
-      "selectCustomer": "Müştəri seçin.", "invalidAmount": "Düzgün məbləğ daxil edin."
+      "selectCustomer": "Müştəri seçin.", "invalidAmount": "Düzgün məbləğ daxil edin.",
+      "useNoCustomer": "Müştərisiz (yalnız nağd)", "noCustomer": "Müştəri yoxdur"
     },
     "expense": {
       "title": "Kassa Xərci",
@@ -168,7 +169,7 @@
     },
     "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "creditReturns": "Balans mədaxilli qaytarmalar", "expenses": "💸 Xərclər", "cashTotal": "Nağd cəmi" },
     "infoRevenue": "Gəlir", "infoTransactions": "Əməliyyatlar",
-    "notCash": "nağd deyil",
+    "notCash": "nağd deyil", "unknownCustomer": "Naməlum",
     "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "transactionsSearch": "\"{{query}}\" ilə uyğun əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "reports": "Hesabatlar yüklənmədi." },
     "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "CreditReturn": "Balans mədaxili", "Payment": "Ödəniş", "Expense": "Xərc", "OpeningCash": "Açılış" },
     "closingDetail": { "title": "Kassa Bağlanması", "cashier": "Kassir", "period": "Dövr", "breakdown": "Maliyyə Xülasəsi", "totals": "Cəmlər", "transactions": "Əməliyyatlar" }

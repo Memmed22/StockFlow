@@ -36,6 +36,25 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
         return (true, null);
     }
 
+    public async Task<(bool ok, string? error)> RecordAnonymousPaymentAsync(RecordCashPaymentDto dto)
+    {
+        var user = await db.Users.FindAsync(dto.UserId);
+        if (user == null) return (false, "User not found.");
+        if (dto.Amount <= 0) return (false, "Payment amount must be greater than zero.");
+
+        db.Sales.Add(new Sale
+        {
+            UserId = dto.UserId,
+            CustomerId = null,
+            Type = SaleType.Payment,
+            TotalAmount = -dto.Amount,
+            DiscountAmount = 0,
+            CreatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+        return (true, null);
+    }
+
     public async Task<(CashClosingDto? dto, string? error)> CreateClosingAsync(CreateCashClosingDto dto)
     {
         var user = await db.Users.FindAsync(dto.UserId);

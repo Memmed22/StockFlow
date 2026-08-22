@@ -59,6 +59,7 @@ export const cashClosingApi = {
   openingStatus: () => api.get('/cashclosings/opening/status'),
   createOpening: (data) => api.post('/cashclosings/opening', data),
   createExpense: (data) => api.post('/cashclosings/expense', data),
+  recordPayment: (data) => api.post('/cashclosings/payment', data),
   preview: () => api.get('/cashclosings/preview'),
   currentPeriodDetail: () => api.get('/cashclosings/current-period-detail'),
   create: (data) => api.post('/cashclosings', data),

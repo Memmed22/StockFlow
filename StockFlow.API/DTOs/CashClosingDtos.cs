@@ -9,6 +9,8 @@ public record CashClosingPreviewDto(
 
 public record CreateExpenseDto(int UserId, decimal Amount, string Description);
 
+public record RecordCashPaymentDto(int UserId, decimal Amount);
+
 public record OpeningCashStatusDto(bool HasOpeningCash, decimal? Amount);
 
 public record CreateOpeningCashDto(int UserId, decimal Amount);
