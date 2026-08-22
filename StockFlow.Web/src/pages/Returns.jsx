@@ -18,11 +18,31 @@ export default function Returns() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerSearch, setCustomerSearch] = useState('');
   const [showCustomerList, setShowCustomerList] = useState(false);
+  const [purchaseCheck, setPurchaseCheck] = useState(null);
+  const [refundMethod, setRefundMethod] = useState('cash');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => { customersApi.getAll().then(r => setCustomers(r.data)).catch(() => {}); }, []);
+
+  useEffect(() => {
+    if (!selectedCustomer || !selectedProduct) return;
+    let cancelled = false;
+    customersApi.hasPurchased(selectedCustomer.id, selectedProduct.id)
+      .then(r => {
+        if (cancelled) return;
+        setPurchaseCheck({ customerId: selectedCustomer.id, productId: selectedProduct.id, purchased: r.data.purchased });
+        if (r.data.purchased && r.data.lastPrice != null) setReturnPrice(r.data.lastPrice.toFixed(2));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [selectedCustomer, selectedProduct]);
+
+  const neverPurchased = !!selectedCustomer && !!selectedProduct
+    && purchaseCheck?.customerId === selectedCustomer.id
+    && purchaseCheck?.productId === selectedProduct.id
+    && !purchaseCheck.purchased;
 
   const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(customerSearch.toLowerCase()) || c.phoneNumber.includes(customerSearch)
@@ -45,11 +65,15 @@ export default function Returns() {
     if (isNaN(price) || price < 0) { setError(t('returns.errors.price')); return; }
     setSubmitting(true);
     try {
-      await returnsApi.process({ productId: selectedProduct.id, quantity: qty, basePrice: selectedProduct.sellingPrice, returnPrice: price, note: note || null, customerId: selectedCustomer?.id ?? null, userId: user.id });
+      await returnsApi.process({
+        productId: selectedProduct.id, quantity: qty, basePrice: selectedProduct.sellingPrice, returnPrice: price,
+        note: note || null, customerId: selectedCustomer?.id ?? null, userId: user.id,
+        settleAsCredit: !!selectedCustomer && refundMethod === 'credit',
+      });
       const customerNote = selectedCustomer ? ` — ${selectedCustomer.name}` : '';
       setSuccess(`${t('returns.returnTotal')}: ${(qty * price).toFixed(2)} ₾${customerNote}`);
       setSelectedProduct(null); setQuantity(''); setReturnPrice(''); setNote('');
-      setSelectedCustomer(null); setCustomerSearch('');
+      setSelectedCustomer(null); setCustomerSearch(''); setRefundMethod('cash');
     } catch (err) {
       setError(err.response?.data?.error || t('returns.errors.processing'));
     } finally {
@@ -144,7 +168,7 @@ export default function Returns() {
                     <span style={{ color: selectedCustomer.balance > 0 ? '#DC2626' : '#059669', fontWeight: 700 }}>{selectedCustomer.balance.toFixed(2)} ₾</span>
                   </div>
                 </div>
-                <button type="button" style={s.removeBtn} onClick={() => { setSelectedCustomer(null); setCustomerSearch(''); }}>{t('returns.remove')}</button>
+                <button type="button" style={s.removeBtn} onClick={() => { setSelectedCustomer(null); setCustomerSearch(''); setRefundMethod('cash'); }}>{t('returns.remove')}</button>
               </div>
             ) : (
               <div style={{ position: 'relative' }}>
@@ -168,8 +192,31 @@ export default function Returns() {
                 )}
               </div>
             )}
-            {selectedCustomer && qty > 0 && (
+            {selectedCustomer && (
+              <div style={s.refundMethodBox}>
+                <span style={s.label}>{t('returns.refundMethod')}</span>
+                <div style={s.refundOptions}>
+                  <label style={{ ...s.refundOption, ...(refundMethod === 'cash' ? s.refundOptionActive : {}) }}>
+                    <input type="radio" name="refundMethod" checked={refundMethod === 'cash'}
+                      onChange={() => setRefundMethod('cash')} style={{ marginRight: 6 }} />
+                    {t('returns.refundCash')}
+                  </label>
+                  <label style={{ ...s.refundOption, ...(refundMethod === 'credit' ? s.refundOptionActive : {}) }}>
+                    <input type="radio" name="refundMethod" checked={refundMethod === 'credit'}
+                      onChange={() => setRefundMethod('credit')} style={{ marginRight: 6 }} />
+                    {t('returns.refundCredit')}
+                  </label>
+                </div>
+              </div>
+            )}
+            {selectedCustomer && qty > 0 && refundMethod === 'cash' && (
+              <div style={s.cashNote}>{t('returns.cashRefundNote', { amount: returnTotal.toFixed(2) })}</div>
+            )}
+            {selectedCustomer && qty > 0 && refundMethod === 'credit' && (
               <div style={s.debtNote}>{t('returns.deductNote', { amount: returnTotal.toFixed(2) })}</div>
+            )}
+            {selectedCustomer && neverPurchased && (
+              <div style={s.warningNote}>{t('returns.neverPurchasedWarning')}</div>
             )}
           </div>
 
@@ -204,7 +251,13 @@ const s = {
   removeBtn: { background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
   dropdown: { position: 'absolute', left: 0, right: 0, top: '100%', background: '#fff', border: '1px solid #E5E7EB', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 100, maxHeight: 220, overflowY: 'auto', marginTop: 4 },
   dropdownItem: { padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #F3F4F6' },
+  refundMethodBox: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 },
+  refundOptions: { display: 'flex', gap: 8 },
+  refundOption: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, fontWeight: 500, color: '#374151', cursor: 'pointer', background: '#F9FAFB' },
+  refundOptionActive: { borderColor: '#D97706', background: '#FFFBEB', color: '#92400E', fontWeight: 700 },
+  cashNote: { fontSize: 12, color: '#B91C1C', background: '#FEF2F2', padding: '5px 10px', borderRadius: 6, fontWeight: 500 },
   debtNote: { fontSize: 12, color: '#059669', background: '#F0FDF4', padding: '5px 10px', borderRadius: 6, fontWeight: 500 },
+  warningNote: { fontSize: 12, color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', padding: '5px 10px', borderRadius: 6, fontWeight: 500 },
   successBox: { background: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: 8, padding: '10px 14px', fontSize: 14, color: '#065F46', fontWeight: 500 },
   errorBox: { background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#B91C1C', fontWeight: 500 },
   primaryBtn: { background: '#D97706', color: '#fff', border: 'none', borderRadius: 8, padding: '11px 24px', cursor: 'pointer', fontWeight: 600, fontSize: 15, alignSelf: 'flex-start' },

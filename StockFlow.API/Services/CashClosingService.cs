@@ -12,7 +12,8 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
         var fromDate = await GetFromDateAsync();
         var toDate = DateTime.UtcNow;
         var (_, _, _, _, _, expected) = await GetBreakdownAsync(fromDate, toDate);
-        return new CashClosingPreviewDto(fromDate, toDate, expected);
+        var creditReturns = await GetCreditReturnsInfoAsync(fromDate, toDate);
+        return new CashClosingPreviewDto(fromDate, toDate, expected, creditReturns);
     }
 
     public async Task<(bool ok, string? error)> CreateExpenseAsync(CreateExpenseDto dto)
@@ -153,6 +154,17 @@ public class CashClosingService(AppDbContext db, TelegramService telegram)
         var expected  = items.Sum(x => x.Type == SaleType.Payment ? -x.TotalAmount : x.TotalAmount);
 
         return (opening, cashSales, payments, returns, expenses, expected);
+    }
+
+    // Store-credit returns never move cash, so they're deliberately excluded from
+    // GetBreakdownAsync/expected — this is purely an informational figure for the UI.
+    private async Task<decimal> GetCreditReturnsInfoAsync(DateTime from, DateTime to)
+    {
+        var amounts = await db.Sales
+            .Where(s => s.CreatedAt > from && s.CreatedAt <= to && s.Type == SaleType.CreditReturn)
+            .Select(s => s.TotalAmount)
+            .ToListAsync();
+        return amounts.Sum(x => -x);
     }
 
     private static string BuildReport(CashClosingDto c,

@@ -3,7 +3,8 @@ namespace StockFlow.API.DTOs;
 public record CashClosingPreviewDto(
     DateTime FromDate,
     DateTime ToDate,
-    decimal ExpectedCash
+    decimal ExpectedCash,
+    decimal CreditReturnsTotal
 );
 
 public record CreateExpenseDto(int UserId, decimal Amount, string Description);
@@ -37,5 +38,6 @@ public record CurrentPeriodDetailDto(
     decimal PaymentsTotal,
     decimal ReturnsTotal,
     decimal ExpensesTotal,
+    decimal CreditReturnsTotal,
     List<DetailedReportItemDto> Items
 );

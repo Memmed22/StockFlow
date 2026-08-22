@@ -129,9 +129,14 @@
     "returnPrice": "Qaytarma qiyməti (₾)", "modified": "dəyişdirilmiş",
     "reset": "Sıfırla", "defaultPrice": "Standart: {{price}} ₾",
     "returnTotal": "Qaytarma cəmi", "note": "Qeyd", "notePlaceholder": "Qaytarma səbəbi (isteğe bağlı)",
-    "linkCustomer": "Müştəriyə bağla", "linkCustomerNote": "(isteğe bağlı — balansdan çıxılır)",
+    "linkCustomer": "Müştəriyə bağla", "linkCustomerNote": "(isteğe bağlı)",
     "searchCustomer": "Müştərini ad və ya telefonla axtarın...",
-    "remove": "Çıxar", "deductNote": "Müştəri balansı {{amount}} ₾ azalacaq",
+    "remove": "Çıxar",
+    "refundMethod": "Ödəniş üsulu",
+    "refundCash": "Nağd qaytarma", "refundCredit": "Balans mədaxili",
+    "cashRefundNote": "Kassadan {{amount}} ₾ nağd veriləcək. Müştəri balansı dəyişməyəcək.",
+    "deductNote": "Müştəri balansı {{amount}} ₾ azalacaq (borcu yoxdursa, artıq mədaxil olunacaq). Kassaya təsir etməyəcək.",
+    "neverPurchasedWarning": "Bu müştərinin bu məhsulu aldığına dair qeyd yoxdur.",
     "processReturn": "Qaytarmanı emal et",
     "processing": "Yerinə yetirilir…",
     "errors": { "selectProduct": "Zəhmət olmasa məhsul seçin.", "quantity": "Düzgün miqdar daxil edin.", "price": "Qiymət 0 və ya daha çox olmalıdır.", "processing": "Qaytarma emal edilərkən xəta." }
@@ -153,6 +158,7 @@
     "title": "Hesabatlar", "subtitle": "Satış, anbar və kassir nəticələri",
     "tabs": { "detailed": "Ətraflı satış", "daily": "Gündəlik", "users": "Kassir üzrə", "stock": "Anbar hesabatı", "closings": "Kassa Bağlanmaları" },
     "apply": "Tətbiq et", "refresh": "Yenilə", "loading": "Yüklənir…",
+    "searchTransactions": "Ad və ya barkodla axtarın…",
     "col": {
       "type": "Növ", "productDesc": "Məhsul / Təsvir", "customer": "Müştəri",
       "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi",
@@ -160,11 +166,11 @@
       "cashier": "Kassir", "product": "Məhsul", "barcode": "Barkod", "currentStock": "Cari anbar",
       "closingDate": "Bağlanma tarixi", "period": "Dövr"
     },
-    "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "expenses": "💸 Xərclər", "cashTotal": "Nağd cəmi" },
+    "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "creditReturns": "Balans mədaxilli qaytarmalar", "expenses": "💸 Xərclər", "cashTotal": "Nağd cəmi" },
     "infoRevenue": "Gəlir", "infoTransactions": "Əməliyyatlar",
     "notCash": "nağd deyil",
-    "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "reports": "Hesabatlar yüklənmədi." },
-    "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "Payment": "Ödəniş", "Expense": "Xərc", "OpeningCash": "Açılış" },
+    "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "transactionsSearch": "\"{{query}}\" ilə uyğun əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "reports": "Hesabatlar yüklənmədi." },
+    "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "CreditReturn": "Balans mədaxili", "Payment": "Ödəniş", "Expense": "Xərc", "OpeningCash": "Açılış" },
     "closingDetail": { "title": "Kassa Bağlanması", "cashier": "Kassir", "period": "Dövr", "breakdown": "Maliyyə Xülasəsi", "totals": "Cəmlər", "transactions": "Əməliyyatlar" }
   },
   "users": {
@@ -204,7 +210,7 @@
     "history": "Əməliyyat tarixçəsi", "netBalance": "Xalis balans", "noTransactions": "Əməliyyat yoxdur.",
     "loading": "Yüklənir...",
     "col": { "date": "Tarix", "type": "Növ", "amount": "Məbləğ" },
-    "items": { "product": "Məhsul", "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi" },
-    "types": { "CashSale": "Nağd satış", "DebitSale": "Kredit", "Return": "Qaytarma", "Payment": "Ödəniş" }
+    "items": { "product": "Məhsul", "barcode": "Barkod", "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi" },
+    "types": { "CashSale": "Nağd satış", "DebitSale": "Kredit", "Return": "Qaytarma", "CreditReturn": "Balans mədaxili", "Payment": "Ödəniş" }
   }
 }

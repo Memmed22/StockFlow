@@ -1,6 +1,6 @@
 namespace StockFlow.API.Models;
 
-public enum SaleType { CashSale, DebitSale, Return, Payment, OpeningCash, Expense }
+public enum SaleType { CashSale, DebitSale, Return, Payment, OpeningCash, Expense, CreditReturn }
 
 public class Sale
 {

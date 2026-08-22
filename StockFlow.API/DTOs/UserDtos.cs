@@ -8,4 +8,4 @@ public record UserDto(int Id, string Username, string Role);
 
 public record LoginResponseDto(int Id, string Username, string Role);
 
-public record ReturnDto(int ProductId, decimal Quantity, decimal BasePrice, decimal ReturnPrice, string? Note, int? CustomerId = null, int UserId = 0);
+public record ReturnDto(int ProductId, decimal Quantity, decimal BasePrice, decimal ReturnPrice, string? Note, int? CustomerId = null, int UserId = 0, bool SettleAsCredit = false);

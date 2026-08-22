@@ -61,6 +61,7 @@ public class ReportService(AppDbContext db)
         // Load stock-level returns
         var returns = await db.StockMovements
             .Include(m => m.Product)
+            .Include(m => m.Customer)
             .Where(m => m.Type == MovementType.Return && m.CreatedAt >= fromDate && m.CreatedAt < toDate)
             .ToListAsync();
 
@@ -73,11 +74,13 @@ public class ReportService(AppDbContext db)
         var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
         var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
         var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);
+        var creditReturnsTotal = items.Where(i => i.Type == "CreditReturn").Sum(i => i.Total);
+        // Credit-settled returns never touch the register, so they're excluded here (informational only).
         var cashTotal       = cashSalesTotal + paymentsTotal + returnsTotal + expensesTotal;
 
         return new DetailedReportDto(
             items,
-            new DetailedReportSummaryDto(cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal, cashTotal));
+            new DetailedReportSummaryDto(cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal, creditReturnsTotal, cashTotal));
     }
 
     public async Task<List<CashClosingDto>> GetClosingsListAsync()
@@ -109,6 +112,7 @@ public class ReportService(AppDbContext db)
 
         var returns = await db.StockMovements
             .Include(m => m.Product)
+            .Include(m => m.Customer)
             .Where(m => m.Type == MovementType.Return && m.CreatedAt > from && m.CreatedAt <= to)
             .ToListAsync();
 
@@ -123,11 +127,13 @@ public class ReportService(AppDbContext db)
         var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
         var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
         var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);
+        var creditReturnsTotal = items.Where(i => i.Type == "CreditReturn").Sum(i => i.Total);
 
         return new ClosingDetailDto(
             closing.Id, closing.User.Username,
             closing.FromDate, closing.ToDate, closing.CreatedAt, closing.Note,
             openingCash, cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal,
+            creditReturnsTotal,
             closing.ExpectedCash, closing.CountedCash, closing.Difference,
             items);
     }
@@ -148,6 +154,7 @@ public class ReportService(AppDbContext db)
 
         var returns = await db.StockMovements
             .Include(m => m.Product)
+            .Include(m => m.Customer)
             .Where(m => m.Type == MovementType.Return && m.CreatedAt > fromDate && m.CreatedAt <= toDate)
             .ToListAsync();
 
@@ -159,9 +166,10 @@ public class ReportService(AppDbContext db)
         var paymentsTotal   = items.Where(i => i.Type == "Payment").Sum(i => i.Total);
         var returnsTotal    = items.Where(i => i.Type == "Return").Sum(i => i.Total);
         var expensesTotal   = items.Where(i => i.Type == "Expense").Sum(i => i.Total);
+        var creditReturnsTotal = items.Where(i => i.Type == "CreditReturn").Sum(i => i.Total);
 
         return new CurrentPeriodDetailDto(
-            openingCash, cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal, items);
+            openingCash, cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal, creditReturnsTotal, items);
     }
 
     // Builds cash/debit sale, return, payment, and expense line items for a detail/closing view.
@@ -189,7 +197,8 @@ public class ReportService(AppDbContext db)
                 r.Product.Name, r.Product.Barcode,
                 -r.Quantity, unitPrice,
                 -(r.Quantity * unitPrice),
-                "Return", null));
+                r.IsCreditReturn ? "CreditReturn" : "Return",
+                r.Customer?.Name));
         }
 
         foreach (var p in sales.Where(s => s.Type == SaleType.Payment))

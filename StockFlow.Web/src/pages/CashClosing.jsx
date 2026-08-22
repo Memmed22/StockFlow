@@ -7,11 +7,12 @@ const fmt = (dt) => new Date(dt).toLocaleString();
 const currency = (n) => `${Number(n).toFixed(2)} ₾`;
 
 const TYPE_CONFIG = {
-  CashSale:  { key: 'Cash',    bg: '#D1FAE5', color: '#065F46' },
-  DebitSale: { key: 'Debit',   bg: '#FEF3C7', color: '#92400E' },
-  Return:    { key: 'Return',  bg: '#FEE2E2', color: '#B91C1C' },
-  Payment:   { key: 'Payment', bg: '#DBEAFE', color: '#1D4ED8' },
-  Expense:   { key: 'Expense', bg: '#FFE4E6', color: '#9F1239' },
+  CashSale:     { key: 'Cash',    bg: '#D1FAE5', color: '#065F46' },
+  DebitSale:    { key: 'Debit',   bg: '#FEF3C7', color: '#92400E' },
+  Return:       { key: 'Return',  bg: '#FEE2E2', color: '#B91C1C' },
+  CreditReturn: { key: 'CreditReturn', bg: '#EDE9FE', color: '#6D28D9' },
+  Payment:      { key: 'Payment', bg: '#DBEAFE', color: '#1D4ED8' },
+  Expense:      { key: 'Expense', bg: '#FFE4E6', color: '#9F1239' },
 };
 
 export default function CashClosing() {
@@ -32,6 +33,7 @@ export default function CashClosing() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingPreview, setLoadingPreview] = useState(true);
+  const [txSearch, setTxSearch] = useState('');
 
   useEffect(() => { loadAll(); }, []);
 
@@ -81,6 +83,12 @@ export default function CashClosing() {
   const diff = preview ? parseFloat(counted || 0) - preview.expectedCash : 0;
   const diffColor = diff < 0 ? '#B91C1C' : diff > 0 ? '#065F46' : '#374151';
 
+  const txQuery = txSearch.trim().toLowerCase();
+  const filteredItems = periodDetail && txQuery
+    ? periodDetail.items.filter(r =>
+        (r.label ?? '').toLowerCase().includes(txQuery) || (r.barcode ?? '').toLowerCase().includes(txQuery))
+    : periodDetail?.items ?? [];
+
   return (
     <div>
       <div style={s.pageHeader}>
@@ -106,7 +114,7 @@ export default function CashClosing() {
               <>
                 <div style={s.periodItem}>
                   <span style={s.periodLabel}>{t('cashClosing.openingCash')}</span>
-                  <span style={{ ...s.periodValue, color: '#059669' }}>{currency(openingStatus.amount)}</span>
+                  <span style={{ ...s.periodValue, color: '#059669' }}>+{currency(openingStatus.amount)}</span>
                 </div>
                 <div style={s.periodDivider} />
               </>
@@ -190,12 +198,13 @@ export default function CashClosing() {
             <div style={s.card}>
               <h3 style={s.cardTitle}>{t('reports.closingDetail.breakdown')}</h3>
               {[
-                { label: t('cashClosing.openingCash'), value: currency(periodDetail.openingCash), color: '#374151' },
+                { label: t('cashClosing.openingCash'), value: `+${currency(periodDetail.openingCash)}`, color: '#374151' },
                 { label: t('reports.summary.cashSales'), value: `+${currency(periodDetail.cashSalesTotal)}`, color: '#059669' },
-                { label: t('reports.summary.debitSales'), value: `${currency(periodDetail.debitSalesTotal)} (${t('reports.notCash')})`, color: '#92400E', muted: true },
                 { label: t('reports.summary.payments'), value: `+${currency(periodDetail.paymentsTotal)}`, color: '#1D4ED8' },
                 { label: t('reports.summary.returns'), value: currency(periodDetail.returnsTotal), color: '#DC2626' },
                 ...(periodDetail.expensesTotal < 0 ? [{ label: t('reports.summary.expenses'), value: currency(periodDetail.expensesTotal), color: '#9F1239' }] : []),
+                ...(periodDetail.creditReturnsTotal !== 0 ? [{ label: t('reports.summary.creditReturns'), value: `${currency(Math.abs(periodDetail.creditReturnsTotal))} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true }] : []),
+                { label: t('reports.summary.debitSales'), value: `${currency(periodDetail.debitSalesTotal)} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true },
               ].map((row, i) => (
                 <div key={i} style={{ ...s.breakdownRow, opacity: row.muted ? 0.7 : 1 }}>
                   <span style={{ fontSize: 14, color: '#374151' }}>{row.label}</span>
@@ -212,7 +221,15 @@ export default function CashClosing() {
             </div>
           </div>
 
-          <h3 style={s.sectionTitle}>{t('reports.closingDetail.transactions')}</h3>
+          <div style={s.tableHeader}>
+            <h3 style={s.sectionTitle}>{t('reports.closingDetail.transactions')}</h3>
+            <input
+              style={s.searchInput}
+              placeholder={t('reports.searchTransactions')}
+              value={txSearch}
+              onChange={e => setTxSearch(e.target.value)}
+            />
+          </div>
           <div style={s.tableWrap}>
             <table style={s.table}>
               <thead>
@@ -227,12 +244,15 @@ export default function CashClosing() {
                 </tr>
               </thead>
               <tbody>
-                {periodDetail.items.map((r, i) => {
+                {filteredItems.map((r, i) => {
                   const cfg = TYPE_CONFIG[r.type] ?? { key: r.type, bg: '#F3F4F8', color: '#374151' };
                   const isDebit = r.type === 'DebitSale';
-                  const isNegative = r.type === 'Return' || r.type === 'Expense';
+                  const isCreditReturn = r.type === 'CreditReturn';
+                  const isReturnQty = r.type === 'Return' || isCreditReturn;
+                  const isNegative = r.type === 'Return' || r.type === 'Expense' || isCreditReturn;
+                  const notCash = isDebit || isCreditReturn;
                   return (
-                    <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : r.type === 'Expense' ? '#FFF1F2' : undefined }}>
+                    <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : isCreditReturn ? '#F5F3FF' : r.type === 'Expense' ? '#FFF1F2' : undefined }}>
                       <td style={s.td}>
                         <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>{t(`reports.types.${cfg.key}`)}</span>
                       </td>
@@ -240,18 +260,20 @@ export default function CashClosing() {
                       <td style={s.td}>{r.barcode ? <code style={s.code}>{r.barcode}</code> : '—'}</td>
                       <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || '—'}</td>
                       <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
-                        {r.quantity != null ? (r.type === 'Return' ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
+                        {r.quantity != null ? (isReturnQty ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
                       </td>
                       <td style={s.td}>{r.unitPrice != null ? `${r.unitPrice.toFixed(2)} ₾` : '—'}</td>
                       <td style={{ ...s.td, textAlign: 'right', fontWeight: 700, color: r.total < 0 ? '#DC2626' : isDebit ? '#92400E' : '#059669' }}>
                         {r.total >= 0 && !isNegative ? '+' : ''}{r.total.toFixed(2)} ₾
-                        {isDebit && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
+                        {notCash && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
                       </td>
                     </tr>
                   );
                 })}
-                {periodDetail.items.length === 0 && (
-                  <tr><td colSpan={7} style={s.empty}>{t('reports.noData.transactions')}</td></tr>
+                {filteredItems.length === 0 && (
+                  <tr><td colSpan={7} style={s.empty}>
+                    {txQuery ? t('reports.noData.transactionsSearch', { query: txSearch.trim() }) : t('reports.noData.transactions')}
+                  </td></tr>
                 )}
               </tbody>
             </table>
@@ -362,6 +384,7 @@ const s = {
   tableHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14 },
   sectionTitle: { margin: 0, fontSize: 16, fontWeight: 600, color: '#111827' },
   sectionSub: { margin: '3px 0 0', fontSize: 12, color: '#9CA3AF' },
+  searchInput: { padding: '8px 14px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, width: 260, background: '#fff', boxSizing: 'border-box' },
 
   tableWrap: { background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   table: { width: '100%', borderCollapse: 'collapse' },

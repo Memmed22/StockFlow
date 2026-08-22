@@ -4,12 +4,13 @@ import { reportsApi } from '../api/client';
 import { useTranslation } from 'react-i18next';
 
 const TYPE_CONFIG = {
-  OpeningCash: { key: 'OpeningCash', bg: '#ECFDF5', color: '#065F46' },
-  CashSale:    { key: 'Cash',        bg: '#D1FAE5', color: '#065F46' },
-  DebitSale:   { key: 'Debit',       bg: '#FEF3C7', color: '#92400E' },
-  Return:      { key: 'Return',      bg: '#FEE2E2', color: '#B91C1C' },
-  Payment:     { key: 'Payment',     bg: '#DBEAFE', color: '#1D4ED8' },
-  Expense:     { key: 'Expense',     bg: '#FFE4E6', color: '#9F1239' },
+  OpeningCash:  { key: 'OpeningCash', bg: '#ECFDF5', color: '#065F46' },
+  CashSale:     { key: 'Cash',        bg: '#D1FAE5', color: '#065F46' },
+  DebitSale:    { key: 'Debit',       bg: '#FEF3C7', color: '#92400E' },
+  Return:       { key: 'Return',      bg: '#FEE2E2', color: '#B91C1C' },
+  CreditReturn: { key: 'CreditReturn', bg: '#EDE9FE', color: '#6D28D9' },
+  Payment:      { key: 'Payment',     bg: '#DBEAFE', color: '#1D4ED8' },
+  Expense:      { key: 'Expense',     bg: '#FFE4E6', color: '#9F1239' },
 };
 
 const currency = (n) => `${Number(n).toFixed(2)} ₾`;
@@ -77,12 +78,13 @@ export default function ClosingDetail() {
         <div style={s.card}>
           <h3 style={s.cardTitle}>{t('reports.closingDetail.breakdown')}</h3>
           {[
-            { label: t('cashClosing.openingCash'),         value: currency(data.openingCash),        color: '#374151' },
+            { label: t('cashClosing.openingCash'),         value: `+${currency(data.openingCash)}`,  color: '#374151' },
             { label: t('reports.summary.cashSales'),       value: `+${currency(data.cashSalesTotal)}`, color: '#059669' },
-            { label: t('reports.summary.debitSales'),      value: `${currency(data.debitSalesTotal)} (${t('reports.notCash')})`, color: '#92400E', muted: true },
             { label: t('reports.summary.payments'),        value: `+${currency(data.paymentsTotal)}`, color: '#1D4ED8' },
             { label: t('reports.summary.returns'),         value: currency(data.returnsTotal),       color: '#DC2626' },
             ...(data.expensesTotal < 0 ? [{ label: t('reports.summary.expenses'), value: currency(data.expensesTotal), color: '#9F1239' }] : []),
+            ...(data.creditReturnsTotal !== 0 ? [{ label: t('reports.summary.creditReturns'), value: `${currency(Math.abs(data.creditReturnsTotal))} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true }] : []),
+            { label: t('reports.summary.debitSales'),      value: `${currency(data.debitSalesTotal)} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true },
           ].map((row, i) => (
             <div key={i} style={{ ...s.breakdownRow, opacity: row.muted ? 0.7 : 1 }}>
               <span style={{ fontSize: 14, color: '#374151' }}>{row.label}</span>
@@ -128,10 +130,13 @@ export default function ClosingDetail() {
           <tbody>
             {data.items.map((r, i) => {
               const cfg = TYPE_CONFIG[r.type] ?? { key: r.type, bg: '#F3F4F8', color: '#374151' };
-              const isNegative = r.type === 'Return' || r.type === 'Expense';
               const isDebit = r.type === 'DebitSale';
+              const isCreditReturn = r.type === 'CreditReturn';
+              const isReturnQty = r.type === 'Return' || isCreditReturn;
+              const isNegative = isReturnQty || r.type === 'Expense';
+              const notCash = isDebit || isCreditReturn;
               return (
-                <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : r.type === 'Expense' ? '#FFF1F2' : undefined }}>
+                <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : isCreditReturn ? '#F5F3FF' : r.type === 'Expense' ? '#FFF1F2' : undefined }}>
                   <td style={s.td}>
                     <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>
                       {t(`reports.types.${cfg.key}`)}
@@ -140,12 +145,12 @@ export default function ClosingDetail() {
                   <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>{r.label}</td>
                   <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || '—'}</td>
                   <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
-                    {r.quantity != null ? (r.type === 'Return' ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
+                    {r.quantity != null ? (isReturnQty ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
                   </td>
                   <td style={s.td}>{r.unitPrice != null ? `${r.unitPrice.toFixed(2)} ₾` : '—'}</td>
                   <td style={{ ...s.td, textAlign: 'right', fontWeight: 700, color: r.total < 0 ? '#DC2626' : isDebit ? '#92400E' : '#059669' }}>
                     {r.total >= 0 && !isNegative ? '+' : ''}{r.total.toFixed(2)} ₾
-                    {isDebit && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
+                    {notCash && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
                   </td>
                 </tr>
               );

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockFlow.API.Data;
 
@@ -10,9 +11,11 @@ using StockFlow.API.Data;
 namespace StockFlow.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260822180755_AddCustomerAndCreditFlagToStockMovement")]
+    partial class AddCustomerAndCreditFlagToStockMovement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.14");
@@ -223,9 +226,6 @@ namespace StockFlow.API.Migrations
                     b.Property<decimal?>("ReturnPrice")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("SaleId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
@@ -236,8 +236,6 @@ namespace StockFlow.API.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("SaleId");
 
                     b.ToTable("StockMovements");
                 });
@@ -332,16 +330,9 @@ namespace StockFlow.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StockFlow.API.Models.Sale", "Sale")
-                        .WithMany()
-                        .HasForeignKey("SaleId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.Navigation("Customer");
 
                     b.Navigation("Product");
-
-                    b.Navigation("Sale");
                 });
 
             modelBuilder.Entity("StockFlow.API.Models.Customer", b =>

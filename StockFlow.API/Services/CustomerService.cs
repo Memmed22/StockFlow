@@ -22,7 +22,7 @@ public class CustomerService(AppDbContext db)
         var ids = customers.Select(c => c.Id).ToList();
         var allSales = await db.Sales
             .Where(s => s.CustomerId.HasValue && ids.Contains(s.CustomerId.Value)
-                && s.Type != SaleType.CashSale)
+                && (s.Type == SaleType.DebitSale || s.Type == SaleType.CreditReturn || s.Type == SaleType.Payment))
             .Select(s => new { s.CustomerId, s.TotalAmount })
             .ToListAsync();
 
@@ -47,9 +47,21 @@ public class CustomerService(AppDbContext db)
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
 
-        // A cash sale is paid in full immediately, so it's shown in the customer's
-        // history but must not count toward their outstanding balance.
-        var balance = sales.Where(s => s.Type != SaleType.CashSale).Sum(s => s.TotalAmount);
+        var returnSaleIds = sales
+            .Where(s => s.Type == SaleType.Return || s.Type == SaleType.CreditReturn)
+            .Select(s => s.Id)
+            .ToList();
+        var returnMovementsBySaleId = await db.StockMovements
+            .Include(m => m.Product)
+            .Where(m => m.SaleId.HasValue && returnSaleIds.Contains(m.SaleId.Value))
+            .ToDictionaryAsync(m => m.SaleId!.Value);
+
+        // Only debt-affecting transaction types count toward the outstanding balance:
+        // a cash sale is paid in full immediately, and a cash-refunded return pays out
+        // from the register rather than adjusting what the customer owes.
+        var balance = sales
+            .Where(s => s.Type == SaleType.DebitSale || s.Type == SaleType.CreditReturn || s.Type == SaleType.Payment)
+            .Sum(s => s.TotalAmount);
 
         var info = new CustomerDto(
             customer.Id, customer.Name, customer.PhoneNumber,
@@ -61,7 +73,13 @@ public class CustomerService(AppDbContext db)
             if (s.Type == SaleType.CashSale || s.Type == SaleType.DebitSale)
             {
                 items = s.Items.Select(i => new CustomerTransactionItemDto(
-                    i.Product.Name, i.Quantity, i.FinalPrice, i.Quantity * i.FinalPrice)).ToList();
+                    i.Product.Name, i.Product.Barcode, i.Quantity, i.FinalPrice, i.Quantity * i.FinalPrice)).ToList();
+            }
+            else if ((s.Type == SaleType.Return || s.Type == SaleType.CreditReturn)
+                && returnMovementsBySaleId.TryGetValue(s.Id, out var movement))
+            {
+                var unitPrice = movement.ReturnPrice ?? 0m;
+                items = [new CustomerTransactionItemDto(movement.Product.Name, movement.Product.Barcode, movement.Quantity, unitPrice, movement.Quantity * unitPrice)];
             }
             return new CustomerTransactionDto(s.Id, s.Type.ToString(), s.TotalAmount, s.CreatedAt, items);
         }).ToList();
@@ -122,10 +140,25 @@ public class CustomerService(AppDbContext db)
         await db.Sales
             .Where(s => s.CustomerId == id)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.CustomerId, (int?)null));
+        await db.StockMovements
+            .Where(m => m.CustomerId == id)
+            .ExecuteUpdateAsync(m => m.SetProperty(x => x.CustomerId, (int?)null));
 
         db.Customers.Remove(customer);
         await db.SaveChangesAsync();
         return (true, null);
+    }
+
+    public async Task<(bool Purchased, decimal? LastPrice)> GetProductPurchaseInfoAsync(int customerId, int productId)
+    {
+        var lastPurchase = await db.Sales
+            .Where(s => s.CustomerId == customerId && (s.Type == SaleType.CashSale || s.Type == SaleType.DebitSale))
+            .SelectMany(s => s.Items, (s, i) => new { s.CreatedAt, i.ProductId, i.FinalPrice })
+            .Where(x => x.ProductId == productId)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        return (lastPurchase != null, lastPurchase?.FinalPrice);
     }
 
     private async Task<decimal> GetBalanceAsync(int customerId)

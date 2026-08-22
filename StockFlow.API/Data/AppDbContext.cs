@@ -100,5 +100,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(s => s.CustomerId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<StockMovement>()
+            .HasOne(m => m.Customer)
+            .WithMany()
+            .HasForeignKey(m => m.CustomerId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<StockMovement>()
+            .HasOne(m => m.Sale)
+            .WithMany()
+            .HasForeignKey(m => m.SaleId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

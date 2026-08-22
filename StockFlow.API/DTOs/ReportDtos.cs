@@ -26,7 +26,7 @@ public record DetailedReportItemDto(
     decimal? Quantity,
     decimal? UnitPrice,
     decimal Total,
-    string Type,           // "CashSale" | "DebitSale" | "Return" | "Payment"
+    string Type,           // "CashSale" | "DebitSale" | "Return" | "CreditReturn" | "Payment" | "Expense"
     string? CustomerName
 );
 
@@ -36,6 +36,7 @@ public record DetailedReportSummaryDto(
     decimal PaymentsTotal,
     decimal ReturnsTotal,
     decimal ExpensesTotal,
+    decimal CreditReturnsTotal,
     decimal CashTotal
 );
 
@@ -57,6 +58,7 @@ public record ClosingDetailDto(
     decimal PaymentsTotal,
     decimal ReturnsTotal,
     decimal ExpensesTotal,
+    decimal CreditReturnsTotal,
     decimal ExpectedCash,
     decimal CountedCash,
     decimal Difference,
