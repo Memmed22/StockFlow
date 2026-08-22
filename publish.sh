@@ -47,10 +47,6 @@ dotnet publish -c Release -r win-x64 --self-contained true \
   /p:DebugType=None \
   /p:DebugSymbols=false
 
-# --- Copy database ---
-echo "  Copying database..."
-cp "$API_DIR/stockflow.db" "$PUBLISH_DIR/stockflow.db"
-
 # --- Write start.bat into the publish folder ---
 echo "  Writing start.bat..."
 cat > "$PUBLISH_DIR/start.bat" << 'EOF'
@@ -117,9 +113,13 @@ if %ERRORLEVEL% GEQ 8 (
     exit /b 1
 )
 echo.
+echo  Restarting StockFlow...
+start "" "%DEST%\StockFlow.API.exe"
+timeout /t 4 >nul
+start "" "http://localhost:5000"
+echo.
 echo  ==========================================
-echo   Update complete!
-echo   Run %DEST%\start.bat to launch StockFlow.
+echo   Update complete! StockFlow is restarting.
 echo  ==========================================
 echo.
 pause

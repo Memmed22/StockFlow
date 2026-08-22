@@ -116,9 +116,13 @@ echo Writing update.bat into publish folder...
     echo     pause ^& exit /b 1
     echo ^)
     echo echo.
+    echo echo  Restarting StockFlow...
+    echo start "" "%%DEST%%\StockFlow.API.exe"
+    echo timeout /t 4 ^>nul
+    echo start "" "http://localhost:5000"
+    echo echo.
     echo echo  ==========================================
-    echo echo   Update complete^^!
-    echo echo   Run %%DEST%%\start.bat to launch StockFlow.
+    echo echo   Update complete^^! StockFlow is restarting.
     echo echo  ==========================================
     echo echo.
     echo pause
