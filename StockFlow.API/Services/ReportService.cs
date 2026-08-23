@@ -118,8 +118,9 @@ public class ReportService(AppDbContext db)
 
         var items = new List<DetailedReportItemDto>();
         items.AddRange(sales.Where(s => s.Type == SaleType.OpeningCash)
-            .Select(o => new DetailedReportItemDto("Opening Cash", null, null, null, o.TotalAmount, "OpeningCash", null)));
+            .Select(o => new DetailedReportItemDto("Opening Cash", null, null, null, o.TotalAmount, "OpeningCash", null, o.CreatedAt)));
         items.AddRange(BuildDetailItems(sales, returns));
+        items = items.OrderBy(i => i.CreatedAt).ToList();
 
         var openingCash    = sales.Where(s => s.Type == SaleType.OpeningCash).Sum(s => s.TotalAmount);
         var cashSalesTotal  = sales.Where(s => s.Type == SaleType.CashSale).Sum(s => s.TotalAmount);
@@ -158,7 +159,7 @@ public class ReportService(AppDbContext db)
             .Where(m => m.Type == MovementType.Return && m.CreatedAt > fromDate && m.CreatedAt <= toDate)
             .ToListAsync();
 
-        var items = BuildDetailItems(sales, returns);
+        var items = BuildDetailItems(sales, returns).OrderBy(i => i.CreatedAt).ToList();
 
         var openingCash     = sales.Where(s => s.Type == SaleType.OpeningCash).Sum(s => s.TotalAmount);
         var cashSalesTotal  = sales.Where(s => s.Type == SaleType.CashSale).Sum(s => s.TotalAmount);
@@ -186,7 +187,7 @@ public class ReportService(AppDbContext db)
                     si.Product.Name, si.Product.Barcode,
                     si.Quantity, si.FinalPrice,
                     si.Quantity * si.FinalPrice,
-                    type, sale.Customer?.Name));
+                    type, sale.Customer?.Name, sale.CreatedAt));
             }
         }
 
@@ -198,21 +199,21 @@ public class ReportService(AppDbContext db)
                 -r.Quantity, unitPrice,
                 -(r.Quantity * unitPrice),
                 r.IsCreditReturn ? "CreditReturn" : "Return",
-                r.Customer?.Name));
+                r.Customer?.Name, r.CreatedAt));
         }
 
         foreach (var p in sales.Where(s => s.Type == SaleType.Payment))
         {
             items.Add(new DetailedReportItemDto(
                 "Payment received", null, null, null,
-                Math.Abs(p.TotalAmount), "Payment", p.Customer?.Name));
+                Math.Abs(p.TotalAmount), "Payment", p.Customer?.Name, p.CreatedAt));
         }
 
         foreach (var e in sales.Where(s => s.Type == SaleType.Expense))
         {
             items.Add(new DetailedReportItemDto(
                 e.Note ?? "Expense", null, null, null,
-                e.TotalAmount, "Expense", null));
+                e.TotalAmount, "Expense", null, e.CreatedAt));
         }
 
         return items;

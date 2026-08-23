@@ -15,4 +15,12 @@ public class ReturnsController(ReturnService returnService) : ControllerBase
         if (error != null) return BadRequest(new { error });
         return Ok(movement);
     }
+
+    [HttpPost("bulk")]
+    public async Task<IActionResult> ProcessBulkReturn([FromBody] BulkReturnDto dto)
+    {
+        var (movements, error) = await returnService.ProcessBulkReturnAsync(dto);
+        if (error != null) return BadRequest(new { error });
+        return Ok(movements);
+    }
 }

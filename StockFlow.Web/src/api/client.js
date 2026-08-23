@@ -37,6 +37,7 @@ export const salesApi = {
 
 export const returnsApi = {
   process: (data) => api.post('/returns', data),
+  processBulk: (data) => api.post('/returns/bulk', data),
 };
 
 export const usersApi = {

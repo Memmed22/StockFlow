@@ -203,6 +203,33 @@
   },
   "customerDetail": {
     "back": "← Back", "balance": "Current Balance (Debt)",
+    "tabs": { "overview": "Overview", "newSale": "New Sale", "newReturn": "New Return" },
+    "newSale": {
+      "searchPlaceholder": "Search by name or scan barcode...",
+      "cartEmpty": "Cart is empty. Search a product to add it.",
+      "col": { "product": "Product", "stock": "Stock", "basePrice": "Base Price", "discount": "Discount", "finalPrice": "Final Price", "qty": "Qty", "lineTotal": "Line Total" },
+      "total": "Total", "reset": "Reset",
+      "paymentType": "Payment Type", "cash": "Cash", "debit": "Debit",
+      "checkout": "Checkout", "processing": "Processing…",
+      "success": "{{amount}} ₾ sale recorded.",
+      "errorEmpty": "Add at least one product.",
+      "outOfStock": "Out of stock",
+      "notEnoughStock": "Not enough stock. Available: {{available}}"
+    },
+    "newReturn": {
+      "searchPlaceholder": "Search by name or scan barcode...",
+      "cartEmpty": "No items added yet. Search a product to add it.",
+      "col": { "product": "Product", "barcode": "Barcode", "qty": "Qty", "returnPrice": "Return Price", "lineTotal": "Line Total" },
+      "modified": "modified", "reset": "Default",
+      "total": "Return Total",
+      "refundMethod": "Settlement Method", "refundCash": "Cash Refund", "refundCredit": "Store Credit",
+      "cashRefundNote": "{{amount}} ₾ will be paid out from the cash register. Customer balance is not affected.",
+      "deductNote": "Customer balance will decrease by {{amount}} ₾ (or add credit if already paid off). Cash register is not affected.",
+      "neverPurchased": "never purchased",
+      "process": "Process Return", "processing": "Processing…",
+      "success": "{{amount}} ₾ return processed.",
+      "errorEmpty": "Add at least one product."
+    },
     "deleteModal": {
       "trigger": "Delete Customer",
       "title": "Delete {{name}}?",
