@@ -27,7 +27,8 @@ public record DetailedReportItemDto(
     decimal? UnitPrice,
     decimal Total,
     string Type,           // "CashSale" | "DebitSale" | "Return" | "CreditReturn" | "Payment" | "Expense"
-    string? CustomerName
+    string? CustomerName,
+    DateTime CreatedAt
 );
 
 public record DetailedReportSummaryDto(

@@ -51,10 +51,12 @@ public class CustomerService(AppDbContext db)
             .Where(s => s.Type == SaleType.Return || s.Type == SaleType.CreditReturn)
             .Select(s => s.Id)
             .ToList();
-        var returnMovementsBySaleId = await db.StockMovements
+        var returnMovementsBySaleId = (await db.StockMovements
             .Include(m => m.Product)
             .Where(m => m.SaleId.HasValue && returnSaleIds.Contains(m.SaleId.Value))
-            .ToDictionaryAsync(m => m.SaleId!.Value);
+            .ToListAsync())
+            .GroupBy(m => m.SaleId!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
         // Only debt-affecting transaction types count toward the outstanding balance:
         // a cash sale is paid in full immediately, and a cash-refunded return pays out
@@ -76,10 +78,13 @@ public class CustomerService(AppDbContext db)
                     i.Product.Name, i.Product.Barcode, i.Quantity, i.FinalPrice, i.Quantity * i.FinalPrice)).ToList();
             }
             else if ((s.Type == SaleType.Return || s.Type == SaleType.CreditReturn)
-                && returnMovementsBySaleId.TryGetValue(s.Id, out var movement))
+                && returnMovementsBySaleId.TryGetValue(s.Id, out var movementsForSale))
             {
-                var unitPrice = movement.ReturnPrice ?? 0m;
-                items = [new CustomerTransactionItemDto(movement.Product.Name, movement.Product.Barcode, movement.Quantity, unitPrice, movement.Quantity * unitPrice)];
+                items = movementsForSale.Select(m =>
+                {
+                    var unitPrice = m.ReturnPrice ?? 0m;
+                    return new CustomerTransactionItemDto(m.Product.Name, m.Product.Barcode, m.Quantity, unitPrice, m.Quantity * unitPrice);
+                }).ToList();
             }
             return new CustomerTransactionDto(s.Id, s.Type.ToString(), s.TotalAmount, s.CreatedAt, items);
         }).ToList();
@@ -164,7 +169,8 @@ public class CustomerService(AppDbContext db)
     private async Task<decimal> GetBalanceAsync(int customerId)
     {
         var amounts = await db.Sales
-            .Where(s => s.CustomerId == customerId && s.Type != SaleType.CashSale)
+            .Where(s => s.CustomerId == customerId &&
+                (s.Type == SaleType.DebitSale || s.Type == SaleType.CreditReturn || s.Type == SaleType.Payment))
             .Select(s => s.TotalAmount)
             .ToListAsync();
         return amounts.Sum();

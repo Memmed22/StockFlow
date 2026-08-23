@@ -198,6 +198,33 @@
   },
   "customerDetail": {
     "back": "← Geri", "balance": "Cari balans (Borc)",
+    "tabs": { "overview": "Ümumi baxış", "newSale": "Yeni Satış", "newReturn": "Yeni Qaytarma" },
+    "newSale": {
+      "searchPlaceholder": "Ad və ya barkodla axtarın...",
+      "cartEmpty": "Səbət boşdur. Məhsul axtarıb əlavə edin.",
+      "col": { "product": "Məhsul", "stock": "Anbar", "basePrice": "Əsas qiymət", "discount": "Endirim", "finalPrice": "Son qiymət", "qty": "Miqdar", "lineTotal": "Cəmi" },
+      "total": "Cəmi", "reset": "Sıfırla",
+      "paymentType": "Ödəniş növü", "cash": "Nağd", "debit": "Borc",
+      "checkout": "Ödəniş", "processing": "Yerinə yetirilir…",
+      "success": "{{amount}} ₾ satış qeydə alındı.",
+      "errorEmpty": "Ən azı bir məhsul əlavə edin.",
+      "outOfStock": "Stokda yoxdur",
+      "notEnoughStock": "Kifayət qədər stok yoxdur. Mövcud: {{available}}"
+    },
+    "newReturn": {
+      "searchPlaceholder": "Ad və ya barkodla axtarın...",
+      "cartEmpty": "Hələ məhsul əlavə edilməyib. Axtarıb əlavə edin.",
+      "col": { "product": "Məhsul", "barcode": "Barkod", "qty": "Miqdar", "returnPrice": "Qaytarma qiyməti", "lineTotal": "Cəmi" },
+      "modified": "dəyişdirilmiş", "reset": "Standart",
+      "total": "Qaytarma cəmi",
+      "refundMethod": "Ödəniş üsulu", "refundCash": "Nağd qaytarma", "refundCredit": "Balans mədaxili",
+      "cashRefundNote": "Kassadan {{amount}} ₾ nağd veriləcək. Müştəri balansı dəyişməyəcək.",
+      "deductNote": "Müştəri balansı {{amount}} ₾ azalacaq (borcu yoxdursa, artıq mədaxil olunacaq). Kassaya təsir etməyəcək.",
+      "neverPurchased": "heç alınmayıb",
+      "process": "Qaytarmanı emal et", "processing": "Yerinə yetirilir…",
+      "success": "{{amount}} ₾ qaytarma emal edildi.",
+      "errorEmpty": "Ən azı bir məhsul əlavə edin."
+    },
     "deleteModal": {
       "trigger": "Müştərini sil",
       "title": "{{name}} silinsin?",
