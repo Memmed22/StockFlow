@@ -414,7 +414,7 @@ export default function CustomerDetail() {
             </thead>
             <tbody>
               {transactions.map(tx => {
-                const isPositive = tx.amount > 0;
+                const isPositive = tx.amount > 0 && tx.type !== 'DebitSale';
                 const hasItems = tx.items && tx.items.length > 0;
                 const isOpen = expanded.has(tx.id);
                 return (

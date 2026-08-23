@@ -178,28 +178,57 @@ public class ReportService(AppDbContext db)
     {
         var items = new List<DetailedReportItemDto>();
 
+        // Line items sharing one Sale (a single POS/customer-detail checkout, however many
+        // products it contained) are bundled into one group so the UI shows one row per
+        // transaction rather than one row per product — matching how a cashier thinks about it.
         foreach (var sale in sales.Where(s => s.Type == SaleType.CashSale || s.Type == SaleType.DebitSale))
         {
             var type = sale.Type == SaleType.CashSale ? "CashSale" : "DebitSale";
-            foreach (var si in sale.Items)
+            var lines = sale.Items.Select(si => new DetailedReportLineDto(
+                si.Product.Name, si.Product.Barcode, si.Quantity, si.FinalPrice, si.Quantity * si.FinalPrice)).ToList();
+            if (lines.Count <= 1)
+            {
+                var single = lines.FirstOrDefault();
+                items.Add(new DetailedReportItemDto(
+                    single?.Label ?? type, single?.Barcode, single?.Quantity, single?.UnitPrice,
+                    single?.Total ?? sale.TotalAmount,
+                    type, sale.Customer?.Name, sale.CreatedAt));
+            }
+            else
             {
                 items.Add(new DetailedReportItemDto(
-                    si.Product.Name, si.Product.Barcode,
-                    si.Quantity, si.FinalPrice,
-                    si.Quantity * si.FinalPrice,
-                    type, sale.Customer?.Name, sale.CreatedAt));
+                    lines[0].Label, null, null, null,
+                    lines.Sum(l => l.Total),
+                    type, sale.Customer?.Name, sale.CreatedAt, lines));
             }
         }
 
-        foreach (var r in returns)
+        // Group by SaleId so a bulk return (several products settled in one submission)
+        // shows as one row too. Falls back to a per-movement group for any pre-migration
+        // Return rows that predate the SaleId column and never got one.
+        foreach (var group in returns.GroupBy(r => r.SaleId ?? -r.Id))
         {
-            var unitPrice = r.ReturnPrice ?? 0m;
-            items.Add(new DetailedReportItemDto(
-                r.Product.Name, r.Product.Barcode,
-                -r.Quantity, unitPrice,
-                -(r.Quantity * unitPrice),
-                r.IsCreditReturn ? "CreditReturn" : "Return",
-                r.Customer?.Name, r.CreatedAt));
+            var groupReturns = group.ToList();
+            var lines = groupReturns.Select(r =>
+            {
+                var unitPrice = r.ReturnPrice ?? 0m;
+                return new DetailedReportLineDto(r.Product.Name, r.Product.Barcode, -r.Quantity, unitPrice, -(r.Quantity * unitPrice));
+            }).ToList();
+            var first = groupReturns[0];
+            var type = first.IsCreditReturn ? "CreditReturn" : "Return";
+            if (lines.Count <= 1)
+            {
+                items.Add(new DetailedReportItemDto(
+                    lines[0].Label, lines[0].Barcode, lines[0].Quantity, lines[0].UnitPrice, lines[0].Total,
+                    type, first.Customer?.Name, first.CreatedAt));
+            }
+            else
+            {
+                items.Add(new DetailedReportItemDto(
+                    lines[0].Label, null, null, null,
+                    lines.Sum(l => l.Total),
+                    type, first.Customer?.Name, first.CreatedAt, lines));
+            }
         }
 
         foreach (var p in sales.Where(s => s.Type == SaleType.Payment))

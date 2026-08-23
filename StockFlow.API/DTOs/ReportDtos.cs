@@ -20,6 +20,17 @@ public record StockReportItemDto(
     decimal Quantity
 );
 
+public record DetailedReportLineDto(
+    string Label,
+    string? Barcode,
+    decimal? Quantity,
+    decimal? UnitPrice,
+    decimal Total
+);
+
+// A group's own Label/Barcode/Quantity/UnitPrice are null when it bundles more than one
+// line under Items (e.g. a single POS/bulk-return checkout with several products) — the
+// group only carries a summed Total then, and the per-product breakdown lives in Items.
 public record DetailedReportItemDto(
     string Label,
     string? Barcode,
@@ -28,7 +39,8 @@ public record DetailedReportItemDto(
     decimal Total,
     string Type,           // "CashSale" | "DebitSale" | "Return" | "CreditReturn" | "Payment" | "Expense"
     string? CustomerName,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    List<DetailedReportLineDto>? Items = null
 );
 
 public record DetailedReportSummaryDto(
