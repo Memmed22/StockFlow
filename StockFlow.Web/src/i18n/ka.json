@@ -169,7 +169,7 @@
     },
     "summary": { "title": "შეჯამება", "cashSales": "ნაღდი გაყიდვები", "debitSales": "კრედიტი (არ ნაღდი)", "payments": "მიღებული გადახდები", "returns": "დაბრუნებები", "creditReturns": "ბალანსზე დაბრუნებები", "expenses": "💸 ხარჯები", "cashTotal": "ნაღდი სულ" },
     "infoRevenue": "შემოსავალი", "infoTransactions": "ტრანზაქციები",
-    "notCash": "არ ნაღდი", "unknownCustomer": "უცნობი",
+    "notCash": "არ ნაღდი", "unknownCustomer": "უცნობი", "groupItems": "{{count}} ნივთი",
     "noData": { "transactions": "ამ პერიოდში ტრანზაქცია არ არის.", "transactionsSearch": "\"{{query}}\"-ის შესაბამისი ტრანზაქცია არ მოიძებნა.", "sales": "ამ პერიოდში გაყიდვა არ არის.", "users": "ამ პერიოდში მონაცემი არ არის.", "products": "პროდუქტი ვერ მოიძებნა.", "reports": "ანგარიშების ჩატვირთვა ვერ მოხერხდა." },
     "types": { "Cash": "ნაღდი", "Debit": "კრედიტი", "Return": "დაბრუნება", "CreditReturn": "ბალანსის დაბრუნება", "Payment": "გადახდა", "Expense": "ხარჯი", "OpeningCash": "გახსნა" },
     "closingDetail": { "title": "სალაროს დახურვა", "cashier": "მოლარე", "period": "პერიოდი", "breakdown": "ფინანსური ანალიზი", "totals": "ჯამები", "transactions": "ტრანზაქციები" }

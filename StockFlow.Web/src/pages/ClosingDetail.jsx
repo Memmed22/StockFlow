@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { reportsApi } from '../api/client';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,15 @@ export default function ClosingDetail() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expanded, setExpanded] = useState(new Set());
+
+  const toggleExpand = (i) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  };
 
   useEffect(() => {
     reportsApi.getClosingDetail(id)
@@ -119,6 +128,7 @@ export default function ClosingDetail() {
         <table style={s.table}>
           <thead>
             <tr>
+              <th style={{ ...s.th, width: 24 }}></th>
               <th style={s.th}>{t('reports.col.type')}</th>
               <th style={s.th}>{t('reports.col.productDesc')}</th>
               <th style={s.th}>{t('reports.col.customer')}</th>
@@ -135,28 +145,68 @@ export default function ClosingDetail() {
               const isReturnQty = r.type === 'Return' || isCreditReturn;
               const isNegative = isReturnQty || r.type === 'Expense';
               const notCash = isDebit || isCreditReturn;
+              const hasItems = r.items && r.items.length > 0;
+              const isOpen = expanded.has(i);
               return (
-                <tr key={i} style={{ ...s.tr, background: isDebit ? '#FFFBEB' : isCreditReturn ? '#F5F3FF' : r.type === 'Expense' ? '#FFF1F2' : undefined }}>
-                  <td style={s.td}>
-                    <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>
-                      {t(`reports.types.${cfg.key}`)}
-                    </span>
-                  </td>
-                  <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>{r.label}</td>
-                  <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || (r.type === 'Payment' ? t('reports.unknownCustomer') : '—')}</td>
-                  <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
-                    {r.quantity != null ? (isReturnQty ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
-                  </td>
-                  <td style={s.td}>{r.unitPrice != null ? `${r.unitPrice.toFixed(2)} ₾` : '—'}</td>
-                  <td style={{ ...s.td, textAlign: 'right', fontWeight: 700, color: r.total < 0 ? '#DC2626' : isDebit ? '#92400E' : '#059669' }}>
-                    {r.total >= 0 && !isNegative ? '+' : ''}{r.total.toFixed(2)} ₾
-                    {notCash && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
-                  </td>
-                </tr>
+                <Fragment key={i}>
+                  <tr
+                    style={{ ...s.tr, cursor: hasItems ? 'pointer' : 'default', background: isDebit ? '#FFFBEB' : isCreditReturn ? '#F5F3FF' : r.type === 'Expense' ? '#FFF1F2' : undefined }}
+                    onClick={() => hasItems && toggleExpand(i)}
+                  >
+                    <td style={{ ...s.td, color: '#94a3b8', fontSize: 12, padding: '12px 0 12px 16px' }}>
+                      {hasItems ? (isOpen ? '▾' : '▸') : ''}
+                    </td>
+                    <td style={s.td}>
+                      <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>
+                        {t(`reports.types.${cfg.key}`)}
+                      </span>
+                    </td>
+                    <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>
+                      {hasItems ? t('reports.groupItems', { count: r.items.length }) : r.label}
+                    </td>
+                    <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || (r.type === 'Payment' ? t('reports.unknownCustomer') : '—')}</td>
+                    <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
+                      {r.quantity != null ? (isReturnQty ? r.quantity.toFixed(2) : `+${r.quantity.toFixed(2)}`) : '—'}
+                    </td>
+                    <td style={s.td}>{r.unitPrice != null ? `${r.unitPrice.toFixed(2)} ₾` : '—'}</td>
+                    <td style={{ ...s.td, textAlign: 'right', fontWeight: 700, color: r.total < 0 ? '#DC2626' : isDebit ? '#92400E' : '#059669' }}>
+                      {r.total >= 0 && !isNegative && !isDebit ? '+' : ''}{r.total.toFixed(2)} ₾
+                      {notCash && <span style={s.notCashTag}>{t('reports.notCash')}</span>}
+                    </td>
+                  </tr>
+                  {hasItems && isOpen && (
+                    <tr style={{ background: '#F9FAFB' }}>
+                      <td colSpan={7} style={{ padding: '0 16px 10px 40px' }}>
+                        <table style={s.itemsTable}>
+                          <thead>
+                            <tr>
+                              <th style={s.itemTh}>{t('reports.col.product')}</th>
+                              <th style={s.itemTh}>{t('reports.col.barcode')}</th>
+                              <th style={s.itemTh}>{t('reports.col.qty')}</th>
+                              <th style={s.itemTh}>{t('reports.col.unitPrice')}</th>
+                              <th style={{ ...s.itemTh, textAlign: 'right' }}>{t('reports.col.total')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {r.items.map((line, idx) => (
+                              <tr key={idx}>
+                                <td style={s.itemTd}>{line.label}</td>
+                                <td style={s.itemTd}>{line.barcode ? <code style={s.code}>{line.barcode}</code> : '—'}</td>
+                                <td style={s.itemTd}>{line.quantity != null ? (isReturnQty ? line.quantity.toFixed(2) : `+${line.quantity.toFixed(2)}`) : '—'}</td>
+                                <td style={s.itemTd}>{line.unitPrice != null ? `${line.unitPrice.toFixed(2)} ₾` : '—'}</td>
+                                <td style={{ ...s.itemTd, textAlign: 'right', fontWeight: 600 }}>{line.total.toFixed(2)} ₾</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               );
             })}
             {data.items.length === 0 && (
-              <tr><td colSpan={6} style={s.empty}>{t('reports.noData.transactions')}</td></tr>
+              <tr><td colSpan={7} style={s.empty}>{t('reports.noData.transactions')}</td></tr>
             )}
           </tbody>
         </table>
@@ -189,5 +239,9 @@ const s = {
   td: { padding: '12px 16px', fontSize: 14, color: '#374151' },
   badge: { display: 'inline-block', fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20 },
   notCashTag: { fontSize: 10, color: '#92400E', background: '#FEF3C7', borderRadius: 4, padding: '1px 5px', marginLeft: 6, fontWeight: 600 },
+  code: { background: '#F3F4F8', padding: '2px 6px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace', color: '#6B7280' },
+  itemsTable: { width: '100%', borderCollapse: 'collapse', fontSize: 13 },
+  itemTh: { padding: '5px 10px', textAlign: 'left', fontWeight: 600, color: '#64748b', borderBottom: '1px solid #e2e8f0' },
+  itemTd: { padding: '5px 10px', color: '#475569' },
   empty: { padding: '32px 16px', textAlign: 'center', color: '#9CA3AF', fontSize: 14 },
 };
