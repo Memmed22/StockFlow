@@ -1,7 +1,7 @@
 {
   "nav": {
     "pos": "გაყიდვა", "returns": "დაბრუნება", "cashClose": "სალარო",
-    "products": "პროდუქტები", "stockIn": "მარაგი", "customers": "კლიენტები",
+    "products": "პროდუქტები", "stockIn": "მარაგი", "companies": "კომპანიები", "customers": "კლიენტები",
     "reports": "ანგარიში", "users": "მომხმარებლები", "signOut": "გასვლა"
   },
   "common": {
@@ -109,11 +109,29 @@
       }
     }
   },
+  "companies": {
+    "title": "კომპანიები",
+    "subtitle": "{{count}} მომწოდებელი",
+    "addCompany": "+ კომპანიის დამატება", "editCompany": "კომპანიის რედაქტირება", "newCompany": "ახალი კომპანია",
+    "deleteConfirm": "წავშალოთ ეს კომპანია?", "noCompanies": "კომპანია ვერ მოიძებნა.",
+    "update": "განახლება", "save": "შენახვა", "cancel": "გაუქმება",
+    "searchPlaceholder": "ძიება სახელით ან კოდით...",
+    "form": {
+      "name": "სახელი *", "namePlaceholder": "კომპანიის სახელი",
+      "code": "კოდი *", "codePlaceholder": "მომწოდებლის კოდი",
+      "contactPerson": "საკონტაქტო პირი", "contactPersonPlaceholder": "სრული სახელი",
+      "phone": "ტელეფონი", "phonePlaceholder": "+995 555 123456",
+      "description": "აღწერა", "optional": "სურვილისამებრ"
+    },
+    "col": { "name": "სახელი", "code": "კოდი", "contactPerson": "საკონტაქტო პირი", "phone": "ტელეფონი", "description": "აღწერა", "actions": "მოქმედება" }
+  },
   "stock": {
     "title": "მარაგის შევსება", "subtitle": "პროდუქტის შემომავალი ინვენტარის ჩაწერა",
+    "tabs": { "quick": "სწრაფი დამატება", "po": "შესყიდვის შეკვეთა" },
     "addStock": "მარაგის დამატება", "product": "პროდუქტი *",
     "searchPlaceholder": "ძიება სახელით ან შტრიხკოდით...",
-    "currentStock": "მიმდინარე მარაგი", "note": "შენიშვნა", "notePlaceholder": "სურვილისამებრ (მომწოდებელი, პარტია…)",
+    "currentStock": "მიმდინარე მარაგი", "buyingPrice": "შესყიდვის ფასი", "sellingPrice": "გასაყიდი ფასი",
+    "note": "შენიშვნა", "notePlaceholder": "სურვილისამებრ (მომწოდებელი, პარტია…)",
     "addButton": "მარაგის დამატება", "saving": "ინახება…", "movements": "მარაგის მოძრაობა",
     "totalRecords": "{{count}} ჩანაწერი სულ",
     "searchMovements": "ძიება სახელით ან შტრიხკოდით…",
@@ -121,7 +139,22 @@
     "col": { "date": "თარიღი", "product": "პროდუქტი", "barcode": "შტრიხკოდი", "type": "ტიპი", "quantity": "რაოდენობა", "note": "შენიშვნა" },
     "prev": "← წინა", "next": "შემდეგი →",
     "pageOf": "გვერდი {{page}} / {{total}}",
-    "errors": { "selectProduct": "გთხოვთ, აირჩიეთ პროდუქტი სიიდან.", "quantity": "შეიყვანეთ სწორი რაოდენობა.", "stockError": "მარაგის დამატებისას შეცდომა." }
+    "errors": { "selectProduct": "გთხოვთ, აირჩიეთ პროდუქტი სიიდან.", "quantity": "შეიყვანეთ სწორი რაოდენობა.", "buyingPrice": "შეიყვანეთ სწორი შესყიდვის ფასი 0-ზე მეტი.", "sellingPrice": "შეიყვანეთ სწორი გასაყიდი ფასი 0-ზე მეტი.", "stockError": "მარაგის დამატებისას შეცდომა." },
+    "po": {
+      "company": "მომწოდებელი", "noCompany": "მომწოდებელი არ არის",
+      "cartEmpty": "ჯერ არაფერია დამატებული. მოძებნეთ პროდუქტი.",
+      "lineTotal": "ჯამი", "totalCost": "სრული ღირებულება",
+      "paymentMethod": "გადახდის მეთოდი", "fromRegister": "სალაროდან", "otherMethod": "სხვა",
+      "registerNote": "სალაროდან ჩამოიჭრება {{amount}} ₾.",
+      "review": "შესყიდვის გადახედვა",
+      "reviewTitle": "შესყიდვის შეკვეთის გადახედვა",
+      "confirm": "შესყიდვის დადასტურება", "confirming": "ინახება…",
+      "errorEmpty": "დაამატეთ სულ მცირე ერთი პროდუქტი.",
+      "successTitle": "შესყიდვა ჩაწერილია",
+      "successSummary": "{{count}} პროდუქტი დაემატა მარაგს — სულ {{amount}} ₾.",
+      "registerDebited": "სალაროდან ჩამოიჭრა {{amount}} ₾.",
+      "newPurchase": "ახალი შესყიდვის დაწყება"
+    }
   },
   "returns": {
     "title": "დაბრუნება", "subtitle": "კლიენტის დაბრუნების დამუშავება — მარაგი ავტომატურად განახლდება",

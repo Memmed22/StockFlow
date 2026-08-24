@@ -24,6 +24,7 @@ export const productsApi = {
 
 export const stockApi = {
   stockIn: (data) => api.post('/stock/in', data),
+  bulkStockIn: (data) => api.post('/stock/bulk-in', data),
   adjustStock: (data) => api.post('/stock/adjust', data),
   getMovements: ({ query, page = 1, pageSize = 20 } = {}) =>
     api.get('/stock/movements', { params: { query: query || undefined, page, pageSize } }),
@@ -54,6 +55,14 @@ export const customersApi = {
   create: (data) => api.post('/customers', data),
   recordPayment: (id, data) => api.post(`/customers/${id}/payment`, data),
   delete: (id) => api.delete(`/customers/${id}`),
+};
+
+export const companiesApi = {
+  getAll: (search) => api.get('/companies', { params: { search } }),
+  getById: (id) => api.get(`/companies/${id}`),
+  create: (data) => api.post('/companies', data),
+  update: (id, data) => api.put(`/companies/${id}`, data),
+  delete: (id) => api.delete(`/companies/${id}`),
 };
 
 export const cashClosingApi = {

@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<SaleItem> SaleItems => Set<SaleItem>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CashClosing> CashClosings => Set<CashClosing>();
+    public DbSet<Company> Companies => Set<Company>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -114,5 +115,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(m => m.SaleId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<StockMovement>()
+            .HasOne(m => m.Company)
+            .WithMany()
+            .HasForeignKey(m => m.CompanyId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Company>()
+            .HasIndex(c => c.Code)
+            .IsUnique();
+
+        modelBuilder.Entity<Company>()
+            .HasIndex(c => c.Name);
     }
 }
