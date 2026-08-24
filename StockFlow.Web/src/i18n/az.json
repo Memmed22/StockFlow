@@ -5,7 +5,7 @@
     "reports": "Hesabatlar", "users": "İstifadəçilər", "signOut": "Çıxış"
   },
   "common": {
-    "save": "Yadda saxla", "cancel": "Ləğv et", "delete": "Sil", "edit": "Redaktə et",
+    "save": "Yadda saxla", "cancel": "Ləğv et", "close": "Bağla", "delete": "Sil", "edit": "Redaktə et",
     "update": "Yenilə", "add": "Əlavə et", "loading": "Yüklənir…", "note": "Qeyd",
     "actions": "Əməliyyatlar", "name": "Ad", "barcode": "Barkod",
     "quantity": "Miqdar",
@@ -228,7 +228,7 @@
     "deleteModal": {
       "trigger": "Müştərini sil",
       "title": "{{name}} silinsin?",
-      "warningWithBalance": "Bu, müştərini həmişəlik siləcək və {{balance}} ₾ məbləğindəki borcunu təmizləyəcək.",
+      "blockedWithBalance": "Bu müştərinin {{balance}} ₾ ödənilməmiş borcu var. Silmədən əvvəl borcu ödəməlidir.",
       "warningNoBalance": "Bu, müştərini həmişəlik siləcək.",
       "keepHistoryNote": "Keçmiş alış-verişləri, qaytarmaları və ödənişləri hesabatlar üçün saxlanılacaq, lakin artıq bu müştəriyə bağlı olmayacaq. Bu geri qaytarıla bilməz.",
       "confirmBtn": "Müştərini sil",

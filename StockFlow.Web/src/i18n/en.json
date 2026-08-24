@@ -5,7 +5,7 @@
     "reports": "Reports", "users": "Users", "signOut": "Sign out"
   },
   "common": {
-    "save": "Save", "cancel": "Cancel", "delete": "Delete", "edit": "Edit",
+    "save": "Save", "cancel": "Cancel", "close": "Close", "delete": "Delete", "edit": "Edit",
     "update": "Update", "add": "Add", "loading": "Loading…", "note": "Note",
     "actions": "Actions", "name": "Name", "barcode": "Barcode",
     "quantity": "Quantity",
@@ -233,7 +233,7 @@
     "deleteModal": {
       "trigger": "Delete Customer",
       "title": "Delete {{name}}?",
-      "warningWithBalance": "This will permanently delete this customer and clear their outstanding balance of {{balance}} ₾.",
+      "blockedWithBalance": "This customer has an outstanding balance of {{balance}} ₾. They must pay it off before you can delete this customer.",
       "warningNoBalance": "This will permanently delete this customer.",
       "keepHistoryNote": "Their past purchases, returns, and payments will be kept for reporting, but no longer linked to this customer. This cannot be undone.",
       "confirmBtn": "Delete Customer",

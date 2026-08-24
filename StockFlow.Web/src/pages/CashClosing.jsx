@@ -212,8 +212,8 @@ export default function CashClosing() {
                 { label: t('reports.summary.payments'), value: `+${currency(periodDetail.paymentsTotal)}`, color: '#1D4ED8' },
                 { label: t('reports.summary.returns'), value: currency(periodDetail.returnsTotal), color: '#DC2626' },
                 ...(periodDetail.expensesTotal < 0 ? [{ label: t('reports.summary.expenses'), value: currency(periodDetail.expensesTotal), color: '#9F1239' }] : []),
-                ...(periodDetail.creditReturnsTotal !== 0 ? [{ label: t('reports.summary.creditReturns'), value: `${currency(Math.abs(periodDetail.creditReturnsTotal))} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true }] : []),
-                { label: t('reports.summary.debitSales'), value: `${currency(periodDetail.debitSalesTotal)} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true },
+                ...(periodDetail.creditReturnsTotal !== 0 ? [{ label: t('reports.summary.creditReturns'), value: currency(Math.abs(periodDetail.creditReturnsTotal)), color: '#9CA3AF', muted: true }] : []),
+                { label: t('reports.summary.debitSales'), value: currency(periodDetail.debitSalesTotal), color: '#9CA3AF', muted: true },
               ].map((row, i) => (
                 <div key={i} style={{ ...s.breakdownRow, opacity: row.muted ? 0.7 : 1 }}>
                   <span style={{ fontSize: 14, color: '#374151' }}>{row.label}</span>
