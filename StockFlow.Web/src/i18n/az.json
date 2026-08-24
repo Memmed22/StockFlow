@@ -113,7 +113,7 @@
     "title": "Anbar doldurma", "subtitle": "Məhsulun gələn inventarını qeyd edin",
     "addStock": "Anbar əlavə et", "product": "Məhsul *",
     "searchPlaceholder": "Ad və ya barkodla axtarın...",
-    "currentStock": "Cari anbar", "note": "Qeyd", "notePlaceholder": "İstəyə bağlı (təchizatçı, partiya…)",
+    "currentStock": "Cari anbar", "buyingPrice": "Alış qiyməti", "sellingPrice": "Satış qiyməti", "note": "Qeyd", "notePlaceholder": "İstəyə bağlı (təchizatçı, partiya…)",
     "addButton": "Anbar əlavə et", "saving": "Saxlanılır…", "movements": "Anbar hərəkətləri",
     "totalRecords": "Cəmi {{count}} qeyd",
     "searchMovements": "Ad və ya barkodla axtarın…",
@@ -121,7 +121,7 @@
     "col": { "date": "Tarix", "product": "Məhsul", "barcode": "Barkod", "type": "Növ", "quantity": "Miqdar", "note": "Qeyd" },
     "prev": "← Əvvəlki", "next": "Növbəti →",
     "pageOf": "Səhifə {{page}} / {{total}}",
-    "errors": { "selectProduct": "Zəhmət olmasa siyahıdan məhsul seçin.", "quantity": "Düzgün miqdar daxil edin.", "stockError": "Anbar əlavə edilərkən xəta." }
+    "errors": { "selectProduct": "Zəhmət olmasa siyahıdan məhsul seçin.", "quantity": "Düzgün miqdar daxil edin.", "buyingPrice": "0-dan böyük düzgün alış qiyməti daxil edin.", "sellingPrice": "0-dan böyük düzgün satış qiyməti daxil edin.", "stockError": "Anbar əlavə edilərkən xəta." }
   },
   "returns": {
     "title": "Qaytarma", "subtitle": "Müştəri qaytarmasını emal edin — anbar avtomatik yenilənəcək",

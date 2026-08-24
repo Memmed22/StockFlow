@@ -116,7 +116,7 @@
     "title": "Stock In", "subtitle": "Record incoming inventory for a product",
     "addStock": "Add Stock", "product": "Product *",
     "searchPlaceholder": "Search by name or barcode...",
-    "currentStock": "Current stock", "note": "Note", "notePlaceholder": "Optional (supplier, batch…)",
+    "currentStock": "Current stock", "buyingPrice": "Buying Price", "sellingPrice": "Selling Price", "note": "Note", "notePlaceholder": "Optional (supplier, batch…)",
     "addButton": "Add Stock", "saving": "Saving…", "movements": "Stock Movements",
     "totalRecords": "{{count}} total record(s)",
     "searchMovements": "Search by name or barcode…",
@@ -124,7 +124,7 @@
     "col": { "date": "Date", "product": "Product", "barcode": "Barcode", "type": "Type", "quantity": "Quantity", "note": "Note" },
     "prev": "← Previous", "next": "Next →",
     "pageOf": "Page {{page}} of {{total}}",
-    "errors": { "selectProduct": "Please select a product from the list.", "quantity": "Enter a valid quantity.", "stockError": "Error adding stock." }
+    "errors": { "selectProduct": "Please select a product from the list.", "quantity": "Enter a valid quantity.", "buyingPrice": "Enter a valid buying price greater than 0.", "sellingPrice": "Enter a valid selling price greater than 0.", "stockError": "Error adding stock." }
   },
   "returns": {
     "title": "Returns",
