@@ -761,18 +761,20 @@ export default function CustomerDetail() {
             <h3 style={styles.modalTitle}>{t('customerDetail.deleteModal.title', { name: info.name })}</h3>
             <p style={styles.modalBody}>
               {balance > 0
-                ? t('customerDetail.deleteModal.warningWithBalance', { balance: balance.toFixed(2) })
+                ? t('customerDetail.deleteModal.blockedWithBalance', { balance: balance.toFixed(2) })
                 : t('customerDetail.deleteModal.warningNoBalance')}
             </p>
-            <p style={styles.modalNote}>{t('customerDetail.deleteModal.keepHistoryNote')}</p>
+            {balance <= 0 && <p style={styles.modalNote}>{t('customerDetail.deleteModal.keepHistoryNote')}</p>}
             {deleteError && <p style={styles.error}>{deleteError}</p>}
             <div style={styles.modalActions}>
               <button style={styles.cancelBtn} onClick={() => setDeleteModal(false)} disabled={deleteLoading}>
-                {t('common.cancel')}
+                {balance > 0 ? t('common.close') : t('common.cancel')}
               </button>
-              <button style={{ ...styles.confirmDeleteBtn, opacity: deleteLoading ? 0.7 : 1 }} onClick={handleDelete} disabled={deleteLoading}>
-                {deleteLoading ? t('customerDetail.deleteModal.deleting') : t('customerDetail.deleteModal.confirmBtn')}
-              </button>
+              {balance <= 0 && (
+                <button style={{ ...styles.confirmDeleteBtn, opacity: deleteLoading ? 0.7 : 1 }} onClick={handleDelete} disabled={deleteLoading}>
+                  {deleteLoading ? t('customerDetail.deleteModal.deleting') : t('customerDetail.deleteModal.confirmBtn')}
+                </button>
+              )}
             </div>
           </div>
         </div>

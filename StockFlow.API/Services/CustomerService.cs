@@ -140,6 +140,10 @@ public class CustomerService(AppDbContext db)
         var customer = await db.Customers.FindAsync(id);
         if (customer == null) return (false, "Customer not found.");
 
+        var balance = await GetBalanceAsync(id);
+        if (balance > 0)
+            return (false, "This customer has an outstanding balance. Settle it before deleting.");
+
         // Keep purchase/return/payment history for reporting, just detach it from the
         // deleted customer (anonymize) so their outstanding balance no longer appears anywhere.
         await db.Sales

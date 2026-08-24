@@ -92,8 +92,8 @@ export default function ClosingDetail() {
             { label: t('reports.summary.payments'),        value: `+${currency(data.paymentsTotal)}`, color: '#1D4ED8' },
             { label: t('reports.summary.returns'),         value: currency(data.returnsTotal),       color: '#DC2626' },
             ...(data.expensesTotal < 0 ? [{ label: t('reports.summary.expenses'), value: currency(data.expensesTotal), color: '#9F1239' }] : []),
-            ...(data.creditReturnsTotal !== 0 ? [{ label: t('reports.summary.creditReturns'), value: `${currency(Math.abs(data.creditReturnsTotal))} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true }] : []),
-            { label: t('reports.summary.debitSales'),      value: `${currency(data.debitSalesTotal)} (${t('reports.notCash')})`, color: '#9CA3AF', muted: true },
+            ...(data.creditReturnsTotal !== 0 ? [{ label: t('reports.summary.creditReturns'), value: currency(Math.abs(data.creditReturnsTotal)), color: '#9CA3AF', muted: true }] : []),
+            { label: t('reports.summary.debitSales'),      value: currency(data.debitSalesTotal), color: '#9CA3AF', muted: true },
           ].map((row, i) => (
             <div key={i} style={{ ...s.breakdownRow, opacity: row.muted ? 0.7 : 1 }}>
               <span style={{ fontSize: 14, color: '#374151' }}>{row.label}</span>
