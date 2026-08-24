@@ -18,6 +18,8 @@ export default function StockIn() {
   const { t } = useTranslation();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState('');
+  const [buyingPrice, setBuyingPrice] = useState('');
+  const [sellingPrice, setSellingPrice] = useState('');
   const [note, setNote] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -74,6 +76,8 @@ export default function StockIn() {
   const handleProductSelect = (product) => {
     setSelectedProduct(product);
     setQuantity('');
+    setBuyingPrice(product.buyingPrice != null ? String(product.buyingPrice) : '');
+    setSellingPrice(product.sellingPrice != null ? String(product.sellingPrice) : '');
     setError('');
   };
 
@@ -85,12 +89,18 @@ export default function StockIn() {
     const isDecimal = UNIT_IS_DECIMAL[selectedProduct.unitType ?? 0];
     const qty = isDecimal ? parseFloat(quantity) : parseInt(quantity);
     if (!qty || qty <= 0) { setError(t('stock.errors.quantity')); return; }
+    const price = parseFloat(buyingPrice);
+    if (!price || price <= 0) { setError(t('stock.errors.buyingPrice')); return; }
+    const sellPrice = parseFloat(sellingPrice);
+    if (!sellPrice || sellPrice <= 0) { setError(t('stock.errors.sellingPrice')); return; }
     setSubmitting(true);
     try {
-      await stockApi.stockIn({ productId: selectedProduct.id, quantity: qty, note: note || null });
+      await stockApi.stockIn({ productId: selectedProduct.id, quantity: qty, note: note || null, buyingPrice: price, sellingPrice: sellPrice });
       setMessage(`+ ${qty} ${UNIT_LABELS[selectedProduct.unitType ?? 0]} — ${selectedProduct.name}`);
       setSelectedProduct(null);
       setQuantity('');
+      setBuyingPrice('');
+      setSellingPrice('');
       setNote('');
       setSearchKey(k => k + 1);
       setPage(1);
@@ -129,7 +139,7 @@ export default function StockIn() {
             )}
           </div>
 
-          <div style={s.twoCol}>
+          <div style={s.fourCol}>
             <div style={s.field}>
               <label style={s.label}>{t('common.quantity')}{unitLabel ? ` (${unitLabel})` : ''} *</label>
               <input
@@ -142,6 +152,36 @@ export default function StockIn() {
                 onChange={e => {
                   const v = e.target.value;
                   if (isDecimal ? /^\d*\.?\d*$/.test(v) : /^\d*$/.test(v)) setQuantity(v);
+                }}
+              />
+            </div>
+            <div style={s.field}>
+              <label style={s.label}>{t('stock.buyingPrice')} (₾) *</label>
+              <input
+                style={{ ...s.input, borderColor: buyingPrice.trim() === '' ? '#DC2626' : '#E5E7EB' }}
+                type="text"
+                inputMode="decimal"
+                required
+                placeholder="e.g. 15.00"
+                value={buyingPrice}
+                onChange={e => {
+                  const v = e.target.value;
+                  if (/^\d*\.?\d*$/.test(v)) setBuyingPrice(v);
+                }}
+              />
+            </div>
+            <div style={s.field}>
+              <label style={s.label}>{t('stock.sellingPrice')} (₾) *</label>
+              <input
+                style={{ ...s.input, borderColor: sellingPrice.trim() === '' ? '#DC2626' : '#E5E7EB' }}
+                type="text"
+                inputMode="decimal"
+                required
+                placeholder="e.g. 20.00"
+                value={sellingPrice}
+                onChange={e => {
+                  const v = e.target.value;
+                  if (/^\d*\.?\d*$/.test(v)) setSellingPrice(v);
                 }}
               />
             </div>
@@ -237,7 +277,7 @@ const s = {
   card: { background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: 24, marginBottom: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   cardTitle: { margin: '0 0 20px', fontSize: 15, fontWeight: 600, color: '#111827' },
   form: { display: 'flex', flexDirection: 'column', gap: 16 },
-  twoCol: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
+  fourCol: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16 },
   field: { display: 'flex', flexDirection: 'column', gap: 6 },
   label: { fontSize: 13, fontWeight: 600, color: '#374151' },
   input: { padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, background: '#F9FAFB', color: '#111827', boxSizing: 'border-box', width: '100%' },

@@ -12,12 +12,22 @@ public class StockService(AppDbContext db)
         var product = await db.Products.FindAsync(dto.ProductId);
         if (product == null) return (null, "Product not found.");
         if (dto.Quantity <= 0) return (null, "Quantity must be greater than zero.");
+        if (dto.BuyingPrice.HasValue && dto.BuyingPrice <= 0)
+            return (null, "Buying price must be greater than zero.");
+        if (dto.SellingPrice.HasValue && dto.SellingPrice <= 0)
+            return (null, "Selling price must be greater than zero.");
+
+        if (dto.BuyingPrice.HasValue && dto.BuyingPrice != product.BuyingPrice)
+            product.BuyingPrice = dto.BuyingPrice.Value;
+        if (dto.SellingPrice.HasValue && dto.SellingPrice != product.SellingPrice)
+            product.SellingPrice = dto.SellingPrice.Value;
 
         var movement = new StockMovement
         {
             ProductId = dto.ProductId,
             Type = MovementType.StockIn,
             Quantity = dto.Quantity,
+            BasePrice = dto.BuyingPrice ?? product.BuyingPrice,
             Note = dto.Note
         };
 
