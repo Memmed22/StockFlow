@@ -65,7 +65,8 @@ public class ReportService(AppDbContext db)
             .Where(m => m.Type == MovementType.Return && m.CreatedAt >= fromDate && m.CreatedAt < toDate)
             .ToListAsync();
 
-        var items = BuildDetailItems(sales, returns);
+        var stockPurchaseCompanies = await GetStockPurchaseCompanyNamesAsync(sales);
+        var items = BuildDetailItems(sales, returns, stockPurchaseCompanies);
 
         // Summed from the sale record itself (not its line items) so a per-sale
         // cart-level discount is correctly netted out of the reported total.
@@ -116,10 +117,11 @@ public class ReportService(AppDbContext db)
             .Where(m => m.Type == MovementType.Return && m.CreatedAt > from && m.CreatedAt <= to)
             .ToListAsync();
 
+        var stockPurchaseCompanies = await GetStockPurchaseCompanyNamesAsync(sales);
         var items = new List<DetailedReportItemDto>();
         items.AddRange(sales.Where(s => s.Type == SaleType.OpeningCash)
             .Select(o => new DetailedReportItemDto("Opening Cash", null, null, null, o.TotalAmount, "OpeningCash", null, o.CreatedAt)));
-        items.AddRange(BuildDetailItems(sales, returns));
+        items.AddRange(BuildDetailItems(sales, returns, stockPurchaseCompanies));
         items = items.OrderBy(i => i.CreatedAt).ToList();
 
         var openingCash    = sales.Where(s => s.Type == SaleType.OpeningCash).Sum(s => s.TotalAmount);
@@ -159,7 +161,8 @@ public class ReportService(AppDbContext db)
             .Where(m => m.Type == MovementType.Return && m.CreatedAt > fromDate && m.CreatedAt <= toDate)
             .ToListAsync();
 
-        var items = BuildDetailItems(sales, returns).OrderBy(i => i.CreatedAt).ToList();
+        var stockPurchaseCompanies = await GetStockPurchaseCompanyNamesAsync(sales);
+        var items = BuildDetailItems(sales, returns, stockPurchaseCompanies).OrderBy(i => i.CreatedAt).ToList();
 
         var openingCash     = sales.Where(s => s.Type == SaleType.OpeningCash).Sum(s => s.TotalAmount);
         var cashSalesTotal  = sales.Where(s => s.Type == SaleType.CashSale).Sum(s => s.TotalAmount);
@@ -173,8 +176,28 @@ public class ReportService(AppDbContext db)
             openingCash, cashSalesTotal, debitSalesTotal, paymentsTotal, returnsTotal, expensesTotal, creditReturnsTotal, items);
     }
 
+    // A stock-purchase Expense (from bulk stock-in) never has a Note — only a manual "Add
+    // Expense" does — so a null Note marks it as one. Its supplier is looked up via the
+    // StockMovements it's linked to (SaleId), not a column on Sale itself.
+    private async Task<Dictionary<int, string?>> GetStockPurchaseCompanyNamesAsync(List<Sale> sales)
+    {
+        var stockPurchaseSaleIds = sales
+            .Where(s => s.Type == SaleType.Expense && s.Note == null)
+            .Select(s => s.Id)
+            .ToList();
+        if (stockPurchaseSaleIds.Count == 0) return new Dictionary<int, string?>();
+
+        var rows = await db.StockMovements
+            .Where(m => m.SaleId != null && stockPurchaseSaleIds.Contains(m.SaleId.Value))
+            .Select(m => new { SaleId = m.SaleId!.Value, CompanyName = m.Company != null ? m.Company.Name : null })
+            .ToListAsync();
+
+        return rows.GroupBy(r => r.SaleId).ToDictionary(g => g.Key, g => g.First().CompanyName);
+    }
+
     // Builds cash/debit sale, return, payment, and expense line items for a detail/closing view.
-    private static List<DetailedReportItemDto> BuildDetailItems(List<Sale> sales, List<StockMovement> returns)
+    private static List<DetailedReportItemDto> BuildDetailItems(
+        List<Sale> sales, List<StockMovement> returns, Dictionary<int, string?> stockPurchaseCompanies)
     {
         var items = new List<DetailedReportItemDto>();
 
@@ -231,18 +254,23 @@ public class ReportService(AppDbContext db)
             }
         }
 
+        // Label is left null here — it's a fixed phrase, not real data, so the client
+        // localizes it instead of receiving a hardcoded English string.
         foreach (var p in sales.Where(s => s.Type == SaleType.Payment))
         {
             items.Add(new DetailedReportItemDto(
-                "Payment received", null, null, null,
+                null, null, null, null,
                 Math.Abs(p.TotalAmount), "Payment", p.Customer?.Name, p.CreatedAt));
         }
 
         foreach (var e in sales.Where(s => s.Type == SaleType.Expense))
         {
+            var isStockPurchase = e.Note == null;
+            var companyName = isStockPurchase && stockPurchaseCompanies.TryGetValue(e.Id, out var cn) ? cn : null;
             items.Add(new DetailedReportItemDto(
-                e.Note ?? "Expense", null, null, null,
-                e.TotalAmount, "Expense", null, e.CreatedAt));
+                isStockPurchase ? null : e.Note, null, null, null,
+                e.TotalAmount, "Expense", null, e.CreatedAt,
+                CompanyName: companyName));
         }
 
         return items;

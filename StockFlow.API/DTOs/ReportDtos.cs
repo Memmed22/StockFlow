@@ -32,7 +32,7 @@ public record DetailedReportLineDto(
 // line under Items (e.g. a single POS/bulk-return checkout with several products) — the
 // group only carries a summed Total then, and the per-product breakdown lives in Items.
 public record DetailedReportItemDto(
-    string Label,
+    string? Label,
     string? Barcode,
     decimal? Quantity,
     decimal? UnitPrice,
@@ -40,7 +40,8 @@ public record DetailedReportItemDto(
     string Type,           // "CashSale" | "DebitSale" | "Return" | "CreditReturn" | "Payment" | "Expense"
     string? CustomerName,
     DateTime CreatedAt,
-    List<DetailedReportLineDto>? Items = null
+    List<DetailedReportLineDto>? Items = null,
+    string? CompanyName = null  // set for a stock-purchase Expense; lets the client compose "Stock purchase — {company}"
 );
 
 public record DetailedReportSummaryDto(
