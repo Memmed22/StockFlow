@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import POS from './pages/POS';
 import Products from './pages/Products';
 import StockIn from './pages/StockIn';
+import Companies from './pages/Companies';
 import Returns from './pages/Returns';
 import Reports from './pages/Reports';
 import Users from './pages/Users';
@@ -45,6 +46,7 @@ export default function App() {
                   <Route path="/closing" element={<CashClosing />} />
                   <Route path="/products" element={<AdminRoute><Products /></AdminRoute>} />
                   <Route path="/stock" element={<AdminRoute><StockIn /></AdminRoute>} />
+                  <Route path="/companies" element={<AdminRoute><Companies /></AdminRoute>} />
                   <Route path="/customers" element={<AdminRoute><Customers /></AdminRoute>} />
                   <Route path="/customers/:id" element={<AdminRoute><CustomerDetail /></AdminRoute>} />
                   <Route path="/reports" element={<AdminRoute><Reports /></AdminRoute>} />

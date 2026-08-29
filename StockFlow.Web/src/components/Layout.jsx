@@ -8,6 +8,7 @@ const NAV_KEYS = [
   { to: '/closing',   key: 'nav.cashClose', roles: ['Admin', 'Cashier'] },
   { to: '/products',  key: 'nav.products', roles: ['Admin'] },
   { to: '/stock',     key: 'nav.stockIn',  roles: ['Admin'] },
+  { to: '/companies', key: 'nav.companies', roles: ['Admin'] },
   { to: '/customers', key: 'nav.customers', roles: ['Admin'] },
   { to: '/reports',   key: 'nav.reports',  roles: ['Admin'] },
   { to: '/users',     key: 'nav.users',    roles: ['Admin'] },

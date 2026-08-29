@@ -21,8 +21,10 @@ public class StockMovement
     public int? CustomerId { get; set; }
     public bool IsCreditReturn { get; set; }
     public int? SaleId { get; set; }
+    public int? CompanyId { get; set; }
 
     public Product Product { get; set; } = null!;
     public Customer? Customer { get; set; }
     public Sale? Sale { get; set; }
+    public Company? Company { get; set; }
 }

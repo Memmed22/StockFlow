@@ -4,6 +4,12 @@ public record StockInDto(int ProductId, decimal Quantity, string? Note, decimal?
 
 public record StockAdjustmentDto(int ProductId, decimal CorrectQuantity, string? Note);
 
+public record StockInLineDto(int ProductId, decimal Quantity, decimal BuyingPrice, decimal? SellingPrice);
+
+public record BulkStockInDto(int UserId, int? CompanyId, List<StockInLineDto> Items, bool PayFromRegister);
+
+public record BulkStockInResultDto(List<StockMovementDto> Movements, decimal TotalCost, bool RegisterDebited);
+
 public record StockMovementDto(
     int Id,
     int ProductId,

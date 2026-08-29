@@ -18,6 +18,14 @@ public class StockController(StockService stockService) : ControllerBase
         return Ok(movement);
     }
 
+    [HttpPost("bulk-in")]
+    public async Task<IActionResult> BulkStockIn([FromBody] BulkStockInDto dto)
+    {
+        var (result, error) = await stockService.BulkStockInAsync(dto);
+        if (error != null) return BadRequest(new { error });
+        return Ok(result);
+    }
+
     [HttpPost("adjust")]
     public async Task<IActionResult> AdjustStock([FromBody] StockAdjustmentDto dto)
     {

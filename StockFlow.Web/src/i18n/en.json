@@ -1,7 +1,7 @@
 {
   "nav": {
     "pos": "POS", "returns": "Returns", "cashClose": "Cash Register",
-    "products": "Products", "stockIn": "Stock In", "customers": "Customers",
+    "products": "Products", "stockIn": "Stock In", "companies": "Companies", "customers": "Customers",
     "reports": "Reports", "users": "Users", "signOut": "Sign out"
   },
   "common": {
@@ -112,11 +112,29 @@
       }
     }
   },
+  "companies": {
+    "title": "Companies",
+    "subtitle": "{{count}} supplier(s)",
+    "addCompany": "+ Add Company", "editCompany": "Edit Company", "newCompany": "New Company",
+    "deleteConfirm": "Delete this company?", "noCompanies": "No companies found.",
+    "update": "Update", "save": "Save", "cancel": "Cancel",
+    "searchPlaceholder": "Search by name or code...",
+    "form": {
+      "name": "Name *", "namePlaceholder": "Company name",
+      "code": "Code *", "codePlaceholder": "Vendor code",
+      "contactPerson": "Contact Person", "contactPersonPlaceholder": "Full name",
+      "phone": "Phone", "phonePlaceholder": "+995 555 123456",
+      "description": "Description", "optional": "Optional"
+    },
+    "col": { "name": "Name", "code": "Code", "contactPerson": "Contact Person", "phone": "Phone", "description": "Description", "actions": "Actions" }
+  },
   "stock": {
     "title": "Stock In", "subtitle": "Record incoming inventory for a product",
+    "tabs": { "quick": "Quick Add", "po": "Purchase Order" },
     "addStock": "Add Stock", "product": "Product *",
     "searchPlaceholder": "Search by name or barcode...",
-    "currentStock": "Current stock", "buyingPrice": "Buying Price", "sellingPrice": "Selling Price", "note": "Note", "notePlaceholder": "Optional (supplier, batch…)",
+    "currentStock": "Current stock", "buyingPrice": "Buying Price", "sellingPrice": "Selling Price",
+    "note": "Note", "notePlaceholder": "Optional (supplier, batch…)",
     "addButton": "Add Stock", "saving": "Saving…", "movements": "Stock Movements",
     "totalRecords": "{{count}} total record(s)",
     "searchMovements": "Search by name or barcode…",
@@ -124,7 +142,22 @@
     "col": { "date": "Date", "product": "Product", "barcode": "Barcode", "type": "Type", "quantity": "Quantity", "note": "Note" },
     "prev": "← Previous", "next": "Next →",
     "pageOf": "Page {{page}} of {{total}}",
-    "errors": { "selectProduct": "Please select a product from the list.", "quantity": "Enter a valid quantity.", "buyingPrice": "Enter a valid buying price greater than 0.", "sellingPrice": "Enter a valid selling price greater than 0.", "stockError": "Error adding stock." }
+    "errors": { "selectProduct": "Please select a product from the list.", "quantity": "Enter a valid quantity.", "buyingPrice": "Enter a valid buying price greater than 0.", "sellingPrice": "Enter a valid selling price greater than 0.", "stockError": "Error adding stock." },
+    "po": {
+      "company": "Supplier", "noCompany": "No supplier",
+      "cartEmpty": "No items added yet. Search a product to add it.",
+      "lineTotal": "Line Total", "totalCost": "Total Cost",
+      "paymentMethod": "Payment Method", "fromRegister": "From Register", "otherMethod": "Other",
+      "registerNote": "{{amount}} ₾ will be deducted from the cash register.",
+      "review": "Review Purchase",
+      "reviewTitle": "Review Purchase Order",
+      "confirm": "Confirm Purchase", "confirming": "Recording…",
+      "errorEmpty": "Add at least one product.",
+      "successTitle": "Purchase Recorded",
+      "successSummary": "{{count}} item(s) added to stock — {{amount}} ₾ total.",
+      "registerDebited": "{{amount}} ₾ deducted from the cash register.",
+      "newPurchase": "Start New Purchase"
+    }
   },
   "returns": {
     "title": "Returns",
