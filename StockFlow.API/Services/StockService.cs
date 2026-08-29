@@ -62,6 +62,24 @@ public class StockService(AppDbContext db)
                 return (null, $"Selling price must be greater than zero for {product.Name}.");
         }
 
+        var totalCost = dto.Items.Sum(i => i.Quantity * i.BuyingPrice);
+
+        // Linked via the movements' SaleId (not a composed Note) so the client can localize
+        // "Stock purchase — {company}" itself instead of receiving fixed English text.
+        Sale? expenseSale = null;
+        if (dto.PayFromRegister)
+        {
+            expenseSale = new Sale
+            {
+                UserId = dto.UserId,
+                Type = SaleType.Expense,
+                TotalAmount = -totalCost,
+                DiscountAmount = 0,
+                CreatedAt = DateTime.UtcNow
+            };
+            db.Sales.Add(expenseSale);
+        }
+
         var movements = new List<StockMovement>();
         foreach (var line in dto.Items)
         {
@@ -74,25 +92,11 @@ public class StockService(AppDbContext db)
                 Type = MovementType.StockIn,
                 Quantity = line.Quantity,
                 BasePrice = line.BuyingPrice,
-                CompanyId = dto.CompanyId
+                CompanyId = dto.CompanyId,
+                Sale = expenseSale
             });
         }
         db.StockMovements.AddRange(movements);
-
-        var totalCost = dto.Items.Sum(i => i.Quantity * i.BuyingPrice);
-
-        if (dto.PayFromRegister)
-        {
-            db.Sales.Add(new Sale
-            {
-                UserId = dto.UserId,
-                Type = SaleType.Expense,
-                TotalAmount = -totalCost,
-                DiscountAmount = 0,
-                Note = $"Stock purchase — {company?.Name ?? "Unknown supplier"}",
-                CreatedAt = DateTime.UtcNow
-            });
-        }
 
         await db.SaveChangesAsync();
 

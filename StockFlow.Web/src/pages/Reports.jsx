@@ -22,6 +22,7 @@ export default function Reports() {
   const [dailySales, setDailySales] = useState([]);
   const [userSales, setUserSales] = useState([]);
   const [stockReport, setStockReport] = useState([]);
+  const [stockSearch, setStockSearch] = useState('');
   const [detailed, setDetailed] = useState(null);
   const [closings, setClosings] = useState([]);
   const [from, setFrom] = useState(todayStr());
@@ -64,6 +65,12 @@ export default function Reports() {
 
   const handleApply = () => fetchAll(from, to);
 
+  const filteredStock = stockSearch.trim()
+    ? stockReport.filter(r =>
+        r.productName?.toLowerCase().includes(stockSearch.trim().toLowerCase()) ||
+        r.barcode?.toLowerCase().includes(stockSearch.trim().toLowerCase()))
+    : stockReport;
+
   return (
     <div>
       <div style={s.pageHeader}>
@@ -100,7 +107,11 @@ export default function Reports() {
       )}
 
       {(tab === 'stock' || tab === 'closings') && (
-        <div style={{ marginBottom: 16 }}>
+        <div style={s.stockToolbar}>
+          {tab === 'stock' && (
+            <input style={s.searchInput} placeholder={t('reports.stockSearchPlaceholder')}
+              value={stockSearch} onChange={e => setStockSearch(e.target.value)} />
+          )}
           <button style={s.applyBtn} onClick={tab === 'closings' ? fetchClosings : () => fetchAll(from, to)} disabled={loading}>
             {loading ? t('reports.loading') : t('reports.refresh')}
           </button>
@@ -140,7 +151,11 @@ export default function Reports() {
                       <td style={s.td}>
                         <span style={{ ...s.badge, background: cfg.bg, color: cfg.color }}>{t(`reports.types.${cfg.key}`)}</span>
                       </td>
-                      <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>{r.label}</td>
+                      <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>
+                        {r.label ?? (r.type === 'Payment' ? t('reports.paymentReceived')
+                          : r.type === 'Expense' ? t('reports.stockPurchaseFrom', { company: r.companyName || t('reports.unknownSupplier') })
+                          : '')}
+                      </td>
                       <td style={s.td}>{r.barcode ? <code style={s.code}>{r.barcode}</code> : '—'}</td>
                       <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || '—'}</td>
                       <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>
@@ -261,7 +276,7 @@ export default function Reports() {
               </tr>
             </thead>
             <tbody>
-              {stockReport.map((r, i) => (
+              {filteredStock.map((r, i) => (
                 <tr key={i} style={s.tr}>
                   <td style={{ ...s.td, fontWeight: 600, color: '#111827' }}>{r.productName}</td>
                   <td style={s.td}><code style={s.code}>{r.barcode}</code></td>
@@ -270,8 +285,10 @@ export default function Reports() {
                   </td>
                 </tr>
               ))}
-              {stockReport.length === 0 && !loading && (
-                <tr><td colSpan={3} style={s.empty}>{t('reports.noData.products')}</td></tr>
+              {filteredStock.length === 0 && !loading && (
+                <tr><td colSpan={3} style={s.empty}>
+                  {stockSearch.trim() ? t('reports.noData.productsSearch', { query: stockSearch.trim() }) : t('reports.noData.products')}
+                </td></tr>
               )}
             </tbody>
           </table>
@@ -347,6 +364,8 @@ const s = {
   filterLabel: { fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' },
   dateInput: { padding: '8px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, background: '#fff', color: '#111827' },
   applyBtn: { background: '#4F46E5', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 20px', cursor: 'pointer', fontWeight: 600, fontSize: 14, flexShrink: 0 },
+  stockToolbar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 },
+  searchInput: { padding: '8px 14px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, width: 280, background: '#fff', boxSizing: 'border-box' },
 
   errorBox: { background: '#FEE2E2', border: '1px solid #FECACA', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#B91C1C', marginBottom: 16 },
   infoBar: { background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, padding: '10px 16px', fontSize: 14, color: '#065F46', marginBottom: 16 },

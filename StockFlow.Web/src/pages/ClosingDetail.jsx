@@ -162,7 +162,10 @@ export default function ClosingDetail() {
                       </span>
                     </td>
                     <td style={{ ...s.td, fontWeight: 500, color: '#111827' }}>
-                      {hasItems ? t('reports.groupItems', { count: r.items.length }) : r.label}
+                      {hasItems ? t('reports.groupItems', { count: r.items.length })
+                        : r.label ?? (r.type === 'Payment' ? t('reports.paymentReceived')
+                          : r.type === 'Expense' ? t('reports.stockPurchaseFrom', { company: r.companyName || t('reports.unknownSupplier') })
+                          : '')}
                     </td>
                     <td style={{ ...s.td, color: '#6B7280', fontSize: 13 }}>{r.customerName || (r.type === 'Payment' ? t('reports.unknownCustomer') : '—')}</td>
                     <td style={{ ...s.td, color: isNegative ? '#DC2626' : '#374151', fontWeight: isNegative ? 700 : 400 }}>

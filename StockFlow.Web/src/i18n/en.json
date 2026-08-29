@@ -198,6 +198,7 @@
     "tabs": { "detailed": "Detailed Sales", "daily": "Daily Summary", "users": "By Cashier", "stock": "Stock Report", "closings": "Cash Closings" },
     "apply": "Apply", "refresh": "Refresh", "loading": "Loading…",
     "searchTransactions": "Search by name or barcode…",
+    "stockSearchPlaceholder": "Search by name or barcode…",
     "col": {
       "type": "Type", "productDesc": "Product / Description", "customer": "Customer",
       "qty": "Qty", "unitPrice": "Unit Price", "total": "Total",
@@ -207,8 +208,9 @@
     },
     "summary": { "title": "Summary", "cashSales": "Cash Sales", "debitSales": "Debit Sales (not cash)", "payments": "Payments Received", "returns": "Returns", "creditReturns": "Store Credit Returns", "expenses": "💸 Expenses", "cashTotal": "Cash Total" },
     "infoRevenue": "Total Revenue", "infoTransactions": "Transactions",
-    "notCash": "not cash", "unknownCustomer": "Unknown", "groupItems": "{{count}} items",
-    "noData": { "transactions": "No transactions in this period.", "transactionsSearch": "No transactions matching \"{{query}}\".", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "reports": "Failed to load reports." },
+    "notCash": "not cash", "unknownCustomer": "Unknown", "unknownSupplier": "Unknown supplier", "groupItems": "{{count}} items",
+    "paymentReceived": "Payment received", "stockPurchaseFrom": "Stock purchase — {{company}}",
+    "noData": { "transactions": "No transactions in this period.", "transactionsSearch": "No transactions matching \"{{query}}\".", "sales": "No sales in this period.", "users": "No sales data for this period.", "products": "No products found.", "productsSearch": "No products matching \"{{query}}\".", "reports": "Failed to load reports." },
     "types": { "Cash": "Cash", "Debit": "Debit", "Return": "Return", "CreditReturn": "Store Credit", "Payment": "Payment", "Expense": "Expense", "OpeningCash": "Opening" },
     "closingDetail": { "title": "Cash Closing", "cashier": "Cashier", "period": "Period", "breakdown": "Financial Breakdown", "totals": "Totals", "transactions": "Transactions" }
   },

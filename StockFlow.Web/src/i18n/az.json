@@ -193,6 +193,7 @@
     "tabs": { "detailed": "Ətraflı satış", "daily": "Gündəlik", "users": "Kassir üzrə", "stock": "Anbar hesabatı", "closings": "Kassa Bağlanmaları" },
     "apply": "Tətbiq et", "refresh": "Yenilə", "loading": "Yüklənir…",
     "searchTransactions": "Ad və ya barkodla axtarın…",
+    "stockSearchPlaceholder": "Ad və ya barkodla axtarın…",
     "col": {
       "type": "Növ", "productDesc": "Məhsul / Təsvir", "customer": "Müştəri",
       "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi",
@@ -202,8 +203,9 @@
     },
     "summary": { "title": "Xülasə", "cashSales": "Nağd satış", "debitSales": "Kredit satışı (nağd deyil)", "payments": "Alınan ödənişlər", "returns": "Qaytarmalar", "creditReturns": "Balans mədaxilli qaytarmalar", "expenses": "💸 Xərclər", "cashTotal": "Nağd cəmi" },
     "infoRevenue": "Gəlir", "infoTransactions": "Əməliyyatlar",
-    "notCash": "nağd deyil", "unknownCustomer": "Naməlum", "groupItems": "{{count}} məhsul",
-    "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "transactionsSearch": "\"{{query}}\" ilə uyğun əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "reports": "Hesabatlar yüklənmədi." },
+    "notCash": "nağd deyil", "unknownCustomer": "Naməlum", "unknownSupplier": "Naməlum firma", "groupItems": "{{count}} məhsul",
+    "paymentReceived": "Ödəniş qəbul edildi", "stockPurchaseFrom": "Mal alışı — {{company}}",
+    "noData": { "transactions": "Bu dövrdə əməliyyat yoxdur.", "transactionsSearch": "\"{{query}}\" ilə uyğun əməliyyat yoxdur.", "sales": "Bu dövrdə satış yoxdur.", "users": "Bu dövrdə məlumat yoxdur.", "products": "Məhsul tapılmadı.", "productsSearch": "\"{{query}}\" ilə uyğun məhsul yoxdur.", "reports": "Hesabatlar yüklənmədi." },
     "types": { "Cash": "Nağd", "Debit": "Borc", "Return": "Qaytarma", "CreditReturn": "Balans mədaxili", "Payment": "Ödəniş", "Expense": "Xərc", "OpeningCash": "Açılış" },
     "closingDetail": { "title": "Kassa Bağlanması", "cashier": "Kassir", "period": "Dövr", "breakdown": "Maliyyə Xülasəsi", "totals": "Cəmlər", "transactions": "Əməliyyatlar" }
   },
