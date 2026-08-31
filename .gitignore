@@ -27,3 +27,4 @@ dist/
 # Publish output
 publish/
 StockFlow.API/wwwroot/
+*.zip
