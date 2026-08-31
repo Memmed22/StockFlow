@@ -2,7 +2,7 @@
   "nav": {
     "pos": "Satış", "returns": "Qaytarma", "cashClose": "Kassa",
     "products": "Məhsullar", "stockIn": "Anbar", "companies": "Firmalar", "customers": "Müştərilər",
-    "reports": "Hesabatlar", "users": "İstifadəçilər", "signOut": "Çıxış"
+    "reports": "Hesabatlar", "users": "İstifadəçilər", "settings": "Tənzimləmələr", "signOut": "Çıxış"
   },
   "common": {
     "save": "Yadda saxla", "cancel": "Ləğv et", "close": "Bağla", "delete": "Sil", "edit": "Redaktə et",
@@ -275,5 +275,18 @@
     "col": { "date": "Tarix", "type": "Növ", "amount": "Məbləğ" },
     "items": { "product": "Məhsul", "barcode": "Barkod", "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi" },
     "types": { "CashSale": "Nağd satış", "DebitSale": "Kredit", "Return": "Qaytarma", "CreditReturn": "Balans mədaxili", "Payment": "Ödəniş" }
+  },
+  "settings": {
+    "title": "Tənzimləmələr",
+    "update": {
+      "title": "Tətbiq Yeniləməsi",
+      "checkButton": "Yeniləmələri Yoxla",
+      "checking": "Yoxlanılır…",
+      "applyButton": "İndi Yenilə",
+      "applying": "Yenilənir — tətbiq qısa müddətdən sonra yenidən başlayacaq. Bu səhifə avtomatik yenilənəcək.",
+      "current": "Cari versiya",
+      "latest": "Son versiya",
+      "upToDate": "Ən son versiyadasınız."
+    }
   }
 }

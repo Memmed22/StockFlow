@@ -6,6 +6,14 @@ PUBLISH_DIR="$SCRIPT_DIR/publish"
 WEB_DIR="$SCRIPT_DIR/StockFlow.Web"
 API_DIR="$SCRIPT_DIR/StockFlow.API"
 
+# Optional version override (e.g. from a CI-triggering git tag), used by
+# the in-app update checker to compare against GitHub Releases.
+VERSION="$1"
+VERSION_ARGS=()
+if [ -n "$VERSION" ]; then
+  VERSION_ARGS=(/p:Version="$VERSION")
+fi
+
 echo ""
 echo "  =========================================="
 echo "       StockFlow - Build & Publish"
@@ -45,7 +53,8 @@ cd "$API_DIR"
 dotnet publish -c Release -r win-x64 --self-contained true \
   -o "$PUBLISH_DIR" \
   /p:DebugType=None \
-  /p:DebugSymbols=false
+  /p:DebugSymbols=false \
+  "${VERSION_ARGS[@]}"
 
 # --- Write start.bat into the publish folder ---
 echo "  Writing start.bat..."

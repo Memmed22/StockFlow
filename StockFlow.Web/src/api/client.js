@@ -76,6 +76,11 @@ export const cashClosingApi = {
   getAll: () => api.get('/cashclosings'),
 };
 
+export const updateApi = {
+  check: () => api.get('/update/check'),
+  apply: (downloadUrl) => api.post('/update/apply', { downloadUrl }),
+};
+
 export const reportsApi = {
   dailySales: (from, to) => api.get('/reports/daily-sales', { params: { from, to } }),
   salesPerUser: (from, to) => api.get('/reports/sales-per-user', { params: { from, to } }),

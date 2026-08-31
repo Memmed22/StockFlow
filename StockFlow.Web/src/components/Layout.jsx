@@ -12,6 +12,7 @@ const NAV_KEYS = [
   { to: '/customers', key: 'nav.customers', roles: ['Admin'] },
   { to: '/reports',   key: 'nav.reports',  roles: ['Admin'] },
   { to: '/users',     key: 'nav.users',    roles: ['Admin'] },
+  { to: '/settings',  key: 'nav.settings', roles: ['Admin'] },
 ];
 
 export default function Layout({ children }) {
