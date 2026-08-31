@@ -2,7 +2,7 @@
   "nav": {
     "pos": "POS", "returns": "Returns", "cashClose": "Cash Register",
     "products": "Products", "stockIn": "Stock In", "companies": "Companies", "customers": "Customers",
-    "reports": "Reports", "users": "Users", "signOut": "Sign out"
+    "reports": "Reports", "users": "Users", "settings": "Settings", "signOut": "Sign out"
   },
   "common": {
     "save": "Save", "cancel": "Cancel", "close": "Close", "delete": "Delete", "edit": "Edit",
@@ -280,5 +280,18 @@
     "col": { "date": "Date", "type": "Type", "amount": "Amount" },
     "items": { "product": "Product", "barcode": "Barcode", "qty": "Qty", "unitPrice": "Unit Price", "total": "Total" },
     "types": { "CashSale": "Cash Sale", "DebitSale": "Debit Sale", "Return": "Return", "CreditReturn": "Store Credit", "Payment": "Payment" }
+  },
+  "settings": {
+    "title": "Settings",
+    "update": {
+      "title": "Application Update",
+      "checkButton": "Check for Updates",
+      "checking": "Checking…",
+      "applyButton": "Update Now",
+      "applying": "Updating — the application will restart shortly. This page will reload automatically.",
+      "current": "Current version",
+      "latest": "Latest version",
+      "upToDate": "You're on the latest version."
+    }
   }
 }

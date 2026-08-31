@@ -27,6 +27,7 @@ builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<CompanyService>();
 builder.Services.AddScoped<CashClosingService>();
 builder.Services.AddScoped<TelegramService>();
+builder.Services.AddScoped<UpdateService>();
 
 builder.Services.AddControllers();
 builder.Services.AddCors(opt =>
