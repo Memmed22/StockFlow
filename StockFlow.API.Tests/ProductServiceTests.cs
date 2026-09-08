@@ -200,6 +200,22 @@ public class ProductServiceTests : SqliteInMemoryTestBase
     }
 
     [Fact]
+    public async Task GetHistoryAsync_MovementEntries_IncludeStockBeforeAndAfter()
+    {
+        var product = await SeedProductAsync();
+        await AddMovementAsync(product.Id, MovementType.StockIn, 10); // 0 -> 10
+        await AddMovementAsync(product.Id, MovementType.Sale, 4);     // 10 -> 6
+        await AddMovementAsync(product.Id, MovementType.Return, 2);   // 6 -> 8
+
+        var result = await CreateService().GetHistoryAsync(product.Id, page: 1, pageSize: 20);
+
+        var byType = result.Items.ToDictionary(i => i.EventType);
+        Assert.Equal(("6", "8"), (byType["Return"].OldValue, byType["Return"].NewValue));
+        Assert.Equal(("10", "6"), (byType["Sale"].OldValue, byType["Sale"].NewValue));
+        Assert.Equal(("0", "10"), (byType["StockIn"].OldValue, byType["StockIn"].NewValue));
+    }
+
+    [Fact]
     public async Task GetHistoryAsync_IncludesChangedByUsername_ForFieldUpdates()
     {
         var user = await SeedUserAsync(username: "alice");

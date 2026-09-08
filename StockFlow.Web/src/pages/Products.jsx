@@ -324,7 +324,12 @@ export default function Products() {
                           {h.changedByUsername && <span style={s.historyUser}> ({h.changedByUsername})</span>}
                         </span>
                       ) : (
-                        <span>{t(`products.history.event.${h.eventType}`, h.eventType)}: <b>{h.quantity}</b></span>
+                        <span>
+                          {t(`products.history.event.${h.eventType}`, h.eventType)}: <b>{h.quantity}</b>
+                          {h.oldValue != null && h.newValue != null && (
+                            <span style={s.historyUser}> ({h.oldValue} → {h.newValue})</span>
+                          )}
+                        </span>
                       )}
                     </li>
                   ))}

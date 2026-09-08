@@ -158,11 +158,22 @@ public class ProductService(AppDbContext db)
     // and cheap enough at this app's data volumes.
     public async Task<PagedResult<ProductHistoryEntryDto>> GetHistoryAsync(int productId, int page, int pageSize)
     {
-        var movements = await db.StockMovements
+        var rawMovements = await db.StockMovements
             .Where(m => m.ProductId == productId)
-            .Select(m => new ProductHistoryEntryDto(
-                m.CreatedAt, m.Type.ToString(), null, m.Quantity, null, null, null, null))
+            .OrderBy(m => m.CreatedAt)
+            .Select(m => new { m.Type, m.Quantity, m.CreatedAt })
             .ToListAsync();
+
+        var movements = new List<ProductHistoryEntryDto>();
+        decimal running = 0;
+        foreach (var m in rawMovements)
+        {
+            var before = running;
+            running += m.Type == MovementType.Sale ? -m.Quantity : m.Quantity;
+            movements.Add(new ProductHistoryEntryDto(
+                m.CreatedAt, m.Type.ToString(), null, m.Quantity,
+                before.ToString("0.##"), running.ToString("0.##"), null, null));
+        }
 
         var fieldChanges = await db.ProductHistory
             .Where(h => h.ProductId == productId)
