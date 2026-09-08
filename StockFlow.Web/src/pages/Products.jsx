@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { productsApi, stockApi } from '../api/client';
 import { useTranslation } from 'react-i18next';
 
+const formatHistoryDate = (iso) => {
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 export default function Products() {
   const { t } = useTranslation();
   const UNIT_TYPES = [
@@ -311,7 +317,7 @@ export default function Products() {
                 <ul style={s.historyList}>
                   {historyData.items.map((h, i) => (
                     <li key={i} style={s.historyItem}>
-                      <span style={s.historyDate}>{new Date(h.timestamp).toLocaleString()}</span>
+                      <span style={s.historyDate}>{formatHistoryDate(h.timestamp)}</span>
                       {h.eventType === 'FieldUpdate' ? (
                         <span>
                           {t(`products.history.field.${h.fieldName}`, h.fieldName)}: <b>{h.oldValue ?? '—'}</b> → <b>{h.newValue ?? '—'}</b>
