@@ -13,7 +13,8 @@ public class StockController(StockService stockService) : ControllerBase
     [HttpPost("in")]
     public async Task<IActionResult> StockIn([FromBody] StockInDto dto)
     {
-        var (movement, error) = await stockService.StockInAsync(dto);
+        int? changedByUserId = int.TryParse(Request.Headers["X-User-Id"], out var uid) ? uid : null;
+        var (movement, error) = await stockService.StockInAsync(dto, changedByUserId);
         if (error != null) return BadRequest(new { error });
         return Ok(movement);
     }

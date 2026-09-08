@@ -11,7 +11,6 @@ const NAV_KEYS = [
   { to: '/companies', key: 'nav.companies', roles: ['Admin'] },
   { to: '/customers', key: 'nav.customers', roles: ['Admin'] },
   { to: '/reports',   key: 'nav.reports',  roles: ['Admin'] },
-  { to: '/users',     key: 'nav.users',    roles: ['Admin'] },
   { to: '/settings',  key: 'nav.settings', roles: ['Admin'] },
 ];
 

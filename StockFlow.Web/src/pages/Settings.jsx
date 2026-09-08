@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { updateApi } from '../api/client';
 import { useTranslation } from 'react-i18next';
+import Users from './Users';
 
 export default function Settings() {
   const { t } = useTranslation();
+  const [tab, setTab] = useState('update');
 
   const [checking, setChecking] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -43,42 +45,56 @@ export default function Settings() {
         <h2 style={s.title}>{t('settings.title')}</h2>
       </div>
 
-      <div style={s.card}>
-        <h3 style={s.cardTitle}>{t('settings.update.title')}</h3>
-
-        {applying ? (
-          <div style={s.updatingBox}>{t('settings.update.applying')}</div>
-        ) : (
-          <>
-            <button style={s.primaryBtn} onClick={handleCheck} disabled={checking}>
-              {checking ? t('settings.update.checking') : t('settings.update.checkButton')}
-            </button>
-
-            {error && <div style={s.errorBox}>{error}</div>}
-
-            {result && (
-              <div style={s.resultBox}>
-                <p style={s.versionLine}>
-                  {t('settings.update.current')}: <strong>{result.currentVersion}</strong>
-                  {' · '}
-                  {t('settings.update.latest')}: <strong>{result.latestVersion}</strong>
-                </p>
-
-                {result.updateAvailable ? (
-                  <>
-                    {result.releaseNotes && <pre style={s.notes}>{result.releaseNotes}</pre>}
-                    <button style={s.successBtn} onClick={handleApply}>
-                      {t('settings.update.applyButton')}
-                    </button>
-                  </>
-                ) : (
-                  <p style={s.upToDate}>{t('settings.update.upToDate')}</p>
-                )}
-              </div>
-            )}
-          </>
-        )}
+      <div style={s.tabBar}>
+        {['update', 'users'].map(key => (
+          <button key={key}
+            style={{ ...s.tab, ...(tab === key ? s.activeTab : {}) }}
+            onClick={() => setTab(key)}>
+            {t(`settings.tabs.${key}`)}
+          </button>
+        ))}
       </div>
+
+      {tab === 'update' && (
+        <div style={s.card}>
+          <h3 style={s.cardTitle}>{t('settings.update.title')}</h3>
+
+          {applying ? (
+            <div style={s.updatingBox}>{t('settings.update.applying')}</div>
+          ) : (
+            <>
+              <button style={s.primaryBtn} onClick={handleCheck} disabled={checking}>
+                {checking ? t('settings.update.checking') : t('settings.update.checkButton')}
+              </button>
+
+              {error && <div style={s.errorBox}>{error}</div>}
+
+              {result && (
+                <div style={s.resultBox}>
+                  <p style={s.versionLine}>
+                    {t('settings.update.current')}: <strong>{result.currentVersion}</strong>
+                    {' · '}
+                    {t('settings.update.latest')}: <strong>{result.latestVersion}</strong>
+                  </p>
+
+                  {result.updateAvailable ? (
+                    <>
+                      {result.releaseNotes && <pre style={s.notes}>{result.releaseNotes}</pre>}
+                      <button style={s.successBtn} onClick={handleApply}>
+                        {t('settings.update.applyButton')}
+                      </button>
+                    </>
+                  ) : (
+                    <p style={s.upToDate}>{t('settings.update.upToDate')}</p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {tab === 'users' && <Users />}
     </div>
   );
 }
@@ -86,6 +102,9 @@ export default function Settings() {
 const s = {
   header: { marginBottom: 16 },
   title: { margin: 0, fontSize: 24, fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' },
+  tabBar: { display: 'flex', gap: 4, marginBottom: 20, background: '#F3F4F8', borderRadius: 10, padding: 4, width: 'fit-content' },
+  tab: { padding: '7px 16px', border: 'none', borderRadius: 7, background: 'transparent', cursor: 'pointer', fontSize: 14, color: '#6B7280', fontWeight: 500 },
+  activeTab: { background: '#fff', color: '#111827', fontWeight: 600, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
   card: { background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: 24, marginBottom: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   cardTitle: { margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: '#111827' },
   primaryBtn: { background: '#4F46E5', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 18px', cursor: 'pointer', fontWeight: 600, fontSize: 14 },

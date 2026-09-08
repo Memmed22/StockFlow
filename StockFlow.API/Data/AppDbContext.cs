@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CashClosing> CashClosings => Set<CashClosing>();
     public DbSet<Company> Companies => Set<Company>();
+    public DbSet<ProductHistory> ProductHistory => Set<ProductHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -129,5 +130,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<Company>()
             .HasIndex(c => c.Name);
+
+        modelBuilder.Entity<ProductHistory>()
+            .HasIndex(h => new { h.ProductId, h.ChangedAt });
+
+        modelBuilder.Entity<ProductHistory>()
+            .HasOne(h => h.ChangedByUser)
+            .WithMany()
+            .HasForeignKey(h => h.ChangedByUserId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -107,6 +107,18 @@
         "invalidQty": "შეიყვანეთ სწორი რაოდენობა (0 ან მეტი).",
         "failed": "კორექტირების შენახვისას შეცდომა."
       }
+    },
+    "history": {
+      "button": "ისტორია",
+      "title": "ისტორია — {{name}}",
+      "empty": "ისტორია ჯერ არ არის.",
+      "field": {
+        "Name": "სახელი", "Barcode": "შტრიხკოდი", "SellingPrice": "გაყიდვის ფასი",
+        "BuyingPrice": "შესყიდვის ფასი", "UnitType": "გაზომვის ერთეული", "Description": "აღწერა"
+      },
+      "event": {
+        "StockIn": "მარაგის შევსება", "Sale": "გაყიდვა", "Return": "დაბრუნება", "Adjustment": "კორექტირება"
+      }
     }
   },
   "companies": {
@@ -194,6 +206,7 @@
     "apply": "გამოყენება", "refresh": "განახლება", "loading": "იტვირთება…",
     "searchTransactions": "ძიება სახელით ან შტრიხკოდით…",
     "stockSearchPlaceholder": "ძიება სახელით ან შტრიხკოდით…",
+    "export": "გატანა CSV-ში",
     "col": {
       "type": "ტიპი", "productDesc": "პროდუქტი / აღწერა", "customer": "კლიენტი",
       "qty": "რ-ბა", "unitPrice": "ერთ. ფასი", "total": "სულ",
@@ -278,6 +291,7 @@
   },
   "settings": {
     "title": "პარამეტრები",
+    "tabs": { "update": "განახლება", "users": "მომხმარებლები" },
     "update": {
       "title": "აპლიკაციის განახლება",
       "checkButton": "განახლების შემოწმება",

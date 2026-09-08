@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using StockFlow.API.DTOs;
 using StockFlow.API.Models;
 using StockFlow.API.Services;
 using Xunit;
@@ -65,5 +67,151 @@ public class ProductServiceTests : SqliteInMemoryTestBase
 
         Assert.Equal(4 * 10m, value.TotalBuyingValue);
         Assert.Equal(4 * 20m, value.TotalSellingValue);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_NoFieldsChanged_WritesNoHistory()
+    {
+        var product = await SeedProductAsync(name: "Widget", barcode: "0001", sellingPrice: 10m, buyingPrice: 5m);
+
+        var (dto, error) = await CreateService().UpdateAsync(product.Id,
+            new UpdateProductDto("Widget", "0001", 10m, 5m, UnitType.Quantity, null), changedByUserId: null);
+
+        Assert.Null(error);
+        Assert.NotNull(dto);
+        Assert.Empty(await Db.ProductHistory.ToListAsync());
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ChangedFields_WritesOnlyThoseFieldsWithOldAndNewValues()
+    {
+        var user = await SeedUserAsync();
+        var product = await SeedProductAsync(name: "Widget", barcode: "0001", sellingPrice: 10m, buyingPrice: 5m);
+
+        var (dto, error) = await CreateService().UpdateAsync(product.Id,
+            new UpdateProductDto("Gadget", "0001", 15m, 5m, UnitType.Quantity, null), changedByUserId: user.Id);
+
+        Assert.Null(error);
+        Assert.NotNull(dto);
+        var history = await Db.ProductHistory.Where(h => h.ProductId == product.Id).ToListAsync();
+        Assert.Equal(2, history.Count);
+
+        var nameChange = Assert.Single(history, h => h.FieldName == "Name");
+        Assert.Equal("Widget", nameChange.OldValue);
+        Assert.Equal("Gadget", nameChange.NewValue);
+        Assert.Equal(user.Id, nameChange.ChangedByUserId);
+
+        var priceChange = Assert.Single(history, h => h.FieldName == "SellingPrice");
+        Assert.Equal("10.00", priceChange.OldValue);
+        Assert.Equal("15.00", priceChange.NewValue);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_AllFieldsChanged_WritesOneRowPerField()
+    {
+        var product = await SeedProductAsync(name: "Widget", barcode: "0001", sellingPrice: 10m, buyingPrice: 5m, unitType: UnitType.Quantity);
+
+        var (dto, error) = await CreateService().UpdateAsync(product.Id,
+            new UpdateProductDto("Gadget", "0002", 20m, 8m, UnitType.Meter, "new desc"), changedByUserId: null);
+
+        Assert.Null(error);
+        Assert.NotNull(dto);
+        var history = await Db.ProductHistory.Where(h => h.ProductId == product.Id).ToListAsync();
+        Assert.Equal(6, history.Count);
+        Assert.Equal(["Name", "Barcode", "SellingPrice", "BuyingPrice", "UnitType", "Description"],
+            history.Select(h => h.FieldName).ToArray());
+    }
+
+    [Fact]
+    public async Task UpdateAsync_BarcodeConflict_FailsAndWritesNoHistory()
+    {
+        await SeedProductAsync(name: "Other", barcode: "TAKEN");
+        var product = await SeedProductAsync(name: "Widget", barcode: "0001");
+
+        var (dto, error) = await CreateService().UpdateAsync(product.Id,
+            new UpdateProductDto("Widget", "TAKEN", 10m, 5m, UnitType.Quantity, null), changedByUserId: null);
+
+        Assert.Null(dto);
+        Assert.NotNull(error);
+        Assert.Empty(await Db.ProductHistory.ToListAsync());
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_MergesStockMovementsAndFieldUpdates_NewestFirst()
+    {
+        var product = await SeedProductAsync();
+        Db.StockMovements.Add(new StockMovement
+        {
+            ProductId = product.Id, Type = MovementType.StockIn, Quantity = 10,
+            CreatedAt = new DateTime(2026, 1, 1)
+        });
+        Db.ProductHistory.Add(new ProductHistory
+        {
+            ProductId = product.Id, FieldName = "Name", OldValue = "A", NewValue = "B",
+            ChangedAt = new DateTime(2026, 1, 2)
+        });
+        Db.StockMovements.Add(new StockMovement
+        {
+            ProductId = product.Id, Type = MovementType.Sale, Quantity = 2,
+            CreatedAt = new DateTime(2026, 1, 3)
+        });
+        await Db.SaveChangesAsync();
+
+        var result = await CreateService().GetHistoryAsync(product.Id, page: 1, pageSize: 20);
+
+        Assert.Equal(3, result.TotalCount);
+        Assert.Equal(["Sale", "FieldUpdate", "StockIn"], result.Items.Select(i => i.EventType).ToArray());
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_ExcludesOtherProductsEntries()
+    {
+        var a = await SeedProductAsync(name: "A", barcode: "A1");
+        var b = await SeedProductAsync(name: "B", barcode: "B1");
+        Db.StockMovements.Add(new StockMovement { ProductId = a.Id, Type = MovementType.StockIn, Quantity = 5 });
+        Db.StockMovements.Add(new StockMovement { ProductId = b.Id, Type = MovementType.StockIn, Quantity = 9 });
+        await Db.SaveChangesAsync();
+
+        var result = await CreateService().GetHistoryAsync(a.Id, page: 1, pageSize: 20);
+
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal(5, result.Items.Single().Quantity);
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_Paginates()
+    {
+        var product = await SeedProductAsync();
+        for (var i = 0; i < 5; i++)
+            Db.StockMovements.Add(new StockMovement
+            {
+                ProductId = product.Id, Type = MovementType.StockIn, Quantity = i + 1,
+                CreatedAt = new DateTime(2026, 1, 1).AddMinutes(i)
+            });
+        await Db.SaveChangesAsync();
+
+        var page1 = await CreateService().GetHistoryAsync(product.Id, page: 1, pageSize: 2);
+        var page2 = await CreateService().GetHistoryAsync(product.Id, page: 2, pageSize: 2);
+
+        Assert.Equal(5, page1.TotalCount);
+        Assert.Equal(2, page1.Items.Count);
+        Assert.Equal(2, page2.Items.Count);
+        Assert.NotEqual(page1.Items[0].Timestamp, page2.Items[0].Timestamp);
+    }
+
+    [Fact]
+    public async Task GetHistoryAsync_IncludesChangedByUsername_ForFieldUpdates()
+    {
+        var user = await SeedUserAsync(username: "alice");
+        var product = await SeedProductAsync();
+        Db.ProductHistory.Add(new ProductHistory
+        {
+            ProductId = product.Id, FieldName = "Name", OldValue = "A", NewValue = "B", ChangedByUserId = user.Id
+        });
+        await Db.SaveChangesAsync();
+
+        var result = await CreateService().GetHistoryAsync(product.Id, page: 1, pageSize: 20);
+
+        Assert.Equal("alice", result.Items.Single().ChangedByUsername);
     }
 }

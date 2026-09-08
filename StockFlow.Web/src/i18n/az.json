@@ -107,6 +107,18 @@
         "invalidQty": "Düzgün miqdar daxil edin (0 və ya çox).",
         "failed": "Düzəlişi yadda saxlayarkən xəta."
       }
+    },
+    "history": {
+      "button": "Tarixçə",
+      "title": "Tarixçə — {{name}}",
+      "empty": "Hələ tarixçə yoxdur.",
+      "field": {
+        "Name": "Ad", "Barcode": "Barkod", "SellingPrice": "Satış qiyməti",
+        "BuyingPrice": "Alış qiyməti", "UnitType": "Ölçü vahidi", "Description": "Təsvir"
+      },
+      "event": {
+        "StockIn": "Anbara giriş", "Sale": "Satış", "Return": "Qaytarma", "Adjustment": "Düzəliş"
+      }
     }
   },
   "companies": {
@@ -194,6 +206,7 @@
     "apply": "Tətbiq et", "refresh": "Yenilə", "loading": "Yüklənir…",
     "searchTransactions": "Ad və ya barkodla axtarın…",
     "stockSearchPlaceholder": "Ad və ya barkodla axtarın…",
+    "export": "CSV ixrac et",
     "col": {
       "type": "Növ", "productDesc": "Məhsul / Təsvir", "customer": "Müştəri",
       "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi",
@@ -278,6 +291,7 @@
   },
   "settings": {
     "title": "Tənzimləmələr",
+    "tabs": { "update": "Yeniləmə", "users": "İstifadəçilər" },
     "update": {
       "title": "Tətbiq Yeniləməsi",
       "checkButton": "Yeniləmələri Yoxla",

@@ -20,6 +20,8 @@ export const productsApi = {
   create: (data) => api.post('/products', data),
   update: (id, data) => api.put(`/products/${id}`, data),
   delete: (id) => api.delete(`/products/${id}`),
+  getHistory: (id, { page = 1, pageSize = 20 } = {}) =>
+    api.get(`/products/${id}/history`, { params: { page, pageSize } }),
 };
 
 export const stockApi = {

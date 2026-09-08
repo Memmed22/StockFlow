@@ -110,6 +110,18 @@
         "invalidQty": "Enter a valid quantity (0 or more).",
         "failed": "Error saving correction."
       }
+    },
+    "history": {
+      "button": "History",
+      "title": "History — {{name}}",
+      "empty": "No history yet.",
+      "field": {
+        "Name": "Name", "Barcode": "Barcode", "SellingPrice": "Selling Price",
+        "BuyingPrice": "Buying Price", "UnitType": "Unit Type", "Description": "Description"
+      },
+      "event": {
+        "StockIn": "Stock In", "Sale": "Sale", "Return": "Return", "Adjustment": "Adjustment"
+      }
     }
   },
   "companies": {
@@ -199,6 +211,7 @@
     "apply": "Apply", "refresh": "Refresh", "loading": "Loading…",
     "searchTransactions": "Search by name or barcode…",
     "stockSearchPlaceholder": "Search by name or barcode…",
+    "export": "Export CSV",
     "col": {
       "type": "Type", "productDesc": "Product / Description", "customer": "Customer",
       "qty": "Qty", "unitPrice": "Unit Price", "total": "Total",
@@ -283,6 +296,7 @@
   },
   "settings": {
     "title": "Settings",
+    "tabs": { "update": "Update", "users": "Users" },
     "update": {
       "title": "Application Update",
       "checkButton": "Check for Updates",

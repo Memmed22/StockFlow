@@ -71,6 +71,12 @@ export default function Reports() {
         r.barcode?.toLowerCase().includes(stockSearch.trim().toLowerCase()))
     : stockReport;
 
+  const handleExportStock = () => {
+    const headers = [t('reports.col.product'), t('reports.col.barcode'), t('reports.col.currentStock')];
+    const rows = filteredStock.map(r => [r.productName, r.barcode, r.quantity]);
+    downloadCsv(`stock-report-${todayStr()}.csv`, headers, rows);
+  };
+
   return (
     <div>
       <div style={s.pageHeader}>
@@ -115,6 +121,11 @@ export default function Reports() {
           <button style={s.applyBtn} onClick={tab === 'closings' ? fetchClosings : () => fetchAll(from, to)} disabled={loading}>
             {loading ? t('reports.loading') : t('reports.refresh')}
           </button>
+          {tab === 'stock' && (
+            <button style={s.exportBtn} onClick={handleExportStock} disabled={filteredStock.length === 0}>
+              {t('reports.export')}
+            </button>
+          )}
         </div>
       )}
 
@@ -350,6 +361,27 @@ function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
+// Excel opens a .csv straight away, so this covers "export to Excel" without a
+// server-side XLSX dependency. The BOM tells Excel to read the file as UTF-8
+// (otherwise it mangles non-ASCII text like Georgian/Azerbaijani product names).
+function downloadCsv(filename, headers, rows) {
+  const escapeCell = (value) => {
+    const str = value == null ? '' : String(value);
+    return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+  };
+  const lines = [headers, ...rows].map(row => row.map(escapeCell).join(','));
+  const csv = '﻿' + lines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 const s = {
   pageHeader: { marginBottom: 24 },
   title: { margin: 0, fontSize: 24, fontWeight: 700, color: '#111827', letterSpacing: '-0.02em' },
@@ -364,6 +396,7 @@ const s = {
   filterLabel: { fontSize: 12, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' },
   dateInput: { padding: '8px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, background: '#fff', color: '#111827' },
   applyBtn: { background: '#4F46E5', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 20px', cursor: 'pointer', fontWeight: 600, fontSize: 14, flexShrink: 0 },
+  exportBtn: { background: '#fff', color: '#111827', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 20px', cursor: 'pointer', fontWeight: 600, fontSize: 14, flexShrink: 0 },
   stockToolbar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 },
   searchInput: { padding: '8px 14px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14, width: 280, background: '#fff', boxSizing: 'border-box' },
 

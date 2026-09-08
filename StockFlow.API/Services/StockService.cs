@@ -7,14 +7,15 @@ namespace StockFlow.API.Services;
 
 public class StockService(AppDbContext db)
 {
-    public async Task<(StockMovementDto? movement, string? error)> StockInAsync(StockInDto dto)
+    public async Task<(StockMovementDto? movement, string? error)> StockInAsync(StockInDto dto, int? changedByUserId)
     {
         var product = await db.Products.FindAsync(dto.ProductId);
         if (product == null) return (null, "Product not found.");
         if (dto.Quantity <= 0) return (null, "Quantity must be greater than zero.");
 
-        var priceError = ApplyPriceUpdate(product, dto.BuyingPrice, dto.SellingPrice);
+        var (priceError, priceChanges) = ApplyPriceUpdate(product, dto.BuyingPrice, dto.SellingPrice, dto.ProductId, changedByUserId);
         if (priceError != null) return (null, priceError);
+        if (priceChanges.Count > 0) db.ProductHistory.AddRange(priceChanges);
 
         var movement = new StockMovement
         {
@@ -81,10 +82,12 @@ public class StockService(AppDbContext db)
         }
 
         var movements = new List<StockMovement>();
+        var priceHistory = new List<ProductHistory>();
         foreach (var line in dto.Items)
         {
             var product = products[line.ProductId];
-            ApplyPriceUpdate(product, line.BuyingPrice, line.SellingPrice);
+            var (_, changes) = ApplyPriceUpdate(product, line.BuyingPrice, line.SellingPrice, line.ProductId, dto.UserId);
+            priceHistory.AddRange(changes);
 
             movements.Add(new StockMovement
             {
@@ -97,6 +100,7 @@ public class StockService(AppDbContext db)
             });
         }
         db.StockMovements.AddRange(movements);
+        if (priceHistory.Count > 0) db.ProductHistory.AddRange(priceHistory);
 
         await db.SaveChangesAsync();
 
@@ -109,17 +113,41 @@ public class StockService(AppDbContext db)
 
     // Updates the product's buying/selling price when a caller-supplied value differs from
     // what's on file — a stock-in is often the moment a supplier's price change is discovered.
-    private static string? ApplyPriceUpdate(Product product, decimal? buyingPrice, decimal? sellingPrice)
+    // Returns the ProductHistory rows for any changed field so callers can persist them.
+    private static (string? error, List<ProductHistory> changes) ApplyPriceUpdate(
+        Product product, decimal? buyingPrice, decimal? sellingPrice, int productId, int? changedByUserId)
     {
-        if (buyingPrice.HasValue && buyingPrice <= 0) return "Buying price must be greater than zero.";
-        if (sellingPrice.HasValue && sellingPrice <= 0) return "Selling price must be greater than zero.";
+        if (buyingPrice.HasValue && buyingPrice <= 0) return ("Buying price must be greater than zero.", []);
+        if (sellingPrice.HasValue && sellingPrice <= 0) return ("Selling price must be greater than zero.", []);
+
+        var changes = new List<ProductHistory>();
 
         if (buyingPrice.HasValue && buyingPrice != product.BuyingPrice)
+        {
+            changes.Add(new ProductHistory
+            {
+                ProductId = productId,
+                FieldName = "BuyingPrice",
+                OldValue = product.BuyingPrice?.ToString("F2"),
+                NewValue = buyingPrice.Value.ToString("F2"),
+                ChangedByUserId = changedByUserId
+            });
             product.BuyingPrice = buyingPrice.Value;
+        }
         if (sellingPrice.HasValue && sellingPrice != product.SellingPrice)
+        {
+            changes.Add(new ProductHistory
+            {
+                ProductId = productId,
+                FieldName = "SellingPrice",
+                OldValue = product.SellingPrice.ToString("F2"),
+                NewValue = sellingPrice.Value.ToString("F2"),
+                ChangedByUserId = changedByUserId
+            });
             product.SellingPrice = sellingPrice.Value;
+        }
 
-        return null;
+        return (null, changes);
     }
 
     public async Task<(StockMovementDto? movement, string? error)> AdjustStockAsync(StockAdjustmentDto dto)

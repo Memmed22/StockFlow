@@ -40,3 +40,14 @@ public record ProductSearchDto(
     decimal SellingPrice,
     UnitType UnitType
 );
+
+public record ProductHistoryEntryDto(
+    DateTime Timestamp,
+    string EventType,
+    string? FieldName,
+    decimal? Quantity,
+    string? OldValue,
+    string? NewValue,
+    int? ChangedByUserId,
+    string? ChangedByUsername
+);

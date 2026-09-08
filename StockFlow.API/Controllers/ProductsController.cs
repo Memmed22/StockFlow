@@ -55,9 +55,23 @@ public class ProductsController(ProductService productService) : ControllerBase
     [RequireAdmin]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto dto)
     {
-        var (product, error) = await productService.UpdateAsync(id, dto);
+        int? changedByUserId = int.TryParse(Request.Headers["X-User-Id"], out var uid) ? uid : null;
+        var (product, error) = await productService.UpdateAsync(id, dto, changedByUserId);
         if (error != null) return BadRequest(new { error });
         return product == null ? NotFound() : Ok(product);
+    }
+
+    [HttpGet("{id:int}/history")]
+    [RequireAdmin]
+    public async Task<IActionResult> GetHistory(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > 100) pageSize = 20;
+
+        var product = await productService.GetByIdAsync(id);
+        if (product == null) return NotFound();
+
+        return Ok(await productService.GetHistoryAsync(id, page, pageSize));
     }
 
     [HttpDelete("{id:int}")]

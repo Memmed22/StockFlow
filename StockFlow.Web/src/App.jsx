@@ -8,7 +8,6 @@ import StockIn from './pages/StockIn';
 import Companies from './pages/Companies';
 import Returns from './pages/Returns';
 import Reports from './pages/Reports';
-import Users from './pages/Users';
 import Customers from './pages/Customers';
 import CustomerDetail from './pages/CustomerDetail';
 import CashClosing from './pages/CashClosing';
@@ -52,7 +51,6 @@ export default function App() {
                   <Route path="/customers/:id" element={<AdminRoute><CustomerDetail /></AdminRoute>} />
                   <Route path="/reports" element={<AdminRoute><Reports /></AdminRoute>} />
                   <Route path="/reports/closing/:id" element={<AdminRoute><ClosingDetail /></AdminRoute>} />
-                  <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
                   <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
                   <Route path="*" element={<DefaultRedirect />} />
                 </Routes>

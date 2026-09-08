@@ -27,6 +27,13 @@ export default function Products() {
   const [correctError, setCorrectError] = useState('');
   const [correctLoading, setCorrectLoading] = useState(false);
 
+  const HISTORY_PAGE_SIZE = 20;
+  const [historyModal, setHistoryModal] = useState(false);
+  const [historyProduct, setHistoryProduct] = useState(null);
+  const [historyData, setHistoryData] = useState(null);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   const load = async () => {
     const { data } = await productsApi.getAll(search || undefined);
     setProducts(data);
@@ -89,6 +96,28 @@ export default function Products() {
     }
   };
   const unitLabel = (unitType) => UNIT_TYPES.find(u => u.value === unitType)?.label ?? UNIT_TYPES[0].label;
+
+  const loadHistory = async (productId, page) => {
+    setHistoryLoading(true);
+    try {
+      const { data } = await productsApi.getHistory(productId, { page, pageSize: HISTORY_PAGE_SIZE });
+      setHistoryData(data);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleOpenHistory = (p) => {
+    setHistoryProduct(p);
+    setHistoryPage(1);
+    setHistoryModal(true);
+    loadHistory(p.id, 1);
+  };
+
+  const handleHistoryPageChange = (next) => {
+    setHistoryPage(next);
+    loadHistory(historyProduct.id, next);
+  };
 
   return (
     <div>
@@ -198,6 +227,7 @@ export default function Products() {
                   <button style={s.editBtn} onClick={() => handleEdit(p)}>{t('common.edit')}</button>
                   <button style={s.delBtn} onClick={() => handleDelete(p.id)}>{t('common.delete')}</button>
                   <button style={s.correctBtn} onClick={() => handleOpenCorrect(p)}>{t('products.correctStock.button')}</button>
+                  <button style={s.historyBtn} onClick={() => handleOpenHistory(p)}>{t('products.history.button')}</button>
                 </td>
               </tr>
             ))}
@@ -265,6 +295,45 @@ export default function Products() {
           </div>
         </div>
       )}
+
+      {historyModal && historyProduct && (
+        <div style={s.overlay} onClick={e => e.target === e.currentTarget && setHistoryModal(false)}>
+          <div style={{ ...s.modal, width: 560 }}>
+            <div style={s.modalHeader}>
+              <h3 style={s.modalTitle}>{t('products.history.title', { name: historyProduct.name })}</h3>
+              <button style={s.modalClose} onClick={() => setHistoryModal(false)}>✕</button>
+            </div>
+
+            {historyLoading && <p style={s.modalSub}>{t('common.loading')}</p>}
+
+            {!historyLoading && historyData && (
+              <>
+                <ul style={s.historyList}>
+                  {historyData.items.map((h, i) => (
+                    <li key={i} style={s.historyItem}>
+                      <span style={s.historyDate}>{new Date(h.timestamp).toLocaleString()}</span>
+                      {h.eventType === 'FieldUpdate' ? (
+                        <span>
+                          {t(`products.history.field.${h.fieldName}`, h.fieldName)}: <b>{h.oldValue ?? '—'}</b> → <b>{h.newValue ?? '—'}</b>
+                          {h.changedByUsername && <span style={s.historyUser}> ({h.changedByUsername})</span>}
+                        </span>
+                      ) : (
+                        <span>{t(`products.history.event.${h.eventType}`, h.eventType)}: <b>{h.quantity}</b></span>
+                      )}
+                    </li>
+                  ))}
+                  {historyData.items.length === 0 && <li style={s.empty}>{t('products.history.empty')}</li>}
+                </ul>
+                <div style={s.pagination}>
+                  <button style={s.ghostBtn} disabled={historyPage <= 1} onClick={() => handleHistoryPageChange(historyPage - 1)}>{t('common.previous')}</button>
+                  <span style={s.paginationLabel}>{t('common.page')} {historyPage}</span>
+                  <button style={s.ghostBtn} disabled={historyPage * HISTORY_PAGE_SIZE >= historyData.totalCount} onClick={() => handleHistoryPageChange(historyPage + 1)}>{t('common.next')}</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -300,6 +369,13 @@ const s = {
   editBtn: { background: '#FEF3C7', color: '#92400E', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', marginRight: 6, fontSize: 13, fontWeight: 600 },
   delBtn: { background: '#FEE2E2', color: '#B91C1C', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', marginRight: 6, fontSize: 13, fontWeight: 600 },
   correctBtn: { background: '#EDE9FE', color: '#5B21B6', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  historyBtn: { background: '#DBEAFE', color: '#1E40AF', border: 'none', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  historyList: { listStyle: 'none', margin: '0 0 16px', padding: 0, maxHeight: 360, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 },
+  historyItem: { padding: '10px 12px', borderRadius: 8, background: '#F9FAFB', border: '1px solid #F3F4F6', fontSize: 13, color: '#374151', display: 'flex', flexDirection: 'column', gap: 3 },
+  historyDate: { fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' },
+  historyUser: { color: '#6B7280', fontStyle: 'italic' },
+  pagination: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 },
+  paginationLabel: { fontSize: 13, color: '#6B7280', fontWeight: 600 },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   modal: { background: '#fff', borderRadius: 14, padding: 28, width: 440, maxWidth: '95vw', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
