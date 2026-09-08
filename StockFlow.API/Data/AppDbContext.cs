@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockFlow.API.Models;
 
 namespace StockFlow.API.Data;
@@ -15,8 +16,34 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<ProductHistory> ProductHistory => Set<ProductHistory>();
 
+    // SQLite has no timezone-aware datetime type, so EF Core reads every DateTime back
+    // as Kind=Unspecified even though every value in this app is written via
+    // DateTime.UtcNow. System.Text.Json then serializes it without a "Z" suffix, and
+    // the browser's `new Date(...)` treats that as local time instead of converting
+    // from UTC — silently shifting every timestamp shown in the UI by the browser's
+    // UTC offset. Marking the value as UTC on read (write is a no-op) fixes this for
+    // every DateTime column in the database, not just the ones touched here.
+    private static readonly ValueConverter<DateTime, DateTime> UtcDateTimeConverter = new(
+        v => v,
+        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+    private static readonly ValueConverter<DateTime?, DateTime?> UtcNullableDateTimeConverter = new(
+        v => v,
+        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                    property.SetValueConverter(UtcDateTimeConverter);
+                else if (property.ClrType == typeof(DateTime?))
+                    property.SetValueConverter(UtcNullableDateTimeConverter);
+            }
+        }
+
         modelBuilder.Entity<Product>()
             .HasIndex(p => p.Barcode)
             .IsUnique();
