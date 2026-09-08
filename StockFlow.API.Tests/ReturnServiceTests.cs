@@ -106,4 +106,75 @@ public class ReturnServiceTests : SqliteInMemoryTestBase
         Assert.Equal(0, await Db.StockMovements.CountAsync());
         Assert.Equal(0, await Db.Sales.CountAsync());
     }
+
+    [Fact]
+    public async Task ProcessBulkReturn_IncreasesStock_ByExactQuantityPerLine_PerProduct()
+    {
+        var user = await SeedUserAsync();
+        var productA = await SeedProductAsync(name: "A", barcode: "A1");
+        var productB = await SeedProductAsync(name: "B", barcode: "B1");
+        await AddMovementAsync(productA.Id, MovementType.StockIn, 10);
+        await AddMovementAsync(productB.Id, MovementType.StockIn, 10);
+        await AddMovementAsync(productA.Id, MovementType.Sale, 4); // A now 6
+        await AddMovementAsync(productB.Id, MovementType.Sale, 2); // B now 8
+
+        var (movements, error) = await CreateService().ProcessBulkReturnAsync(new BulkReturnDto(
+            Items:
+            [
+                new ReturnLineDto(productA.Id, Quantity: 2, BasePrice: 10m, ReturnPrice: 10m, Note: null),
+                new ReturnLineDto(productB.Id, Quantity: 1, BasePrice: 10m, ReturnPrice: 10m, Note: null)
+            ],
+            CustomerId: null, UserId: user.Id, SettleAsCredit: false));
+
+        Assert.Null(error);
+        Assert.NotNull(movements);
+        Assert.Equal(2, movements!.Count);
+        Assert.Equal(8, await CurrentStockAsync(productA.Id));
+        Assert.Equal(9, await CurrentStockAsync(productB.Id));
+    }
+
+    [Fact]
+    public async Task ProcessBulkReturn_MultipleLinesForSameProduct_SumsIntoStock()
+    {
+        var user = await SeedUserAsync();
+        var product = await SeedProductAsync();
+        await AddMovementAsync(product.Id, MovementType.StockIn, 10);
+        await AddMovementAsync(product.Id, MovementType.Sale, 10); // stock now 0
+
+        var (movements, error) = await CreateService().ProcessBulkReturnAsync(new BulkReturnDto(
+            Items:
+            [
+                new ReturnLineDto(product.Id, Quantity: 3, BasePrice: 10m, ReturnPrice: 10m, Note: null),
+                new ReturnLineDto(product.Id, Quantity: 2, BasePrice: 10m, ReturnPrice: 10m, Note: null)
+            ],
+            CustomerId: null, UserId: user.Id, SettleAsCredit: false));
+
+        Assert.Null(error);
+        Assert.NotNull(movements);
+        Assert.Equal(5, await CurrentStockAsync(product.Id));
+    }
+
+    [Fact]
+    public async Task ProcessBulkReturn_InvalidLine_Fails_AndLeavesStockUnchangedForAllLines()
+    {
+        var user = await SeedUserAsync();
+        var productA = await SeedProductAsync(name: "A", barcode: "A1");
+        var productB = await SeedProductAsync(name: "B", barcode: "B1");
+        await AddMovementAsync(productA.Id, MovementType.StockIn, 5);
+        await AddMovementAsync(productB.Id, MovementType.StockIn, 5);
+
+        var (movements, error) = await CreateService().ProcessBulkReturnAsync(new BulkReturnDto(
+            Items:
+            [
+                new ReturnLineDto(productA.Id, Quantity: 2, BasePrice: 10m, ReturnPrice: 10m, Note: null),
+                new ReturnLineDto(productB.Id, Quantity: 0, BasePrice: 10m, ReturnPrice: 10m, Note: null) // invalid
+            ],
+            CustomerId: null, UserId: user.Id, SettleAsCredit: false));
+
+        Assert.Null(movements);
+        Assert.NotNull(error);
+        Assert.Equal(5, await CurrentStockAsync(productA.Id));
+        Assert.Equal(5, await CurrentStockAsync(productB.Id));
+        Assert.Equal(0, await Db.Sales.CountAsync());
+    }
 }
