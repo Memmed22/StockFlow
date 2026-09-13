@@ -289,9 +289,15 @@
     "items": { "product": "Məhsul", "barcode": "Barkod", "qty": "Miqdar", "unitPrice": "Vahid qiymət", "total": "Cəmi" },
     "types": { "CashSale": "Nağd satış", "DebitSale": "Kredit", "Return": "Qaytarma", "CreditReturn": "Balans mədaxili", "Payment": "Ödəniş" }
   },
+  "sync": {
+    "banner": {
+      "never": "heç vaxt",
+      "message": "Bulud ehtiyat nüsxəsi {{lastSuccess}} tarixindən bəri uğurlu olmayıb — mağazanın internet bağlantısını yoxlayın."
+    }
+  },
   "settings": {
     "title": "Tənzimləmələr",
-    "tabs": { "update": "Yeniləmə", "users": "İstifadəçilər" },
+    "tabs": { "update": "Yeniləmə", "sync": "Ehtiyat Nüsxə", "users": "İstifadəçilər" },
     "update": {
       "title": "Tətbiq Yeniləməsi",
       "checkButton": "Yeniləmələri Yoxla",
@@ -301,6 +307,20 @@
       "current": "Cari versiya",
       "latest": "Son versiya",
       "upToDate": "Ən son versiyadasınız."
+    },
+    "sync": {
+      "title": "Bulud Ehtiyat Nüsxəsi",
+      "lastSuccess": "Son uğurlu ehtiyat nüsxə",
+      "never": "heç vaxt",
+      "healthy": "Sağlam",
+      "degraded": "Problem var",
+      "syncNowButton": "İndi Ehtiyat Nüsxə Yarat",
+      "syncing": "Ehtiyat nüsxə yaradılır…",
+      "restoring": "Bərpa edilir — tətbiq qısa müddətdən sonra yenidən başlayacaq. Bu səhifə avtomatik yenilənəcək.",
+      "snapshotsTitle": "Bərpa nöqtələri",
+      "noSnapshots": "Hələ ehtiyat nüsxə tapılmadı.",
+      "restoreButton": "Bərpa et",
+      "restoreConfirm": "Bu, bütün lokal məlumatları bu ehtiyat nüsxə ilə əvəz edəcək. Bu geri qaytarıla bilməz. Davam edilsin?"
     }
   }
 }

@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import SyncStatusBanner from './SyncStatusBanner';
 
 const NAV_KEYS = [
   { to: '/pos',       key: 'nav.pos',      roles: ['Admin', 'Cashier'] },
@@ -76,6 +77,7 @@ export default function Layout({ children }) {
         </div>
       </nav>
 
+      <SyncStatusBanner />
       <main style={styles.main}>{children}</main>
     </div>
   );

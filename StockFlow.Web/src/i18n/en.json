@@ -294,9 +294,15 @@
     "items": { "product": "Product", "barcode": "Barcode", "qty": "Qty", "unitPrice": "Unit Price", "total": "Total" },
     "types": { "CashSale": "Cash Sale", "DebitSale": "Debit Sale", "Return": "Return", "CreditReturn": "Store Credit", "Payment": "Payment" }
   },
+  "sync": {
+    "banner": {
+      "never": "never",
+      "message": "Cloud backup hasn't succeeded since {{lastSuccess}} — check the shop's internet connection."
+    }
+  },
   "settings": {
     "title": "Settings",
-    "tabs": { "update": "Update", "users": "Users" },
+    "tabs": { "update": "Update", "sync": "Backup & Restore", "users": "Users" },
     "update": {
       "title": "Application Update",
       "checkButton": "Check for Updates",
@@ -306,6 +312,20 @@
       "current": "Current version",
       "latest": "Latest version",
       "upToDate": "You're on the latest version."
+    },
+    "sync": {
+      "title": "Cloud Backup",
+      "lastSuccess": "Last successful backup",
+      "never": "never",
+      "healthy": "Healthy",
+      "degraded": "Degraded",
+      "syncNowButton": "Back Up Now",
+      "syncing": "Backing up…",
+      "restoring": "Restoring — the application will restart shortly. This page will reload automatically.",
+      "snapshotsTitle": "Recovery points",
+      "noSnapshots": "No backups found yet.",
+      "restoreButton": "Restore",
+      "restoreConfirm": "This will replace all local data with this backup. This cannot be undone. Continue?"
     }
   }
 }

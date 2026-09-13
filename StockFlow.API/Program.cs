@@ -28,6 +28,8 @@ builder.Services.AddScoped<CompanyService>();
 builder.Services.AddScoped<CashClosingService>();
 builder.Services.AddScoped<TelegramService>();
 builder.Services.AddScoped<UpdateService>();
+builder.Services.AddScoped<CloudSyncService>();
+builder.Services.AddHostedService<CloudSyncBackgroundService>();
 
 builder.Services.AddControllers();
 builder.Services.AddCors(opt =>

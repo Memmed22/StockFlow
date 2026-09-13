@@ -83,6 +83,13 @@ export const updateApi = {
   apply: (downloadUrl) => api.post('/update/apply', { downloadUrl }),
 };
 
+export const syncApi = {
+  status: () => api.get('/sync/status'),
+  syncNow: () => api.post('/sync/sync-now'),
+  snapshots: () => api.get('/sync/snapshots'),
+  restore: (blobName) => api.post('/sync/restore', { blobName }),
+};
+
 export const reportsApi = {
   dailySales: (from, to) => api.get('/reports/daily-sales', { params: { from, to } }),
   salesPerUser: (from, to) => api.get('/reports/sales-per-user', { params: { from, to } }),
