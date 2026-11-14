@@ -246,6 +246,7 @@
     "create": "Create", "searchPlaceholder": "Search by name or phone...",
     "noCustomers": "No customers found.",
     "col": { "name": "Name", "phone": "Phone", "description": "Description", "balance": "Balance" },
+    "filter": { "all": "All", "debt": "With debt", "settled": "Settled", "credit": "Overpaid", "min": "Min", "max": "Max", "range": "Balance range", "clear": "Clear filters", "showing": "Showing {{shown}} of {{total}}", "totalInView": "Debt in view", "noMatch": "No customers match the filters.", "rangeInvalid": "Min is greater than max" },
     "view": "View →",
     "errors": { "load": "Failed to load customers.", "create": "Failed to create customer." }
   },
