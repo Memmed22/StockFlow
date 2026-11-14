@@ -241,6 +241,7 @@
     "create": "Yarat", "searchPlaceholder": "Ad və ya telefonla axtarın...",
     "noCustomers": "Müştəri tapılmadı.",
     "col": { "name": "Ad", "phone": "Telefon", "description": "Təsvir", "balance": "Balans" },
+    "filter": { "all": "Hamısı", "debt": "Borclu", "settled": "Borcsuz", "credit": "Artıq ödənib", "min": "Min", "max": "Maks", "range": "Balans aralığı", "clear": "Filterləri təmizlə", "showing": "{{total}} müştəridən {{shown}} göstərilir", "totalInView": "Göstərilən borc", "noMatch": "Filterlərə uyğun müştəri tapılmadı.", "rangeInvalid": "Min maksdan böyükdür" },
     "view": "Bax →",
     "errors": { "load": "Müştərilər yüklənmədi.", "create": "Müştəri yaradılmadı." }
   },
